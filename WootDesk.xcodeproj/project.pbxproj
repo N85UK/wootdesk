@@ -1,0 +1,985 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0123D84AEBCCDA04B2A616C1 /* ChatwootConversationDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E110E9C5B071CB77B301E92 /* ChatwootConversationDTO.swift */; };
+		05E8B42E191EE80DB90E0ABA /* AppModelAndFeatureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F62BC26DE5079831E2732E84 /* AppModelAndFeatureTests.swift */; };
+		08352AFF85173811F64775BA /* ChatwootAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD410DC52010B791DC6E4ED5 /* ChatwootAPI.swift */; };
+		10E37443A0986697182E34D5 /* KeychainCredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77597DDC0A70396B081B1FB3 /* KeychainCredentialStore.swift */; };
+		1853E4B87367CA150A2DF2E9 /* ConversationListStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40CA499C6587E5AE02328016 /* ConversationListStateTests.swift */; };
+		1C69899A148226784F3E3267 /* DateParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1250C9151F9814B606D29C9 /* DateParser.swift */; };
+		1D2C1248FFAC371762B608A2 /* error_response_errors_array.json in Resources */ = {isa = PBXBuildFile; fileRef = 9F37B83FA649B7E82032AC55 /* error_response_errors_array.json */; };
+		287F64B77671227563C1D507 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1AF3FC964E7CF17BFD5C26CC /* Assets.xcassets */; };
+		29CA318BBB12AA4F0F5F0347 /* InMemoryCredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C44F4D5548D0987670BE2DC /* InMemoryCredentialStore.swift */; };
+		2A0023956C8E9C60A8B08834 /* ServerProfilePersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F1B6FCBD99A2625A662D059 /* ServerProfilePersistenceTests.swift */; };
+		2DECF936DE967C18E6CBDD91 /* WootDeskLaunchUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0253A820B5AA6DC4814F192D /* WootDeskLaunchUITests.swift */; };
+		30B9FBC8C7FC24A0C6357A2C /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E51BC0BA46C49E63A850960 /* AppLogger.swift */; };
+		37774D271A20C1681059E4D2 /* APIError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CC6D95A358294D3F3094BD7 /* APIError.swift */; };
+		37F600AAD2258BD3E23718A9 /* ChatwootDecodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E43134BC865AA51D2A6BF049 /* ChatwootDecodingTests.swift */; };
+		38FBCB266E00BEA5320B15C6 /* Conversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83672B33B090BDB1D0D26F7A /* Conversation.swift */; };
+		41A42C82CD85D0327985EA4A /* PreviewData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F26594DE89174F5250DFCA04 /* PreviewData.swift */; };
+		470CAA72FB81EFF587AF79AE /* profile_no_accounts.json in Resources */ = {isa = PBXBuildFile; fileRef = 8AC721DB14E31745E375D2CF /* profile_no_accounts.json */; };
+		4AE9E3582285C18F36B5BDD1 /* error_response.json in Resources */ = {isa = PBXBuildFile; fileRef = 3BF892426799738B3B42E5F7 /* error_response.json */; };
+		4C07B15EA84DD84A3326261F /* APIRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 865343BEA74AB7F4508D9BD3 /* APIRequest.swift */; };
+		4D809F371345D75AAFD21C53 /* AccountPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DE41A7B077950EB18998765 /* AccountPickerView.swift */; };
+		533BCD2ACC3CE8F159FB6339 /* MockAIProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5EE0FACCE47AC5DB38EB27 /* MockAIProvider.swift */; };
+		55636D3093A6A3851681C847 /* InMemoryServerProfileRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03454911F5CE2CDF4481010D /* InMemoryServerProfileRepository.swift */; };
+		56861309B531E2F39951A4A8 /* CredentialStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 810F0EA0ABB63D0B85B209ED /* CredentialStoreTests.swift */; };
+		578E0FE4611EB895427F0590 /* ConversationRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7345548ECFDAB2EE959323B /* ConversationRowView.swift */; };
+		67B658B77FCC64C24B431443 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E4A2F265BEA5F7EE9FC879F /* AppEnvironment.swift */; };
+		6FA230DE2929CE09DE1B9A97 /* ChatwootProfileDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD4904AF668DC66D86BB97D4 /* ChatwootProfileDTO.swift */; };
+		6FD41351AAA2529BC786C42A /* URLAndRequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAA065212A27C1585B59818F /* URLAndRequestTests.swift */; };
+		786C0FA0E98D10442A1B6D78 /* conversations_flat.json in Resources */ = {isa = PBXBuildFile; fileRef = 0EDBAC91331E760494071B19 /* conversations_flat.json */; };
+		7A07BFB2DF2019A01A66D15A /* ConnectionFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41626B5FF8F6C0B42AF9F505 /* ConnectionFlowTests.swift */; };
+		84CA230FB90546F3A045E5F8 /* ConnectionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB4AFFC8056C9E1E8F0E238D /* ConnectionListView.swift */; };
+		8564FE24A6A4F616131B45A3 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95E8532BF2D5E8261B18BEE1 /* SettingsView.swift */; };
+		898820DF6871F2AB07236873 /* FileServerProfileRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7D59F58FA193FE6330A5365 /* FileServerProfileRepository.swift */; };
+		935AB745EA53C13FA54B8E51 /* ConversationListState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5813D8D6F96F553D698242C6 /* ConversationListState.swift */; };
+		998F152F29738C682037A1CB /* FixtureLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3208ABE31D90C51F79082630 /* FixtureLoader.swift */; };
+		99FF17D90C28CFB3F3F16EB8 /* Contact.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C318A473973FC12DA44698C /* Contact.swift */; };
+		9DBEEC17A42940053B17E238 /* ChatwootContactDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E8223996B54134E21948EA4 /* ChatwootContactDTO.swift */; };
+		9E3DF8E63E51C261A5A348ED /* CredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4023CC5EF12EB39F395E1549 /* CredentialStore.swift */; };
+		A3F44C39C43081695FC7A047 /* ChatwootAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41988343BD16218152D1EE42 /* ChatwootAPIClient.swift */; };
+		A8FF315E328204DBB7E9B2C8 /* conversations_wrapped.json in Resources */ = {isa = PBXBuildFile; fileRef = 32B04B5C1D3620843E544A2E /* conversations_wrapped.json */; };
+		AF6791DD00E1A3DC78E2DA3D /* StubChatwootAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBA326E253515332228DAB29 /* StubChatwootAPI.swift */; };
+		B13482F33FB66B2F353EB026 /* profile_single_account.json in Resources */ = {isa = PBXBuildFile; fileRef = 673794FEBDEED96440DCABEE /* profile_single_account.json */; };
+		B189615F3594BC6B5FE13096 /* ChatwootMessageDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 915226C29EDAC69D3F8C1C55 /* ChatwootMessageDTO.swift */; };
+		B8E76547B335B894A0B73D90 /* malformed_response.json in Resources */ = {isa = PBXBuildFile; fileRef = 20AA8837D796BEB927E93EEA /* malformed_response.json */; };
+		C993C410153FE0F892336565 /* ConversationDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFD2B7D60852FD769B0BEDF9 /* ConversationDetailView.swift */; };
+		CC43F48E124F7E9D83023776 /* ChatwootAccount.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19E73B82E07D7FA521266112 /* ChatwootAccount.swift */; };
+		D04D0DCE282F4BE7C699E429 /* conversations_empty.json in Resources */ = {isa = PBXBuildFile; fileRef = 29FB1D603A00C5D0393C339D /* conversations_empty.json */; };
+		D2F96EBBD6E7C43B7C83E17A /* ServerProfileRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EAED0EA01F665EA9BA56FFE /* ServerProfileRepository.swift */; };
+		D94EA79982CE9D3A88C38EA4 /* ServerProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 766E33A07DBC0E0BA4873BB7 /* ServerProfile.swift */; };
+		DAF9D5D554201198D2F3E94D /* ChatwootAPIClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2028181E01D6B2C00D3BDF5 /* ChatwootAPIClientTests.swift */; };
+		DBEFD856692B22B35C46C2B6 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 6A52EDDED3BB4EF8B817FDC6 /* PrivacyInfo.xcprivacy */; };
+		DC3E29CF80194C6D30C6F8F5 /* AIProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44475406F089465DE8E4E254 /* AIProvider.swift */; };
+		DCF8BD8F9F29A3C4D88AFCAD /* conversations_missing_fields.json in Resources */ = {isa = PBXBuildFile; fileRef = 2863E9B54DBEDB6FBA8ABBEC /* conversations_missing_fields.json */; };
+		DF16997CDE8C6CF1FC65F86B /* ConversationListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B74B59DCF23B06B40ECFD7C2 /* ConversationListView.swift */; };
+		E1C8096CBA9CA971ACF64CC8 /* MockURLProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8251393573697DEBC96FB29 /* MockURLProtocol.swift */; };
+		E3B38E15CC111427F5465752 /* profile_multi_account.json in Resources */ = {isa = PBXBuildFile; fileRef = DE8CD2CEEE7E78BFA89BC188 /* profile_multi_account.json */; };
+		E6F2C858AC84E47C44532FC3 /* ConnectionViewState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FC7C57EDB21504EC13E77E1 /* ConnectionViewState.swift */; };
+		E70C91F54C3450ECCEDFFBA8 /* WootDeskApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E2F6D7267EC5DA90EA54645 /* WootDeskApp.swift */; };
+		E97BA16E18035219BE735BC3 /* ChatwootAccountDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20B0174C4792ED8C7B52864E /* ChatwootAccountDTO.swift */; };
+		F0BB1316F0F391BA2E334F0A /* ResearchModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02D1591BC1A92714E95497B1 /* ResearchModels.swift */; };
+		F35B90103569FFA56BC94EA6 /* AddConnectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42A4B9739677BC129AA985F7 /* AddConnectionView.swift */; };
+		FDB2B9B8E8B86BA4160B6A5D /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13BF23C248945766BA9AFB78 /* AppModel.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		18842A4DFDDFDB959237ABFE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CB7C7A4BA42892B281B3B5EA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BCD6BFE39A3AD3C3873828EF;
+			remoteInfo = WootDesk;
+		};
+		E0C4C92CB070CA673AC8191C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CB7C7A4BA42892B281B3B5EA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = BCD6BFE39A3AD3C3873828EF;
+			remoteInfo = WootDesk;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0253A820B5AA6DC4814F192D /* WootDeskLaunchUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WootDeskLaunchUITests.swift; sourceTree = "<group>"; };
+		02D1591BC1A92714E95497B1 /* ResearchModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResearchModels.swift; sourceTree = "<group>"; };
+		03454911F5CE2CDF4481010D /* InMemoryServerProfileRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InMemoryServerProfileRepository.swift; sourceTree = "<group>"; };
+		0956D1E86D5002E9CCE3931A /* WootDesk.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = WootDesk.entitlements; sourceTree = "<group>"; };
+		0E2F6D7267EC5DA90EA54645 /* WootDeskApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WootDeskApp.swift; sourceTree = "<group>"; };
+		0EDBAC91331E760494071B19 /* conversations_flat.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = conversations_flat.json; sourceTree = "<group>"; };
+		13BF23C248945766BA9AFB78 /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		19E73B82E07D7FA521266112 /* ChatwootAccount.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatwootAccount.swift; sourceTree = "<group>"; };
+		1AF3FC964E7CF17BFD5C26CC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		1FC7C57EDB21504EC13E77E1 /* ConnectionViewState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionViewState.swift; sourceTree = "<group>"; };
+		20AA8837D796BEB927E93EEA /* malformed_response.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = malformed_response.json; sourceTree = "<group>"; };
+		20B0174C4792ED8C7B52864E /* ChatwootAccountDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatwootAccountDTO.swift; sourceTree = "<group>"; };
+		25EADC1AC61D20A17ED6A221 /* WootDeskUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WootDeskUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		2863E9B54DBEDB6FBA8ABBEC /* conversations_missing_fields.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = conversations_missing_fields.json; sourceTree = "<group>"; };
+		29FB1D603A00C5D0393C339D /* conversations_empty.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = conversations_empty.json; sourceTree = "<group>"; };
+		2DE41A7B077950EB18998765 /* AccountPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountPickerView.swift; sourceTree = "<group>"; };
+		3208ABE31D90C51F79082630 /* FixtureLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FixtureLoader.swift; sourceTree = "<group>"; };
+		32B04B5C1D3620843E544A2E /* conversations_wrapped.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = conversations_wrapped.json; sourceTree = "<group>"; };
+		3BF892426799738B3B42E5F7 /* error_response.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = error_response.json; sourceTree = "<group>"; };
+		4023CC5EF12EB39F395E1549 /* CredentialStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialStore.swift; sourceTree = "<group>"; };
+		40CA499C6587E5AE02328016 /* ConversationListStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationListStateTests.swift; sourceTree = "<group>"; };
+		41626B5FF8F6C0B42AF9F505 /* ConnectionFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionFlowTests.swift; sourceTree = "<group>"; };
+		41988343BD16218152D1EE42 /* ChatwootAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatwootAPIClient.swift; sourceTree = "<group>"; };
+		42A4B9739677BC129AA985F7 /* AddConnectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddConnectionView.swift; sourceTree = "<group>"; };
+		44475406F089465DE8E4E254 /* AIProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIProvider.swift; sourceTree = "<group>"; };
+		4E4A2F265BEA5F7EE9FC879F /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
+		5813D8D6F96F553D698242C6 /* ConversationListState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationListState.swift; sourceTree = "<group>"; };
+		5C44F4D5548D0987670BE2DC /* InMemoryCredentialStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InMemoryCredentialStore.swift; sourceTree = "<group>"; };
+		5E51BC0BA46C49E63A850960 /* AppLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLogger.swift; sourceTree = "<group>"; };
+		5E8223996B54134E21948EA4 /* ChatwootContactDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatwootContactDTO.swift; sourceTree = "<group>"; };
+		673794FEBDEED96440DCABEE /* profile_single_account.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = profile_single_account.json; sourceTree = "<group>"; };
+		6A52EDDED3BB4EF8B817FDC6 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		6EAED0EA01F665EA9BA56FFE /* ServerProfileRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerProfileRepository.swift; sourceTree = "<group>"; };
+		766E33A07DBC0E0BA4873BB7 /* ServerProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerProfile.swift; sourceTree = "<group>"; };
+		77597DDC0A70396B081B1FB3 /* KeychainCredentialStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainCredentialStore.swift; sourceTree = "<group>"; };
+		7C318A473973FC12DA44698C /* Contact.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Contact.swift; sourceTree = "<group>"; };
+		810F0EA0ABB63D0B85B209ED /* CredentialStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialStoreTests.swift; sourceTree = "<group>"; };
+		83672B33B090BDB1D0D26F7A /* Conversation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Conversation.swift; sourceTree = "<group>"; };
+		865343BEA74AB7F4508D9BD3 /* APIRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIRequest.swift; sourceTree = "<group>"; };
+		886D8C188E6F5C43276F26CE /* WootDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WootDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8AC721DB14E31745E375D2CF /* profile_no_accounts.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = profile_no_accounts.json; sourceTree = "<group>"; };
+		8CC6D95A358294D3F3094BD7 /* APIError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIError.swift; sourceTree = "<group>"; };
+		8E110E9C5B071CB77B301E92 /* ChatwootConversationDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatwootConversationDTO.swift; sourceTree = "<group>"; };
+		915226C29EDAC69D3F8C1C55 /* ChatwootMessageDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatwootMessageDTO.swift; sourceTree = "<group>"; };
+		956B3C596B05CB1029877952 /* WootDeskTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WootDeskTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		95E8532BF2D5E8261B18BEE1 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		9F1B6FCBD99A2625A662D059 /* ServerProfilePersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerProfilePersistenceTests.swift; sourceTree = "<group>"; };
+		9F37B83FA649B7E82032AC55 /* error_response_errors_array.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = error_response_errors_array.json; sourceTree = "<group>"; };
+		A7345548ECFDAB2EE959323B /* ConversationRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationRowView.swift; sourceTree = "<group>"; };
+		AD4904AF668DC66D86BB97D4 /* ChatwootProfileDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatwootProfileDTO.swift; sourceTree = "<group>"; };
+		AFD2B7D60852FD769B0BEDF9 /* ConversationDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationDetailView.swift; sourceTree = "<group>"; };
+		B74B59DCF23B06B40ECFD7C2 /* ConversationListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationListView.swift; sourceTree = "<group>"; };
+		B7D59F58FA193FE6330A5365 /* FileServerProfileRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileServerProfileRepository.swift; sourceTree = "<group>"; };
+		BB5EE0FACCE47AC5DB38EB27 /* MockAIProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAIProvider.swift; sourceTree = "<group>"; };
+		C8251393573697DEBC96FB29 /* MockURLProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockURLProtocol.swift; sourceTree = "<group>"; };
+		CAA065212A27C1585B59818F /* URLAndRequestTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLAndRequestTests.swift; sourceTree = "<group>"; };
+		CBA326E253515332228DAB29 /* StubChatwootAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubChatwootAPI.swift; sourceTree = "<group>"; };
+		CD410DC52010B791DC6E4ED5 /* ChatwootAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatwootAPI.swift; sourceTree = "<group>"; };
+		D1250C9151F9814B606D29C9 /* DateParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateParser.swift; sourceTree = "<group>"; };
+		DE8CD2CEEE7E78BFA89BC188 /* profile_multi_account.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = profile_multi_account.json; sourceTree = "<group>"; };
+		E43134BC865AA51D2A6BF049 /* ChatwootDecodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatwootDecodingTests.swift; sourceTree = "<group>"; };
+		F2028181E01D6B2C00D3BDF5 /* ChatwootAPIClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatwootAPIClientTests.swift; sourceTree = "<group>"; };
+		F26594DE89174F5250DFCA04 /* PreviewData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreviewData.swift; sourceTree = "<group>"; };
+		F62BC26DE5079831E2732E84 /* AppModelAndFeatureTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModelAndFeatureTests.swift; sourceTree = "<group>"; };
+		FB4AFFC8056C9E1E8F0E238D /* ConnectionListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionListView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		24B2F59FE2E5F4E385EF76BA /* Security */ = {
+			isa = PBXGroup;
+			children = (
+				4023CC5EF12EB39F395E1549 /* CredentialStore.swift */,
+				5C44F4D5548D0987670BE2DC /* InMemoryCredentialStore.swift */,
+				77597DDC0A70396B081B1FB3 /* KeychainCredentialStore.swift */,
+			);
+			path = Security;
+			sourceTree = "<group>";
+		};
+		2A69E39668A71AB4F9652C9D /* Connections */ = {
+			isa = PBXGroup;
+			children = (
+				2DE41A7B077950EB18998765 /* AccountPickerView.swift */,
+				42A4B9739677BC129AA985F7 /* AddConnectionView.swift */,
+				FB4AFFC8056C9E1E8F0E238D /* ConnectionListView.swift */,
+				1FC7C57EDB21504EC13E77E1 /* ConnectionViewState.swift */,
+			);
+			path = Connections;
+			sourceTree = "<group>";
+		};
+		2DA8E7FE77AF198C44C11062 /* Preview */ = {
+			isa = PBXGroup;
+			children = (
+				F26594DE89174F5250DFCA04 /* PreviewData.swift */,
+			);
+			path = Preview;
+			sourceTree = "<group>";
+		};
+		3B1F9D39EF99B0E4DF14340F /* Conversations */ = {
+			isa = PBXGroup;
+			children = (
+				AFD2B7D60852FD769B0BEDF9 /* ConversationDetailView.swift */,
+				5813D8D6F96F553D698242C6 /* ConversationListState.swift */,
+				B74B59DCF23B06B40ECFD7C2 /* ConversationListView.swift */,
+				A7345548ECFDAB2EE959323B /* ConversationRowView.swift */,
+			);
+			path = Conversations;
+			sourceTree = "<group>";
+		};
+		43DF53F9A615DC3084D67EAF /* AI */ = {
+			isa = PBXGroup;
+			children = (
+				44475406F089465DE8E4E254 /* AIProvider.swift */,
+				BB5EE0FACCE47AC5DB38EB27 /* MockAIProvider.swift */,
+				02D1591BC1A92714E95497B1 /* ResearchModels.swift */,
+			);
+			path = AI;
+			sourceTree = "<group>";
+		};
+		4AE86F41636E7E31A9C41608 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				59008D4843582A53EBC9E185 /* API */,
+				F33B7751B9872B982873723F /* Logging */,
+				C85C27552E30E0BC267F5E75 /* Models */,
+				E98652B92FF735DC0BAE4613 /* Persistence */,
+				2DA8E7FE77AF198C44C11062 /* Preview */,
+				24B2F59FE2E5F4E385EF76BA /* Security */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		58BC1BA92016A752D4488B64 /* SecurityTests */ = {
+			isa = PBXGroup;
+			children = (
+				810F0EA0ABB63D0B85B209ED /* CredentialStoreTests.swift */,
+			);
+			path = SecurityTests;
+			sourceTree = "<group>";
+		};
+		59008D4843582A53EBC9E185 /* API */ = {
+			isa = PBXGroup;
+			children = (
+				8CC6D95A358294D3F3094BD7 /* APIError.swift */,
+				865343BEA74AB7F4508D9BD3 /* APIRequest.swift */,
+				CD410DC52010B791DC6E4ED5 /* ChatwootAPI.swift */,
+				41988343BD16218152D1EE42 /* ChatwootAPIClient.swift */,
+				CBA326E253515332228DAB29 /* StubChatwootAPI.swift */,
+				90AE1BC7106A0122854E7D9F /* DTO */,
+			);
+			path = API;
+			sourceTree = "<group>";
+		};
+		5B257757043455A67DB07591 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				4E4A2F265BEA5F7EE9FC879F /* AppEnvironment.swift */,
+				13BF23C248945766BA9AFB78 /* AppModel.swift */,
+				0E2F6D7267EC5DA90EA54645 /* WootDeskApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		6C45B562916FB088F24BA779 /* WootDesk */ = {
+			isa = PBXGroup;
+			children = (
+				43DF53F9A615DC3084D67EAF /* AI */,
+				5B257757043455A67DB07591 /* App */,
+				4AE86F41636E7E31A9C41608 /* Core */,
+				EB8168812D0FE7ECE988FB5C /* Features */,
+				AF3FC81EFC41DC3E7ADB7EB2 /* Resources */,
+			);
+			path = WootDesk;
+			sourceTree = "<group>";
+		};
+		70735DBAA08EA53FCE89846C /* WootDeskTests */ = {
+			isa = PBXGroup;
+			children = (
+				EC785E02A47387A199AC5D44 /* APITests */,
+				7090999DB32D59200EFB2666 /* FeatureTests */,
+				EFCF45F57F34F039166D7986 /* Fixtures */,
+				D9DAE9584D688BEBEE976F4E /* PersistenceTests */,
+				58BC1BA92016A752D4488B64 /* SecurityTests */,
+			);
+			path = WootDeskTests;
+			sourceTree = "<group>";
+		};
+		7090999DB32D59200EFB2666 /* FeatureTests */ = {
+			isa = PBXGroup;
+			children = (
+				F62BC26DE5079831E2732E84 /* AppModelAndFeatureTests.swift */,
+				41626B5FF8F6C0B42AF9F505 /* ConnectionFlowTests.swift */,
+				40CA499C6587E5AE02328016 /* ConversationListStateTests.swift */,
+			);
+			path = FeatureTests;
+			sourceTree = "<group>";
+		};
+		817387E4922173888C8173BB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				886D8C188E6F5C43276F26CE /* WootDesk.app */,
+				956B3C596B05CB1029877952 /* WootDeskTests.xctest */,
+				25EADC1AC61D20A17ED6A221 /* WootDeskUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		90AE1BC7106A0122854E7D9F /* DTO */ = {
+			isa = PBXGroup;
+			children = (
+				20B0174C4792ED8C7B52864E /* ChatwootAccountDTO.swift */,
+				5E8223996B54134E21948EA4 /* ChatwootContactDTO.swift */,
+				8E110E9C5B071CB77B301E92 /* ChatwootConversationDTO.swift */,
+				915226C29EDAC69D3F8C1C55 /* ChatwootMessageDTO.swift */,
+				AD4904AF668DC66D86BB97D4 /* ChatwootProfileDTO.swift */,
+				D1250C9151F9814B606D29C9 /* DateParser.swift */,
+			);
+			path = DTO;
+			sourceTree = "<group>";
+		};
+		AF3FC81EFC41DC3E7ADB7EB2 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				1AF3FC964E7CF17BFD5C26CC /* Assets.xcassets */,
+				6A52EDDED3BB4EF8B817FDC6 /* PrivacyInfo.xcprivacy */,
+				0956D1E86D5002E9CCE3931A /* WootDesk.entitlements */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		C5B450C530799614D608F5F8 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				95E8532BF2D5E8261B18BEE1 /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		C85C27552E30E0BC267F5E75 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				19E73B82E07D7FA521266112 /* ChatwootAccount.swift */,
+				7C318A473973FC12DA44698C /* Contact.swift */,
+				83672B33B090BDB1D0D26F7A /* Conversation.swift */,
+				766E33A07DBC0E0BA4873BB7 /* ServerProfile.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		D3F015CDDD5CDD854A9601D0 = {
+			isa = PBXGroup;
+			children = (
+				6C45B562916FB088F24BA779 /* WootDesk */,
+				70735DBAA08EA53FCE89846C /* WootDeskTests */,
+				FD1E38F0CC6CD48030B373F2 /* WootDeskUITests */,
+				817387E4922173888C8173BB /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D9DAE9584D688BEBEE976F4E /* PersistenceTests */ = {
+			isa = PBXGroup;
+			children = (
+				9F1B6FCBD99A2625A662D059 /* ServerProfilePersistenceTests.swift */,
+			);
+			path = PersistenceTests;
+			sourceTree = "<group>";
+		};
+		E98652B92FF735DC0BAE4613 /* Persistence */ = {
+			isa = PBXGroup;
+			children = (
+				B7D59F58FA193FE6330A5365 /* FileServerProfileRepository.swift */,
+				03454911F5CE2CDF4481010D /* InMemoryServerProfileRepository.swift */,
+				6EAED0EA01F665EA9BA56FFE /* ServerProfileRepository.swift */,
+			);
+			path = Persistence;
+			sourceTree = "<group>";
+		};
+		EB8168812D0FE7ECE988FB5C /* Features */ = {
+			isa = PBXGroup;
+			children = (
+				2A69E39668A71AB4F9652C9D /* Connections */,
+				3B1F9D39EF99B0E4DF14340F /* Conversations */,
+				C5B450C530799614D608F5F8 /* Settings */,
+			);
+			path = Features;
+			sourceTree = "<group>";
+		};
+		EC785E02A47387A199AC5D44 /* APITests */ = {
+			isa = PBXGroup;
+			children = (
+				F2028181E01D6B2C00D3BDF5 /* ChatwootAPIClientTests.swift */,
+				E43134BC865AA51D2A6BF049 /* ChatwootDecodingTests.swift */,
+				C8251393573697DEBC96FB29 /* MockURLProtocol.swift */,
+				CAA065212A27C1585B59818F /* URLAndRequestTests.swift */,
+			);
+			path = APITests;
+			sourceTree = "<group>";
+		};
+		EFCF45F57F34F039166D7986 /* Fixtures */ = {
+			isa = PBXGroup;
+			children = (
+				29FB1D603A00C5D0393C339D /* conversations_empty.json */,
+				0EDBAC91331E760494071B19 /* conversations_flat.json */,
+				2863E9B54DBEDB6FBA8ABBEC /* conversations_missing_fields.json */,
+				32B04B5C1D3620843E544A2E /* conversations_wrapped.json */,
+				9F37B83FA649B7E82032AC55 /* error_response_errors_array.json */,
+				3BF892426799738B3B42E5F7 /* error_response.json */,
+				3208ABE31D90C51F79082630 /* FixtureLoader.swift */,
+				20AA8837D796BEB927E93EEA /* malformed_response.json */,
+				DE8CD2CEEE7E78BFA89BC188 /* profile_multi_account.json */,
+				8AC721DB14E31745E375D2CF /* profile_no_accounts.json */,
+				673794FEBDEED96440DCABEE /* profile_single_account.json */,
+			);
+			path = Fixtures;
+			sourceTree = "<group>";
+		};
+		F33B7751B9872B982873723F /* Logging */ = {
+			isa = PBXGroup;
+			children = (
+				5E51BC0BA46C49E63A850960 /* AppLogger.swift */,
+			);
+			path = Logging;
+			sourceTree = "<group>";
+		};
+		FD1E38F0CC6CD48030B373F2 /* WootDeskUITests */ = {
+			isa = PBXGroup;
+			children = (
+				0253A820B5AA6DC4814F192D /* WootDeskLaunchUITests.swift */,
+			);
+			path = WootDeskUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1AE147478B62F861F3F83F5A /* WootDeskUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5BB58CD5FA2592DA29F4F8E9 /* Build configuration list for PBXNativeTarget "WootDeskUITests" */;
+			buildPhases = (
+				16D66A9EDEFDFCA52775F2AB /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CD481D439EEF6106015376E8 /* PBXTargetDependency */,
+			);
+			name = WootDeskUITests;
+			packageProductDependencies = (
+			);
+			productName = WootDeskUITests;
+			productReference = 25EADC1AC61D20A17ED6A221 /* WootDeskUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		BCD6BFE39A3AD3C3873828EF /* WootDesk */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 313B765BB22269B322AA7307 /* Build configuration list for PBXNativeTarget "WootDesk" */;
+			buildPhases = (
+				07E5EBF4F8DFDC6683EC5692 /* Sources */,
+				80CD4849EFBCA9C8C71959C3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = WootDesk;
+			packageProductDependencies = (
+			);
+			productName = WootDesk;
+			productReference = 886D8C188E6F5C43276F26CE /* WootDesk.app */;
+			productType = "com.apple.product-type.application";
+		};
+		DFCE097DA58506A6A13AF290 /* WootDeskTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E5F7ADAF6A5E38F8F6A20F43 /* Build configuration list for PBXNativeTarget "WootDeskTests" */;
+			buildPhases = (
+				232680B7A2C0BF8FE595E68A /* Sources */,
+				9617711E7158948C6B330D73 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				02BD0D003D5A082CB0F5356B /* PBXTargetDependency */,
+			);
+			name = WootDeskTests;
+			packageProductDependencies = (
+			);
+			productName = WootDeskTests;
+			productReference = 956B3C596B05CB1029877952 /* WootDeskTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		CB7C7A4BA42892B281B3B5EA /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					1AE147478B62F861F3F83F5A = {
+						TestTargetID = BCD6BFE39A3AD3C3873828EF;
+					};
+					BCD6BFE39A3AD3C3873828EF = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = AF4D8010980CB27276A29A61 /* Build configuration list for PBXProject "WootDesk" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = D3F015CDDD5CDD854A9601D0;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 817387E4922173888C8173BB /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				BCD6BFE39A3AD3C3873828EF /* WootDesk */,
+				DFCE097DA58506A6A13AF290 /* WootDeskTests */,
+				1AE147478B62F861F3F83F5A /* WootDeskUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		80CD4849EFBCA9C8C71959C3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				287F64B77671227563C1D507 /* Assets.xcassets in Resources */,
+				DBEFD856692B22B35C46C2B6 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9617711E7158948C6B330D73 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D04D0DCE282F4BE7C699E429 /* conversations_empty.json in Resources */,
+				786C0FA0E98D10442A1B6D78 /* conversations_flat.json in Resources */,
+				DCF8BD8F9F29A3C4D88AFCAD /* conversations_missing_fields.json in Resources */,
+				A8FF315E328204DBB7E9B2C8 /* conversations_wrapped.json in Resources */,
+				4AE9E3582285C18F36B5BDD1 /* error_response.json in Resources */,
+				1D2C1248FFAC371762B608A2 /* error_response_errors_array.json in Resources */,
+				B8E76547B335B894A0B73D90 /* malformed_response.json in Resources */,
+				E3B38E15CC111427F5465752 /* profile_multi_account.json in Resources */,
+				470CAA72FB81EFF587AF79AE /* profile_no_accounts.json in Resources */,
+				B13482F33FB66B2F353EB026 /* profile_single_account.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		07E5EBF4F8DFDC6683EC5692 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DC3E29CF80194C6D30C6F8F5 /* AIProvider.swift in Sources */,
+				37774D271A20C1681059E4D2 /* APIError.swift in Sources */,
+				4C07B15EA84DD84A3326261F /* APIRequest.swift in Sources */,
+				4D809F371345D75AAFD21C53 /* AccountPickerView.swift in Sources */,
+				F35B90103569FFA56BC94EA6 /* AddConnectionView.swift in Sources */,
+				67B658B77FCC64C24B431443 /* AppEnvironment.swift in Sources */,
+				30B9FBC8C7FC24A0C6357A2C /* AppLogger.swift in Sources */,
+				FDB2B9B8E8B86BA4160B6A5D /* AppModel.swift in Sources */,
+				08352AFF85173811F64775BA /* ChatwootAPI.swift in Sources */,
+				A3F44C39C43081695FC7A047 /* ChatwootAPIClient.swift in Sources */,
+				CC43F48E124F7E9D83023776 /* ChatwootAccount.swift in Sources */,
+				E97BA16E18035219BE735BC3 /* ChatwootAccountDTO.swift in Sources */,
+				9DBEEC17A42940053B17E238 /* ChatwootContactDTO.swift in Sources */,
+				0123D84AEBCCDA04B2A616C1 /* ChatwootConversationDTO.swift in Sources */,
+				B189615F3594BC6B5FE13096 /* ChatwootMessageDTO.swift in Sources */,
+				6FA230DE2929CE09DE1B9A97 /* ChatwootProfileDTO.swift in Sources */,
+				84CA230FB90546F3A045E5F8 /* ConnectionListView.swift in Sources */,
+				E6F2C858AC84E47C44532FC3 /* ConnectionViewState.swift in Sources */,
+				99FF17D90C28CFB3F3F16EB8 /* Contact.swift in Sources */,
+				38FBCB266E00BEA5320B15C6 /* Conversation.swift in Sources */,
+				C993C410153FE0F892336565 /* ConversationDetailView.swift in Sources */,
+				935AB745EA53C13FA54B8E51 /* ConversationListState.swift in Sources */,
+				DF16997CDE8C6CF1FC65F86B /* ConversationListView.swift in Sources */,
+				578E0FE4611EB895427F0590 /* ConversationRowView.swift in Sources */,
+				9E3DF8E63E51C261A5A348ED /* CredentialStore.swift in Sources */,
+				1C69899A148226784F3E3267 /* DateParser.swift in Sources */,
+				898820DF6871F2AB07236873 /* FileServerProfileRepository.swift in Sources */,
+				29CA318BBB12AA4F0F5F0347 /* InMemoryCredentialStore.swift in Sources */,
+				55636D3093A6A3851681C847 /* InMemoryServerProfileRepository.swift in Sources */,
+				10E37443A0986697182E34D5 /* KeychainCredentialStore.swift in Sources */,
+				533BCD2ACC3CE8F159FB6339 /* MockAIProvider.swift in Sources */,
+				41A42C82CD85D0327985EA4A /* PreviewData.swift in Sources */,
+				F0BB1316F0F391BA2E334F0A /* ResearchModels.swift in Sources */,
+				D94EA79982CE9D3A88C38EA4 /* ServerProfile.swift in Sources */,
+				D2F96EBBD6E7C43B7C83E17A /* ServerProfileRepository.swift in Sources */,
+				8564FE24A6A4F616131B45A3 /* SettingsView.swift in Sources */,
+				AF6791DD00E1A3DC78E2DA3D /* StubChatwootAPI.swift in Sources */,
+				E70C91F54C3450ECCEDFFBA8 /* WootDeskApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		16D66A9EDEFDFCA52775F2AB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2DECF936DE967C18E6CBDD91 /* WootDeskLaunchUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		232680B7A2C0BF8FE595E68A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				05E8B42E191EE80DB90E0ABA /* AppModelAndFeatureTests.swift in Sources */,
+				DAF9D5D554201198D2F3E94D /* ChatwootAPIClientTests.swift in Sources */,
+				37F600AAD2258BD3E23718A9 /* ChatwootDecodingTests.swift in Sources */,
+				7A07BFB2DF2019A01A66D15A /* ConnectionFlowTests.swift in Sources */,
+				1853E4B87367CA150A2DF2E9 /* ConversationListStateTests.swift in Sources */,
+				56861309B531E2F39951A4A8 /* CredentialStoreTests.swift in Sources */,
+				998F152F29738C682037A1CB /* FixtureLoader.swift in Sources */,
+				E1C8096CBA9CA971ACF64CC8 /* MockURLProtocol.swift in Sources */,
+				2A0023956C8E9C60A8B08834 /* ServerProfilePersistenceTests.swift in Sources */,
+				6FD41351AAA2529BC786C42A /* URLAndRequestTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		02BD0D003D5A082CB0F5356B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BCD6BFE39A3AD3C3873828EF /* WootDesk */;
+			targetProxy = E0C4C92CB070CA673AC8191C /* PBXContainerItemProxy */;
+		};
+		CD481D439EEF6106015376E8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = BCD6BFE39A3AD3C3873828EF /* WootDesk */;
+			targetProxy = 18842A4DFDDFDB959237ABFE /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		3137135FB4571AA37B22D2A1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		475BE8266B0554390A16CD29 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				"BUNDLE_LOADER[sdk=iphonesimulator*]" = "$(TEST_HOST)";
+				"BUNDLE_LOADER[sdk=macosx*]" = "$(TEST_HOST)";
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.n85.wootdesk.tests;
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/WootDesk.app/Contents/MacOS/WootDesk";
+				"TEST_HOST[sdk=iphonesimulator*]" = "$(BUILT_PRODUCTS_DIR)/WootDesk.app/WootDesk";
+				"TEST_HOST[sdk=macosx*]" = "$(BUILT_PRODUCTS_DIR)/WootDesk.app/Contents/MacOS/WootDesk";
+			};
+			name = Release;
+		};
+		5D61520FD53949203314B8EF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = WootDesk/Resources/WootDesk.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = "";
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]" = "";
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = WootDesk/Resources/WootDesk.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "WootDesk/Resources/Info-Release.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.n85.wootdesk;
+				PRODUCT_NAME = WootDesk;
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		89B2372677962BE61C434B99 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.n85.wootdesk.uitests;
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = WootDesk;
+			};
+			name = Release;
+		};
+		9A5A0D2C7CE75385C34CC405 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.0.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		D0A8EEF8BC0553A7BF8878E6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.n85.wootdesk.uitests;
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = WootDesk;
+			};
+			name = Debug;
+		};
+		DFA76B1A68F1D0F180697EA2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				"BUNDLE_LOADER[sdk=iphonesimulator*]" = "$(TEST_HOST)";
+				"BUNDLE_LOADER[sdk=macosx*]" = "$(TEST_HOST)";
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_IDENTITY = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.n85.wootdesk.tests;
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/WootDesk.app/Contents/MacOS/WootDesk";
+				"TEST_HOST[sdk=iphonesimulator*]" = "$(BUILT_PRODUCTS_DIR)/WootDesk.app/WootDesk";
+				"TEST_HOST[sdk=macosx*]" = "$(BUILT_PRODUCTS_DIR)/WootDesk.app/Contents/MacOS/WootDesk";
+			};
+			name = Debug;
+		};
+		E95ADC936F954FA169BE964B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = WootDesk/Resources/WootDesk.entitlements;
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = "";
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]" = "";
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = WootDesk/Resources/WootDesk.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "WootDesk/Resources/Info-Debug.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dev.n85.wootdesk;
+				PRODUCT_NAME = WootDesk;
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		313B765BB22269B322AA7307 /* Build configuration list for PBXNativeTarget "WootDesk" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E95ADC936F954FA169BE964B /* Debug */,
+				5D61520FD53949203314B8EF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		5BB58CD5FA2592DA29F4F8E9 /* Build configuration list for PBXNativeTarget "WootDeskUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D0A8EEF8BC0553A7BF8878E6 /* Debug */,
+				89B2372677962BE61C434B99 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		AF4D8010980CB27276A29A61 /* Build configuration list for PBXProject "WootDesk" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9A5A0D2C7CE75385C34CC405 /* Debug */,
+				3137135FB4571AA37B22D2A1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		E5F7ADAF6A5E38F8F6A20F43 /* Build configuration list for PBXNativeTarget "WootDeskTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DFA76B1A68F1D0F180697EA2 /* Debug */,
+				475BE8266B0554390A16CD29 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = CB7C7A4BA42892B281B3B5EA /* Project object */;
+}

@@ -1,0 +1,31 @@
+{
+  "payload": [
+    {
+      "id": 6001,
+      "account_id": 1,
+      "inbox_id": 20,
+      "status": "pending",
+      "priority": "medium",
+      "unread_count": 1,
+      "last_activity_at": 1700000000000,
+      "created_at": 1699990000000,
+      "inbox_name": "API Channel",
+      "meta": {
+        "sender": {
+          "id": 401,
+          "name": "Charlie Dev",
+          "email": "charlie@example.com"
+        },
+        "channel": "Channel::Api"
+      },
+      "messages": [
+        {
+          "id": 9003,
+          "content": "Checking webhook payload delivery.",
+          "message_type": 0,
+          "created_at": 1700000000000
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+name: Bug Report
+description: Report a reproducible bug or issue in WootDesk
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Thank you for reporting a bug in WootDesk. Never include a real access token, private server address, customer message, screenshot containing personal data, or other credential. Use invented or redacted values.
+  - type: input
+    id: os_version
+    attributes:
+      label: Operating System & Version
+      placeholder: e.g. macOS 15.0 Sequoia / iOS 18.0
+    validations:
+      required: true
+  - type: input
+    id: chatwoot_version
+    attributes:
+      label: Chatwoot Server Version
+      placeholder: e.g. Chatwoot v3.12.0 (self-hosted) / Cloud
+    validations:
+      required: false
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction_steps
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the behaviour.
+      placeholder: |
+        1. Open WootDesk
+        2. Enter a redacted server URL and invented token
+        3. Observe the reported error
+    validations:
+      required: true
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: Expected Behaviour
+      description: What did you expect to happen?
+    validations:
+      required: true

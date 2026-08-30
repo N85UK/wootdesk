@@ -1,0 +1,13 @@
+{
+  "id": 101,
+  "name": "Jane Support Lead",
+  "email": "jane@example.com",
+  "accounts": [
+    {
+      "id": 1,
+      "name": "Acme Support Global",
+      "role": "administrator",
+      "status": "active"
+    }
+  ]
+}
