@@ -82,7 +82,8 @@ xcodegen generate
 tests. It needs no Chatwoot server, credentials, or signing identity.
 
 The macOS UI tests are excluded by default because an unsigned UI-test runner is
-killed by macOS before it can connect. Run them with ad-hoc signing:
+killed by macOS before it can connect. Run them with ad-hoc signing. The script
+closes any running WootDesk instance first so the test build owns the app launch:
 
 ```bash
 ./script/ci.sh --with-ui-tests
