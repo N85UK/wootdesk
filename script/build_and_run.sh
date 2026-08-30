@@ -14,6 +14,10 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
+PROJECT_ROOT="$(pwd)"
+XCODE_DERIVED_DATA_ROOT="${HOME}/Library/Developer/Xcode/DerivedData"
+LSREGISTER_PATH="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
+
 VERIFY=0
 LAUNCH=1
 DEBUG=0
@@ -44,6 +48,19 @@ echo "========================================="
 
 echo "-> Stopping any running WootDesk instance..."
 killall WootDesk 2>/dev/null || true
+
+if [[ "${LAUNCH}" -eq 1 ]]; then
+    # Several local Xcode builds use the same bundle identifier. Older build
+    # products can otherwise leave Launch Services pointing at a placeholder icon.
+    echo "-> Unregistering stale local WootDesk build products..."
+    while IFS= read -r registered_app; do
+        case "${registered_app}" in
+            "${PROJECT_ROOT}"/build/*/WootDesk.app|"${XCODE_DERIVED_DATA_ROOT}"/WootDesk-*/Build/Products/*/WootDesk.app)
+                "${LSREGISTER_PATH}" -u "${registered_app}" > /dev/null 2>&1 || true
+                ;;
+        esac
+    done < <(mdfind "kMDItemCFBundleIdentifier == 'dev.n85.wootdesk'")
+fi
 
 if command -v xcodegen &> /dev/null; then
     echo "-> Regenerating the Xcode project with xcodegen..."
@@ -88,8 +105,12 @@ if [[ "${DEBUG}" -eq 1 ]]; then
     exec lldb -- "${APP_BINARY}"
 fi
 
+echo "-> Registering the fresh WootDesk application..."
+touch "${APP_PATH}"
+"${LSREGISTER_PATH}" -f "${APP_PATH}"
+
 echo "-> Launching WootDesk..."
-open "${APP_PATH}"
+/usr/bin/open -n "${APP_PATH}"
 
 if [[ "${LOGS}" -eq 1 ]]; then
     echo "-> Streaming WootDesk process logs..."
