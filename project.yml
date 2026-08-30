@@ -1,0 +1,118 @@
+name: WootDesk
+options:
+  bundleIdPrefix: dev.n85
+  deploymentTarget:
+    macOS: "15.0"
+    iOS: "18.0"
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+    CURRENT_PROJECT_VERSION: 1
+    MARKETING_VERSION: 1.0.0
+
+targets:
+  WootDesk:
+    type: application
+    platform: macOS
+    supportedDestinations:
+      - macOS
+      - iOS
+    sources:
+      - path: WootDesk
+        excludes:
+          - Resources/Info-Debug.plist
+          - Resources/Info-Release.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.n85.wootdesk
+        PRODUCT_NAME: WootDesk
+        GENERATE_INFOPLIST_FILE: NO
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+        CODE_SIGN_ENTITLEMENTS: ""
+        "CODE_SIGN_ENTITLEMENTS[sdk=macosx*]": WootDesk/Resources/WootDesk.entitlements
+        "CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]": ""
+        "CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]": ""
+        CODE_SIGN_STYLE: Automatic
+        MACOSX_DEPLOYMENT_TARGET: "15.0"
+        IPHONEOS_DEPLOYMENT_TARGET: "18.0"
+      configs:
+        Debug:
+          SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG
+          INFOPLIST_FILE: WootDesk/Resources/Info-Debug.plist
+        Release:
+          SWIFT_ACTIVE_COMPILATION_CONDITIONS: ""
+          INFOPLIST_FILE: WootDesk/Resources/Info-Release.plist
+          "ENABLE_HARDENED_RUNTIME[sdk=macosx*]": YES
+    # WootDesk runs sandboxed. It needs outbound network access to reach the user's
+    # Chatwoot server and nothing else: no file access, no camera, no microphone,
+    # no location, and no inbound network server.
+    entitlements:
+      path: WootDesk/Resources/WootDesk.entitlements
+      properties:
+        com.apple.security.app-sandbox: true
+        com.apple.security.network.client: true
+
+  WootDeskTests:
+    type: bundle.unit-test
+    platform: macOS
+    supportedDestinations:
+      - macOS
+      - iOS
+    sources:
+      - path: WootDeskTests
+    dependencies:
+      - target: WootDesk
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.n85.wootdesk.tests
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_IDENTITY: ""
+        CODE_SIGNING_ALLOWED: NO
+        CODE_SIGNING_REQUIRED: NO
+        MACOSX_DEPLOYMENT_TARGET: "15.0"
+        IPHONEOS_DEPLOYMENT_TARGET: "18.0"
+        "TEST_HOST[sdk=macosx*]": "$(BUILT_PRODUCTS_DIR)/WootDesk.app/Contents/MacOS/WootDesk"
+        "TEST_HOST[sdk=iphonesimulator*]": "$(BUILT_PRODUCTS_DIR)/WootDesk.app/WootDesk"
+        "BUNDLE_LOADER[sdk=macosx*]": "$(TEST_HOST)"
+        "BUNDLE_LOADER[sdk=iphonesimulator*]": "$(TEST_HOST)"
+      configs:
+        Debug:
+          SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG
+
+  WootDeskUITests:
+    type: bundle.ui-testing
+    platform: macOS
+    supportedDestinations:
+      - macOS
+      - iOS
+    sources:
+      - path: WootDeskUITests
+    dependencies:
+      - target: WootDesk
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: dev.n85.wootdesk.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_IDENTITY: ""
+        CODE_SIGNING_ALLOWED: NO
+        CODE_SIGNING_REQUIRED: NO
+        MACOSX_DEPLOYMENT_TARGET: "15.0"
+        IPHONEOS_DEPLOYMENT_TARGET: "18.0"
+        "TEST_TARGET_NAME": "WootDesk"
+
+schemes:
+  WootDesk:
+    build:
+      targets:
+        WootDesk: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - name: WootDeskTests
+        - name: WootDeskUITests

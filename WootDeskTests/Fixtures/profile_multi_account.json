@@ -1,0 +1,25 @@
+{
+  "id": 202,
+  "name": "Alex Multi Team",
+  "email": "alex@example.com",
+  "accounts": [
+    {
+      "id": 1,
+      "name": "Acme EMEA Customer Care",
+      "role": "agent",
+      "status": "active"
+    },
+    {
+      "id": 2,
+      "name": "Acme Americas Tier 2",
+      "role": "administrator",
+      "status": "active"
+    },
+    {
+      "id": 3,
+      "name": "Acme APAC Live Chat",
+      "role": "agent",
+      "status": "active"
+    }
+  ]
+}

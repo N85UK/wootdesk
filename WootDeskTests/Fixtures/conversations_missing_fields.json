@@ -1,0 +1,14 @@
+{
+  "payload": [
+    {
+      "id": 7001,
+      "status": null,
+      "priority": null,
+      "unread_count": null,
+      "last_activity_at": null,
+      "created_at": null,
+      "meta": null,
+      "messages": null
+    }
+  ]
+}

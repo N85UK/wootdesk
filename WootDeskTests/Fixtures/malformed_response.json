@@ -1,0 +1,5 @@
+{
+  "unexpected_root": {
+    "not_a_payload": "this response matches no known Chatwoot shape"
+  }
+}
