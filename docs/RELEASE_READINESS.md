@@ -12,11 +12,11 @@ Last reviewed: 30 August 2026
 
 | Field | Detail |
 |---|---|
-| Proposed release | 1.0.0 (1) |
+| Proposed release | 1.0.0 (2) |
 | Release channel | TestFlight first, then App Store after approval |
 | Platforms | iOS, iPadOS, macOS |
 | Release date | To confirm |
-| Repository branch | `feat/foundation-chatwoot-connection` |
+| Repository branch | `codex/app-store-submission` |
 | Public service | Not released |
 
 ## Current decision
@@ -24,9 +24,20 @@ Last reviewed: 30 August 2026
 Public App Store release: **No-go**
 
 The foundation connection and conversation-list slice works, but message
-history and replies are not implemented. A signed TestFlight candidate may be
-prepared after the account, signing, privacy, demo, and archive gates below are
-complete.
+history and replies are not implemented. A signed iOS build 2 TestFlight
+candidate exists and is marked Ready to Submit, but it has no testers and is not
+approved for public release. Feature, privacy, demo access, physical-device,
+macOS distribution, and owner-approval gates remain open.
+
+## Current App Store Connect build ledger
+
+| Platform | Version and build | State | Compliance | Tester exposure |
+|---|---|---|---|---|
+| iOS and iPadOS | 1.0.0 (1) | Superseded | Missing Compliance | None recorded |
+| iOS and iPadOS | 1.0.0 (2) | Ready to Submit | `ITSAppUsesNonExemptEncryption = false` | None |
+| macOS | 1.0.0 (2) | Local archive only | Not uploaded | None |
+
+No platform version has been submitted for App Review.
 
 ## Included scope
 
@@ -54,12 +65,12 @@ complete.
 | GO-001 | Foundation automated checks pass | `./script/ci.sh --with-ui-tests`, 61 unit tests and 2 UI tests on 30 August 2026 | Pass |
 | GO-002 | Live self-hosted connection works | Maintainer confirmed connection on 30 August 2026, no credential retained | Pass |
 | GO-003 | Message history and replies meet Milestone 2 acceptance | Milestone 2 test evidence | Blocked |
-| GO-004 | iOS and macOS archives validate | Xcode Organizer validation reports | Not started |
+| GO-004 | iOS and macOS archives validate locally | Signed iOS archive and App Store export passed; signed universal macOS archive, sandbox, runtime, icon, and privacy checks passed | Pass |
 | GO-005 | Physical-device TestFlight checks pass | Test matrix and tester sign-off | Not started |
 | GO-006 | App Store metadata and screenshots are approved | Final platform metadata | Not started |
-| GO-007 | Privacy and export-compliance answers are approved | Account Holder record | Not started |
+| GO-007 | Privacy and export-compliance answers are approved | Build 2 export-compliance declaration is recorded; App Store privacy answers remain pending | In progress |
 | GO-008 | Dedicated App Review server and account are ready | Private review runbook | Not started |
-| GO-009 | App Store Connect agreements and roles are ready | Account Holder evidence | Not started |
+| GO-009 | App Store Connect agreements and roles are ready | App record and build upload succeeded; final agreement and role review remains pending | In progress |
 | GO-010 | Product, security, and release owners record Go | Signed decision table below | Not started |
 
 ## Quality checks
@@ -75,6 +86,8 @@ complete.
 | Security | Keychain, HTTPS, sandbox, no secret logging | Security tests and local sandbox launch verification passed | Pass for source build |
 | Privacy | No analytics, tracking, or live AI | Manifest copied into macOS and iOS app bundles | Pass for source build |
 | App icons | Asset catalogue validates on both platforms | Debug and Release platform builds passed | Pass |
+| iOS distribution | App Store package signs and processes | Build 2 uses Apple Distribution, App Store provisioning, and is Ready to Submit | Pass |
+| macOS distribution | Sandboxed universal archive validates locally | Build 2 archive passed local signing, hardened-runtime, icon, and privacy checks; export and upload pending | In progress |
 | Real devices | Supported-device behaviour | TestFlight matrix | Not started |
 
 ## Required release test matrix
@@ -88,16 +101,16 @@ complete.
 
 ## Automated verification evidence
 
-The final source validation used the only installed Xcode toolchain, Xcode 27.0
-build 27A5194q with Apple Swift 6.4.
+The build 2 source and distribution validation used Xcode 27.0 beta 6, build
+27A5252f, with Apple Swift 6.4.
 
 | Command | Result |
 |---|---|
 | `xcodegen generate --spec project.yml` | Passed |
-| `./script/ci.sh --with-ui-tests` | macOS Debug build, iOS Simulator Debug build, 61 unit tests, and 2 UI tests passed |
-| macOS Release build with signing disabled | Passed |
-| iOS Simulator Release build with signing disabled | Passed |
-| `./script/build_and_run.sh --verify` | Built, launched, remained running, and App Sandbox entitlement was present |
+| `./script/ci.sh` | macOS Debug build, generic iOS Simulator Debug build, and 61 unit tests in 8 suites passed |
+| Signed iOS Release archive and local App Store export | Passed, build 2 signed with Apple Distribution and App Store provisioning |
+| Signed macOS Release archive | Passed, universal archive with App Sandbox, hardened runtime, icon, and privacy manifest |
+| App Store Connect upload | Build 2 processed and is Ready to Submit |
 
 Xcode emitted its normal destination-selection warning because the Mac can be
 addressed as either arm64 or x86_64, and a metadata-extraction warning because
@@ -114,7 +127,8 @@ asset, privacy-manifest, or signing error.
 - [ ] Privacy manifest matches the exact release binary.
 - [ ] Public privacy-policy URL is accessible without authentication.
 - [ ] App Store privacy answers match all platforms and linked services.
-- [ ] Export-compliance decision is recorded by the Account Holder.
+- [x] Build 2 export-compliance decision is recorded as
+      `ITSAppUsesNonExemptEncryption = false`.
 - [ ] Demo environment contains invented data and no production integration.
 - [ ] App Review credentials are entered only in private App Store Connect fields.
 
@@ -122,9 +136,10 @@ asset, privacy-manifest, or signing error.
 
 The active risks and responses are maintained in
 `docs/governance/RISK_REGISTER.md`. The highest release blockers are incomplete
-Milestone 2 functionality, unsigned archives, missing physical-device evidence,
-missing review-only server access, and the current Apple documentation ambiguity
-around a single multiplatform target for universal purchase.
+Milestone 2 functionality, missing physical-device evidence, missing review-only
+server access, pending privacy answers, the unverified macOS upload path, and the
+current Apple documentation ambiguity around a single multiplatform target for
+universal purchase.
 
 ## Rollback and stop conditions
 

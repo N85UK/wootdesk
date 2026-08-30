@@ -1,6 +1,6 @@
 # Draft App Store Metadata
 
-Status: Draft, not submitted
+Status: Draft listing metadata, iOS build 2 uploaded, not submitted for review
 
 Last reviewed: 30 August 2026
 
@@ -24,7 +24,22 @@ credentials, customer data, or a real server address to this repository.
 | Privacy policy URL | `https://github.com/N85UK/wootdesk/blob/main/PRIVACY.md` |
 
 The privacy-policy URL becomes a valid release URL only after `PRIVACY.md` is
-merged into the default branch and confirmed accessible without authentication.
+confirmed accessible from the public default branch without authentication.
+
+## Current submission snapshot
+
+| Item | Verified state |
+|---|---|
+| App Store Connect record | Present for iOS, iPadOS, and macOS |
+| iOS build 1 | Superseded, Missing Compliance |
+| iOS build 2 | Uploaded, Ready to Submit |
+| Export compliance | `ITSAppUsesNonExemptEncryption = false` in build 2 |
+| TestFlight testers | None added |
+| App Review | Not submitted |
+| macOS distribution | Archive validated locally, not exported or uploaded |
+
+This is a process snapshot, not a public-release approval. The release remains
+blocked by the criteria in `docs/RELEASE_READINESS.md`.
 
 ## Promotional text
 
@@ -68,7 +83,7 @@ character limit before submission.
 
 ## What's New
 
-First TestFlight foundation build:
+Build 2 TestFlight foundation candidate:
 
 - Add and validate a Chatwoot server securely.
 - Select an account and restore the saved connection.
@@ -130,10 +145,11 @@ flows are explained in `PRIVACY.md` even though N85 Dev does not receive them.
 ## Export compliance draft
 
 WootDesk uses operating-system HTTPS and Keychain services and does not
-implement its own encryption algorithm. The likely answer is that the app does
-not contain non-exempt encryption, but the Account Holder must complete Apple's
-current export-compliance questions and retain the decision evidence. Do not add
-`ITSAppUsesNonExemptEncryption` until that determination is confirmed.
+implement its own encryption algorithm. Build 2 therefore declares
+`ITSAppUsesNonExemptEncryption = false`. App Store Connect processed that build
+without the Missing Compliance state shown for build 1. Retain this declaration
+only while the app continues to use exempt Apple operating-system cryptography,
+and reassess it if the encryption implementation or linked services change.
 
 ## Age rating
 

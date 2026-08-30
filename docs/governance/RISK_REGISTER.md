@@ -11,7 +11,7 @@ impact. Scores support triage but do not replace owner judgement.
 
 | ID | Risk | Probability | Impact | Score | Response | State |
 |---|---|---:|---:|---:|---|---|
-| RISK-001 | App Store Connect may not accept both platform archives from the current single multiplatform target because current Apple documents are inconsistent | 2 | 4 | 8 | Preflight both archives. Add thin distribution targets only if App Store Connect requires them | Open |
+| RISK-001 | App Store Connect may not accept the macOS archive from the current single multiplatform target because current Apple documents are inconsistent | 2 | 4 | 8 | The iOS build is accepted and both local archives validate. Export and upload the macOS build, then add thin distribution targets only if App Store Connect requires them | Open |
 | RISK-002 | A public foundation release may disappoint users because message history and replies are absent | 4 | 4 | 16 | Keep public release blocked until Milestone 2 acceptance | Open |
 | RISK-003 | App Review cannot validate the server-dependent workflow | 3 | 5 | 15 | Provide an isolated review server with invented data and stable private credentials | Open |
 | RISK-004 | Privacy disclosures drift when telemetry, push, crash reporting, or AI is added | 3 | 5 | 15 | Review the policy, manifest, binary traffic, and App Store answers for every release | Open |
@@ -19,6 +19,7 @@ impact. Scores support triage but do not replace owner judgement.
 | RISK-006 | Product artwork or listing copy is mistaken for official Chatwoot branding | 2 | 5 | 10 | Use an original generic icon, independent-project notice, and final rights review | Reduced |
 | RISK-007 | A personal development-team identifier or signing asset is committed | 2 | 4 | 8 | Keep automatic signing without `DEVELOPMENT_TEAM`; scan the final diff | Reduced |
 | RISK-008 | Screenshots or review fixtures expose customer information or a live token | 2 | 5 | 10 | Use dedicated invented data and keep access only in private review fields | Open |
+| RISK-009 | App Store Connect build state and the repository release ledger drift apart | 2 | 3 | 6 | Record the build number, processing state, compliance state, and tester exposure after every release session | Open |
 
 Review open risks before each TestFlight build and public release decision. Add
 an owner and target date when a release candidate is scheduled.
