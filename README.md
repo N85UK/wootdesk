@@ -81,6 +81,9 @@ xcodegen generate
 `script/ci.sh` builds the macOS and iOS Simulator destinations and runs the unit
 tests. It needs no Chatwoot server, credentials, or signing identity.
 
+`script/build_and_run.sh` refreshes the project-local Launch Services entries
+before launching, so older Xcode build products cannot supply a stale Dock icon.
+
 The macOS UI tests are excluded by default because an unsigned UI-test runner is
 killed by macOS before it can connect. Run them with ad-hoc signing. The script
 closes any running WootDesk instance first so the test build owns the app launch:
