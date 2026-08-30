@@ -1,41 +1,60 @@
 # App Store Submission Guide
 
-Status: Preparation guide, no App Store Connect action performed
+Status: TestFlight submission guide and verified build ledger
 
 Last verified against Apple documentation: 30 August 2026
 
 ## Release position
 
-WootDesk can now build with a complete app-icon catalogue and has the local
-security boundaries needed for TestFlight preparation. It is not yet ready for
-public App Store submission because message history and replies are deliberately
-outside the foundation milestone. The recommended sequence is:
+WootDesk has a registered App ID, an App Store Connect record, local Apple
+Distribution signing, validated iOS and macOS build 2 archives, and an uploaded
+iOS TestFlight candidate. It is not ready for public App Store submission
+because message history and replies are deliberately outside the foundation
+milestone. The recommended sequence is:
 
-1. Push and review the foundation branch.
+1. Keep iOS build 2 unassigned while release documentation is reviewed.
 2. Complete conversation detail, message history, and replies.
 3. Create a dedicated review-only Chatwoot environment with invented data.
-4. Produce and validate signed iOS and macOS archives.
-5. Test both archives through TestFlight.
-6. Approve the release-readiness gate.
-7. Submit the iOS and macOS versions for App Review.
+4. Export and upload the macOS build, then verify platform association.
+5. Add approved internal testers and complete the physical-device matrix.
+6. Approve privacy, metadata, screenshots, and release-readiness gates.
+7. Submit the iOS and macOS versions for App Review only after an explicit Go.
 
-No Apple account, agreement, certificate, App Store Connect record, build
-upload, TestFlight group, or review submission is created by repository work.
+Apple account credentials, team identifiers, signing identities, and private
+review access are never stored in this repository.
 
 ## Current repository configuration
 
 | Item | Current value | Release meaning |
 |---|---|---|
 | Product | WootDesk | Shared product name |
-| Bundle ID | `dev.n85.wootdesk` | Proposed explicit App ID and App Store Connect bundle ID |
+| Bundle ID | `dev.n85.wootdesk` | Registered explicit App ID and App Store Connect bundle ID |
 | Version | `1.0.0` | Marketing version, change only through reviewed release work |
-| Build | `1` | Increment for every uploaded build |
+| Build | `2` | Increment for every uploaded build |
 | Platforms | iOS, iPadOS, macOS | One native SwiftUI multiplatform target |
 | Minimum versions | iOS 18, iPadOS 18, macOS 15 | Must match App Store metadata and testing |
 | Signing style | Automatic | A team is selected locally, not committed |
 | macOS sandbox | Enabled | Outbound network client only |
 | App icon | Complete | Separate iOS and macOS platform treatments |
 | Privacy manifest | Present | Declares no tracking, collection, or required-reason API use in this build |
+
+## Current verified submission state
+
+| Item | State |
+|---|---|
+| Explicit App ID | Registered for `dev.n85.wootdesk` |
+| App Store Connect record | Present for iOS, iPadOS, and macOS |
+| Apple Distribution identity | Installed locally with an accessible private key |
+| iOS build 1 | Superseded, Missing Compliance |
+| iOS build 2 | Uploaded, processed, Ready to Submit |
+| Build 2 export compliance | `ITSAppUsesNonExemptEncryption = false` |
+| macOS build 2 | Signed universal archive validated locally, not exported or uploaded |
+| TestFlight testers | None added |
+| App Review | Not submitted |
+
+Build 2 uses only Apple operating-system HTTPS, TLS, and Keychain cryptography.
+The export-compliance declaration must be reviewed again if that implementation
+changes.
 
 ## Apple account prerequisites
 
@@ -53,9 +72,9 @@ Apple documents agreement management in
 
 ## Register the app identifier
 
-Register an explicit App ID for `dev.n85.wootdesk` in Certificates, Identifiers
-and Profiles. Apple supports a single App ID across iOS and macOS. Enable only
-the capabilities the release build uses.
+An explicit App ID for `dev.n85.wootdesk` is registered in Certificates,
+Identifiers and Profiles. Apple supports a single App ID across iOS and macOS.
+Enable only the capabilities the release build uses.
 
 The foundation build needs no CloudKit, push notification, associated domain,
 in-app purchase, Sign in with Apple, camera, microphone, or location capability.
@@ -68,7 +87,9 @@ Reference:
 
 `project.yml` enables automatic signing but intentionally contains no
 `DEVELOPMENT_TEAM` value. This keeps personal and organisation team identifiers
-out of the public repository.
+out of the public repository. One Apple Distribution identity with an accessible
+private key is installed on the release Mac; no certificate material is stored
+in Git.
 
 On the release Mac:
 
@@ -88,7 +109,7 @@ Apple's preparation guide explains team selection and supported destinations:
 
 ## Create the App Store Connect record
 
-Create one App Store Connect app record for the iOS, iPadOS, and macOS versions.
+One App Store Connect app record now covers the iOS, iPadOS, and macOS versions.
 Apple says a multiple-platform app offered together should use one record, one
 bundle ID, and platform-specific information.
 
@@ -128,9 +149,9 @@ References:
 
 ## Publish privacy information
 
-Before uploading a release candidate:
+Before public App Review submission:
 
-1. Merge `PRIVACY.md` into the public default branch.
+1. Confirm `PRIVACY.md` remains on the public default branch.
 2. Confirm its public URL works without authentication.
 3. Review `PrivacyInfo.xcprivacy` against the exact release binary.
 4. Complete App Store Connect's app privacy questions across all platforms.
@@ -219,16 +240,25 @@ entitlement path, and absence of debug-only transport exceptions.
 
 ## Create archives
 
-Use Xcode Organizer because it manages distribution certificates, profiles,
-validation, and upload diagnostics:
+Build 2 has signed iOS and macOS archives. The iOS archive was exported with
+Apple Distribution signing and App Store provisioning. Its release package has
+debug entitlement disabled, an arm64 executable, iOS 18 minimum deployment,
+launch and orientation metadata, app-icon assets, and `PrivacyInfo.xcprivacy`.
+
+The macOS archive contains arm64 and x86_64 executables, a macOS 15 minimum
+deployment, hardened runtime, App Sandbox with outbound network access only,
+app-icon assets, and `PrivacyInfo.xcprivacy`. It remains a local archive until
+the Mac App Store export and upload path is completed.
+
+For later builds, Xcode Organizer can manage distribution certificates,
+profiles, validation, and upload diagnostics:
 
 1. Select the WootDesk scheme and a generic iOS device destination.
 2. Choose Product, then Archive.
-3. In Organizer, choose Validate App and resolve every error.
-4. Retain the validated iOS archive.
-5. Select My Mac as the destination and archive again.
-6. Validate the macOS archive and inspect its entitlements.
-7. Confirm each archive contains the expected icon and `PrivacyInfo.xcprivacy`.
+3. Validate the iOS archive and resolve every error.
+4. Select My Mac as the destination and archive again.
+5. Validate the macOS archive and inspect its entitlements.
+6. Confirm each archive contains the expected icon and `PrivacyInfo.xcprivacy`.
 
 Useful local inspection for the exported macOS app:
 
@@ -242,10 +272,16 @@ signature used by `script/build_and_run.sh`.
 
 ## Upload and TestFlight
 
-From each validated archive, choose Distribute App, App Store Connect, and
-Upload. Xcode associates the build using its bundle ID, version, and build
-number. Wait for processing to complete before selecting it in App Store
-Connect.
+iOS build 2 has been uploaded and processing completed. App Store Connect marks
+it Ready to Submit. Build 1 remains visible as superseded with Missing
+Compliance. The build 2 package contains
+`ITSAppUsesNonExemptEncryption = false`, so no separate Missing Compliance state
+is shown for it.
+
+No TestFlight group or tester has been added. The macOS build has not been
+exported or uploaded. For each future archive, choose Distribute App, App Store
+Connect, and Upload, then wait for processing to complete before assigning the
+build.
 
 Release through TestFlight first:
 
@@ -293,18 +329,19 @@ References:
 - [App Sandbox information](https://developer.apple.com/help/app-store-connect/reference/app-uploads/app-sandbox-information/)
 - [Notarising macOS software before distribution](https://developer.apple.com/documentation/security/notarizing-macos-software-before-distribution)
 
-## Actions that require the Account Holder
+## Remaining account-owner actions
 
-Repository work cannot safely complete these actions:
+The following release actions remain pending and require an authorised account
+owner:
 
-- Accept legal agreements.
-- Register the final App ID if it does not already exist.
-- Select the organisation team and create distribution signing assets.
-- Reserve the App Store name and create the app record.
-- Decide price, territories, age rating, and export-compliance answers.
-- Publish the privacy answers.
-- Provide private review contact and demo credentials.
-- Upload a signed build or submit it for review.
+- Confirm current legal agreements, roles, and EU trader status.
+- Approve price, territories, age rating, and App Store privacy answers.
+- Approve platform metadata and screenshots containing invented data only.
+- Create or approve the Mac Installer Distribution signing asset if required by
+  the macOS App Store export.
+- Provide private review contact and dedicated demo credentials.
+- Approve TestFlight tester access.
+- Submit either platform for App Review.
 
-These actions should be performed only from the approved release commit after
-the release gate is complete.
+No public submission should occur until the release gate is complete against an
+approved release commit.

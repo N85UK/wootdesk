@@ -115,16 +115,20 @@ Detailed architectural and design documentation is available in [`docs/`](docs/)
 
 ## App Store Position
 
-The repository is prepared for signed archive and TestFlight work, but no App
-Store Connect record, uploaded build, or public release is claimed. Public
-submission remains a no-go until message history and replies are complete,
-platform archives validate, privacy and review information are approved, and
-physical-device TestFlight checks pass.
+The App Store Connect record and signing path are in place. iOS build 2 has
+completed processing and is marked Ready to Submit in TestFlight. Build 1 is
+superseded and remains marked Missing Compliance. No testers have been added,
+and no build has been submitted for App Review. A macOS archive has passed
+local validation but has not been exported or uploaded to App Store Connect.
+
+Public submission remains a no-go until message history and replies are
+complete, privacy and review information are approved, the macOS distribution
+path is verified, and physical-device TestFlight checks pass.
 
 Follow [the App Store submission guide](docs/APP_STORE_SUBMISSION.md) for the
 account, signing, metadata, archive, TestFlight, and review sequence. Account
-agreements, signing-team selection, build upload, and App Review submission must
-be completed by an authorised Apple Developer account holder.
+agreements, signing changes, future build uploads, tester access, and App Review
+submission must be completed by an authorised Apple Developer account holder.
 
 ---
 
