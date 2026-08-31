@@ -32,8 +32,11 @@ public actor SystemNotificationPermissionClient: NotificationPermissionClient {
     public init() {}
 
     public func authorisationStatus() async -> NotificationAuthorisationStatus {
-        let settings = await UNUserNotificationCenter.current().notificationSettings()
-        return Self.map(settings.authorizationStatus)
+        await withCheckedContinuation { continuation in
+            UNUserNotificationCenter.current().getNotificationSettings { settings in
+                continuation.resume(returning: Self.map(settings.authorizationStatus))
+            }
+        }
     }
 
     public func requestAuthorisation() async throws -> Bool {
