@@ -12,26 +12,27 @@ Last reviewed: 31 August 2026
 
 | Field | Detail |
 |---|---|
-| Proposed release | 1.0.0 (3 or later) |
+| Proposed release | 1.0.0 (4 or later) |
 | Release channel | TestFlight first, then App Store after approval |
 | Platforms | iOS, iPadOS, macOS |
 | Release date | To confirm |
-| Repository branch | `codex/milestone-2-conversation-detail` |
+| Repository branch | `main` |
 | Public service | Not released |
 
 ## Current decision
 
 Public App Store release: **No-go**
 
-The repository now contains paginated message history, plain-text public
-replies, private notes, safe in-memory draft and attachment handling, and
-privacy-first received-attachment presentation. Local iOS and macOS build 3
-archives contain those changes, but neither has been uploaded. The macOS
-archive now also exports as a signed Mac App Store installer with a matching
-embedded provisioning profile. The signed iOS
-build 2 TestFlight candidate predates them, has no testers, and is not approved
-for public release. Dedicated-server acceptance, physical-device testing,
-listing, privacy, review access, and owner approval gates
+The repository now contains paginated message history, replies, private notes,
+safe attachment handling, a native APNs client, secure per-profile gateway
+enrolment, and a self-hostable WootDesk Push Gateway. Build 4 source passes the
+complete local CI path, but it has not been signed, archived, uploaded, or
+tested on physical devices. The gateway has not been deployed and its initial
+account-wide recipient policy is not approved for organisations that require
+per-agent routing. The signed iOS build 2 TestFlight candidate predates the
+message and notification work, has no testers, and is not approved for public
+release. Apple capability, provisioning, deployment, dedicated-server,
+physical-device, listing, privacy, review-access, and owner-approval gates
 remain open.
 
 ## Current App Store Connect build ledger
@@ -58,6 +59,7 @@ No platform version has been submitted for App Review.
 - `REQ-ATTACH-001`: Upload files and present received attachment metadata without automatic remote fetch.
 - `REQ-MSG-SAFE-001`: Present processed HTML and inline Markdown without active embedded links.
 - `REQ-PUSH-CLIENT-001`: Request notification permission, register with APNs, and expose accurate local and provider-required states without persisting the device token.
+- `REQ-PUSH-GATEWAY-001`: Enrol and remove a saved profile through an authenticated gateway that encrypts APNs tokens and emits generic alerts.
 - `REQ-DIST-001`: Include valid iOS, iPadOS, and macOS app icons.
 - `REQ-PRIV-001`: Ship without analytics, tracking, or live AI requests.
 
@@ -65,7 +67,7 @@ No platform version has been submitted for App Review.
 
 - Arbitrary HTML, remote media previews, and active links inside message content.
 - Assignment, labels, teams, and status mutation.
-- Real-time updates, the Chatwoot-to-APNs provider, remote new-message delivery, and background refresh.
+- ActionCable real-time updates, a live hosted gateway service, approved per-agent recipient routing, and background refresh.
 - Live AI features or an AI Gateway.
 - Offline conversation storage.
 - Developer ID distribution outside the Mac App Store.
@@ -74,7 +76,7 @@ No platform version has been submitted for App Review.
 
 | ID | Criterion | Evidence | Status |
 |---|---|---|---|
-| GO-001 | Automated source checks pass | `./script/ci.sh`, 93 unit tests, plus 3 iPhone and 3 iPad Simulator UI journeys on 30 August 2026 | Pass |
+| GO-001 | Automated source checks pass | `./script/ci.sh`, 18 Node gateway tests, 116 Swift tests, plus the previously recorded iPhone, iPad, and macOS UI journeys | Pass |
 | GO-002 | Live self-hosted connection works | Maintainer confirmed connection on 30 August 2026, no credential retained | Pass |
 | GO-003 | Message history, replies, private notes, and attachments meet Milestone 2 acceptance | Source implementation and mocked tests pass; opt-in live harness exists; dedicated-server and TestFlight acceptance remain | In progress |
 | GO-004 | iOS and macOS archives validate locally | Signed build 3 iOS archive and App Store export passed; signed universal build 3 macOS archive and installer export passed with the expected sandbox, runtime, icon, privacy, metadata, installer identity, and embedded profile | Pass |
@@ -85,7 +87,7 @@ No platform version has been submitted for App Review.
 | GO-009 | App Store Connect agreements and roles are ready | App record and build upload succeeded; final agreement and role review remains pending | In progress |
 | GO-010 | Product, security, and release owners record Go | Signed decision table below | Not started |
 | GO-011 | macOS App Store package exports and validates | Xcode export succeeded; the Apple-issued installer signature validates, the embedded profile matches `dev.n85.wootdesk`, and the payload remains universal | Pass locally, upload pending |
-| GO-012 | Remote new-message notifications are private, profile-safe, and reliable | Push provider deployment, signed build 4 entitlements, physical-device delivery, token rotation, deletion, and cross-profile test evidence | Not started; client foundation only |
+| GO-012 | Remote new-message notifications are private, profile-safe, and reliable | Client and gateway source, deterministic enrolment, rotation, deletion, filtering, and route-isolation tests pass; Apple capability, approved recipient policy, deployment, signed build 4, and physical delivery remain | In progress; source complete, live acceptance blocked |
 
 ## Quality checks
 
@@ -93,13 +95,13 @@ No platform version has been submitted for App Review.
 |---|---|---|---|
 | macOS build | Debug app builds | Generic macOS build passed | Pass |
 | iOS build | Generic Simulator destination builds | Generic iOS Simulator build passed | Pass |
-| Unit tests | All deterministic tests pass without a live server | 93 Swift Testing tests in 10 suites passed; 2 opt-in XCTest live cases skipped as designed | Pass |
+| Unit tests | All deterministic tests pass without a live server | 116 Swift tests in 13 suites and 18 Node gateway tests passed | Pass |
 | UI tests | First-run setup and the message/reply journey work without a live server | 3 tests passed on an iPhone 17 Pro Simulator, 3 passed on an iPad Pro 13-inch Simulator, and 3 passed on this Apple silicon Mac after the controlled Automation Mode setup | Pass on iPhone, iPad, and this Mac |
 | Swift concurrency | Swift 6 complete strict checking | Project build settings | Configured |
 | Accessibility | Labels, keyboard flow, Dynamic Type, VoiceOver states | Code review and UI checks | In review |
 | Security | Keychain, HTTPS, sandbox, no secret logging | Security tests and local sandbox launch verification passed | Pass for source build |
 | Privacy | No analytics, tracking, or live AI | Manifest copied into macOS and iOS app bundles | Pass for source build |
-| Notification client | Permission, local verification, and APNs lifecycle use native APIs without persisting or logging tokens | Six deterministic state tests plus unsigned macOS and iOS Simulator builds | Pass for client foundation; provider blocked |
+| Notification system source | Permission, cold-launch routing, secure enrolment, APNs rotation, removal, webhook filtering, and encrypted storage work without exposing tokens or message content | Dedicated Swift client tests, 18 Node gateway tests, and unsigned macOS and iOS Simulator builds | Pass for source; Apple activation, deployment, and devices blocked |
 | App icons | Asset catalogue validates on both platforms | Debug and Release platform builds passed | Pass |
 | iOS distribution | App Store package signs and exports | Build 3 local archive and App Store package export passed; build 2 remains the only uploaded build | Pass locally, upload pending |
 | macOS distribution | Sandboxed universal archive validates and exports | Build 3 archive and signed App Store installer export pass; upload has not started | Pass locally, upload pending |
@@ -116,13 +118,14 @@ No platform version has been submitted for App Review.
 
 ## Automated verification evidence
 
-The build 3 source and distribution validation used Xcode 27.0 beta 6, build
-27A5252f, with Apple Swift 6.4.
+Build 4 source validation used Xcode 27.0 beta 6, build 27A5252f, with Apple
+Swift 6.4. The signed build 3 archive evidence is historical and does not prove
+that build 4 is signable with the refreshed push capability.
 
 | Command | Result |
 |---|---|
 | `xcodegen generate --spec project.yml` | Passed |
-| `./script/ci.sh` | Build 4 macOS Debug build, generic iOS Simulator Debug build, and 93 unit tests in 10 suites passed; 2 live cases skipped by default |
+| `./script/ci.sh` | Build 4 generic macOS and iOS Simulator Debug builds, 116 Swift tests in 13 suites, 18 Node gateway tests, and the dependency policy check passed |
 | iPhone Simulator UI suite | 3 UI tests passed, including message history and a stub-confirmed reply without network access |
 | iPad Simulator UI suite | 3 UI tests passed after replacing a beta-runner element tap with a semantic centre-coordinate tap |
 | macOS UI suite | Passed 3 tests on 31 August 2026 after the documented one-time Automation Mode configuration; XCTest established the automation session without an authentication prompt |
@@ -131,6 +134,7 @@ The build 3 source and distribution validation used Xcode 27.0 beta 6, build
 | Signed macOS Release archive | Passed for build 3, universal arm64 and x86_64, macOS 15 minimum, App Sandbox with network and user-selected read-only file access, hardened runtime, icon, privacy manifest, and copyright metadata |
 | macOS local App Store package export | Passed on 31 August 2026; one Mac Installer Distribution identity has an accessible private key, the package signature validates, and the embedded Mac App Store profile matches the bundle |
 | App Store Connect upload | Build 2 processed and is Ready to Submit |
+| Current local signing inventory | `security find-identity -p codesigning -v` reported zero valid identities and no local provisioning profiles were found on 31 August 2026; build 4 distribution is blocked until approved identities and refreshed profiles are available |
 
 Xcode emitted its normal destination-selection warning because the Mac can be
 addressed as either arm64 or x86_64, and a metadata-extraction warning because
@@ -159,14 +163,15 @@ asset, privacy-manifest, or signing error.
 The active risks and responses are maintained in
 `docs/governance/RISK_REGISTER.md`. The highest release blockers are missing
 Milestone 2 live acceptance, missing physical-device evidence, missing
-review-only server access, pending privacy answers, the pending macOS upload
-proof, and the current Apple documentation ambiguity around a single
-multiplatform target for universal purchase.
+review-only server access, pending privacy answers, unavailable current local
+distribution identities and profiles, the unapproved account-wide gateway
+recipient policy, gateway deployment, and the Apple documentation ambiguity
+around a single multiplatform target for universal purchase.
 
-Build 4 source adds the native notification permission, local verification,
-and APNs registration foundation. It does not include a Chatwoot-to-APNs
-provider, so remote new-message delivery remains blocked and must not be
-represented as active.
+Build 4 source includes the native notification client and WootDesk Push
+Gateway. Remote new-message delivery remains blocked until Apple activation,
+approved recipient policy, a hardened deployment, signed-build inspection, and
+invented-data physical-device acceptance all pass.
 
 ## Rollback and stop conditions
 

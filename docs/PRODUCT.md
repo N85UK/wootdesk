@@ -33,7 +33,7 @@ WootDesk is an independent native Apple client for [Chatwoot](https://www.chatwo
 2. **System Security & Privacy:**
    - Credentials stored solely in Apple Keychain.
    - Transport encryption enforced via TLS/HTTPS.
-   - No analytics or remote telemetry. Network data is sent only to the selected Chatwoot server in this milestone.
+   - No analytics or remote telemetry. Network data goes to the selected Chatwoot server and, only after deliberate enrolment, the selected authenticated WootDesk Push Gateway.
 
 3. **Independent & Extensible Architecture:**
    - Works with any self-hosted or cloud Chatwoot instance supporting the Application API.
@@ -55,8 +55,10 @@ Milestone 1 is an early-development foundation, not a production or App Store
 release. The Milestone 2 source now adds paginated message history, plain-text
 replies, private notes, safe inline formatting, attachment upload, and
 privacy-first attachment presentation. Milestone 3 now includes the native
-notification permission and APNs registration foundation, but remote Chatwoot
-delivery is not active until the authenticated push provider is implemented.
+notification client, secure per-profile device enrolment, and a self-hostable
+authenticated push gateway. Remote Chatwoot delivery is not active until Apple
+capabilities and profiles are refreshed, the gateway recipient policy is
+approved, the service is deployed, and signed physical-device acceptance passes.
 Public distribution remains blocked until this work passes dedicated
 invented-data server and TestFlight acceptance,
 the remaining distribution and listing gates close, and the named release

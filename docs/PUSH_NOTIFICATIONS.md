@@ -1,6 +1,6 @@
 # Push Notification Architecture and Activation
 
-Status: native Apple client foundation implemented, remote Chatwoot delivery not yet active
+Status: native client and self-hostable gateway implemented, deployment and signed-device acceptance pending
 
 Last reviewed: 31 August 2026
 
@@ -21,6 +21,20 @@ iPadOS, and macOS:
 - previews and UI tests use an inert notification client and never contact APNs;
 - Debug and Release builds select development and production APNs environments
   through generated entitlements.
+- the app can enrol, update, and remove one gateway registration per saved
+  profile after APNs has supplied a device token;
+- each gateway address, device API token, and stable device identifier is stored
+  together in a separate Apple Keychain service under the profile UUID;
+- APNs token rotation refreshes every configured saved profile, while switching
+  profiles refreshes the active profile's account routing;
+- deleting a server profile first removes its gateway registration. A failed
+  remote removal keeps the profile and Chatwoot credential so stale routing is
+  never silently abandoned;
+- notification taps validate the opaque profile, account, and conversation
+  identifiers before switching profiles and loading the first conversation page.
+- a notification tap received during cold launch is retained until the root app
+  state is ready, and returning from System Settings retries Apple registration
+  after permission is granted.
 
 `script/build_and_run.sh` uses ad-hoc signing for a convenient sandboxed local
 launch. Apple does not permit an ad-hoc signature to claim the APNs entitlement,
@@ -28,10 +42,13 @@ so that script substitutes `WootDesk-Local.entitlements`, which retains the App
 Sandbox but omits push. APNs registration must be tested with a development
 certificate and a matching push-capable provisioning profile.
 
-This is not yet end-to-end push delivery. A device token identifies an app and
-device to Apple. It does not cause a Chatwoot server to send events. A provider
-server must receive authenticated Chatwoot events and send a suitable payload
-to APNs.
+This repository also contains the WootDesk Push Gateway under `Gateway/`. Its
+deterministic tests exercise device authentication, encrypted token storage,
+webhook filtering, APNs token signing, idempotency, invalid-token removal, and
+generic payload creation. This source is not evidence of a deployed service.
+End-to-end delivery still requires Apple credentials, a hardened HTTPS
+deployment, Chatwoot webhook configuration, enrolled signed devices, and the
+acceptance matrix below.
 
 Apple describes the two separate responsibilities in
 [Registering your app with APNs](https://developer.apple.com/documentation/usernotifications/registering-your-app-with-apns)
@@ -59,7 +76,7 @@ Chatwoot installation to send through the same Firebase project, or require a
 separate app build per organisation. That conflicts with WootDesk's goal of one
 independent client supporting many user-controlled servers.
 
-## Required provider design
+## Implemented gateway design and release boundary
 
 The intended production path is:
 
@@ -71,20 +88,21 @@ Chatwoot account webhook
   -> WootDesk on iPhone, iPad, or Mac
 ```
 
-The gateway may be hosted by an organisation or self-hosted. It must meet these
-requirements before WootDesk enables remote delivery:
+The gateway may be hosted by an organisation or self-hosted. The implementation
+meets the following source-level boundaries:
 
 1. Accept only HTTPS and authenticate both device enrolment and administration.
-2. Verify Chatwoot webhook HMAC signatures, enforce a short timestamp window,
-   and deduplicate the `X-Chatwoot-Delivery` identifier.
+2. Require a high-entropy secret in the webhook route. Timestamped HMAC
+   verification is available only when a trustworthy Chatwoot version or
+   ingress adapter supplies the documented headers. Current account-webhook
+   signature behaviour varies, so the route secret remains mandatory.
 3. Never request or receive a Chatwoot personal access token.
 4. Store an APNs token with its APNs environment, bundle topic, opaque device
    identifier, WootDesk profile identifier, and Chatwoot account identifier.
 5. Encrypt device registrations at rest and keep Apple signing keys in an
    approved secret store.
-6. Send alerts only for an explicitly enabled event policy. The first policy
-   should cover new incoming customer messages, not private notes or the user's
-   own outgoing replies.
+6. Send alerts only for new public incoming messages. Private notes, outgoing
+   replies, unsupported events, and ambiguous privacy values are ignored.
 7. Use generic lock-screen text by default. Customer names and message bodies
    must require an explicit privacy choice.
 8. Keep only opaque routing identifiers in the APNs custom payload. Fetch the
@@ -93,17 +111,24 @@ requirements before WootDesk enables remote delivery:
    invalid-token responses, rate limits, retries, and registration expiry.
 10. Never log device tokens, webhook secrets, Apple keys, message bodies, or
     customer identifiers.
-11. Provide retention, deletion, audit, availability, and incident procedures.
+11. Provide retention, deletion, audit, availability, and incident procedures
+    in the operator's deployment runbook.
 12. Rate limit registration and delivery, and reject payloads outside a small
     documented schema.
 
-The Chatwoot webhook secret and any future gateway access token are secrets.
+The current source-level policy notifies every enrolled device registered for
+the event's Chatwoot account. It does not yet prove which Chatwoot agent should
+receive an event. Do not deploy it for an organisation that requires per-agent
+recipient routing until that policy and its identity source are implemented and
+reviewed.
+
+The Chatwoot webhook route secret and gateway device API token are secrets.
 They belong in server secret storage and Apple Keychain respectively, never in
 the server-profile JSON file, screenshots, source, or logs.
 
-## App completion work after the gateway exists
+## Current app-side gateway integration
 
-The app still needs a small authenticated gateway client that:
+The app now has an authenticated gateway client that:
 
 1. enrols the current APNs token for an explicit saved profile and account;
 2. refreshes enrolment when APNs changes the token;
@@ -113,8 +138,9 @@ The app still needs a small authenticated gateway client that:
 6. validates an incoming opaque payload and opens the correct saved profile and
    conversation without briefly showing data from another server.
 
-These operations require a defined gateway API and authentication mechanism.
-They must not be simulated by a success-only local implementation.
+The API contract, deployment configuration, secret handling, and operational
+gates are documented in [`Gateway/README.md`](../Gateway/README.md). Previews and
+UI tests use an inert manager that never simulates successful enrolment.
 
 ## Apple Developer activation
 
@@ -142,6 +168,10 @@ silent background reconciliation.
 Local deterministic checks:
 
 ```bash
+cd Gateway
+npm test
+npm run check
+cd ..
 xcodegen generate --spec project.yml
 xcodebuild test \
   -project WootDesk.xcodeproj \

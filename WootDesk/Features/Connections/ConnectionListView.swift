@@ -152,7 +152,7 @@ public struct ConnectionListView: View {
             }
             Button("Cancel", role: .cancel) {}
         } message: { profile in
-            Text("Are you sure you want to remove \(profile.displayName)? Saved credentials for this server will be deleted from your Keychain.")
+            Text("Are you sure you want to remove \(profile.displayName)? Its remote notification registration will be removed first, then its saved credentials will be deleted from your Keychain.")
         }
     }
 

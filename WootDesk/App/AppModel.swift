@@ -232,11 +232,42 @@ public final class AppModel {
         }
     }
 
+    /// Selects the saved profile referenced by an opaque notification route.
+    /// Account matching prevents a payload from crossing profile boundaries.
+    public func activateNotificationRoute(_ route: PushNotificationRoute) async -> Bool {
+        guard let profile = profiles.first(where: { $0.id == route.profileID }),
+              profile.selectedAccountID == route.accountID else {
+            AppLogger.app.error("A remote notification did not match a saved WootDesk profile and account.")
+            lastError = "The notification belongs to a server profile that is no longer available."
+            return false
+        }
+
+        if activeProfile?.id != profile.id {
+            await selectProfile(profile)
+        }
+        guard activeProfile?.id == profile.id,
+              activeProfile?.selectedAccountID == route.accountID,
+              activeToken != nil else {
+            return false
+        }
+
+        selectedNavigationItem = .conversations(status: nil)
+        return true
+    }
+
     /// Safely deletes a server profile and eliminates its Keychain secret.
     public func deleteProfile(id: UUID) async {
         guard profiles.contains(where: { $0.id == id }) else { return }
 
         do {
+            do {
+                try await environment.pushGatewayManager.removeRegistration(for: id)
+            } catch {
+                AppLogger.app.error("The push gateway registration could not be removed, so the server profile was retained.")
+                lastError = Self.userMessage(for: error)
+                return
+            }
+
             let previousProfiles = profiles
             let previousActiveID = try await environment.profileRepository.loadActiveProfileID()
             var remainingProfiles = profiles.filter { $0.id != id }

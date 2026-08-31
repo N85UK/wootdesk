@@ -368,10 +368,71 @@ struct AppModelAndFeatureTests {
         #expect(try await repository.loadActiveProfileID() == profile.id)
         #expect(appModel.lastError != nil)
     }
+
+    @Test("A failed push gateway removal keeps the profile and Chatwoot credential")
+    @MainActor
+    func testDeleteStopsWhenPushGatewayRemovalFails() async throws {
+        let profile = ServerProfile(
+            displayName: "Protected Push Profile",
+            baseURL: URL(string: "https://protected-push.example.com")!,
+            selectedAccountID: 42,
+            selectedAccountName: "Invented Account"
+        )
+        let repository = InMemoryServerProfileRepository(
+            initialProfiles: [profile],
+            initialActiveProfileID: profile.id
+        )
+        let credentials = InMemoryCredentialStore(initialTokens: [profile.id: "retained-token"])
+        let environment = AppEnvironment(
+            apiClient: StubChatwootAPI(),
+            profileRepository: repository,
+            credentialStore: credentials,
+            pushGatewayManager: FailingRemovalPushGatewayManager(),
+            isDebug: true
+        )
+        let appModel = AppModel(environment: environment)
+        await appModel.initialize()
+
+        await appModel.deleteProfile(id: profile.id)
+
+        #expect(appModel.profiles.map(\.id) == [profile.id])
+        #expect(appModel.activeProfile?.id == profile.id)
+        #expect(try credentials.loadToken(for: profile.id) == "retained-token")
+        #expect(try await repository.loadProfiles().map(\.id) == [profile.id])
+        #expect(appModel.lastError == PushGatewayAPIError.unavailable.errorDescription)
+    }
 }
 
 private enum InjectedStoreError: Error {
     case expectedFailure
+}
+
+private actor FailingRemovalPushGatewayManager: PushGatewayRegistrationManaging {
+    func summary(for profileID: UUID) -> PushGatewayConfigurationSummary? {
+        nil
+    }
+
+    func configure(
+        baseURL: String,
+        apiToken: String,
+        profile: ServerProfile,
+        deviceToken: Data,
+        environment: PushGatewayEnvironment
+    ) throws -> PushGatewayConfigurationSummary {
+        throw PushGatewayAPIError.unavailable
+    }
+
+    func refreshRegistration(
+        profile: ServerProfile,
+        deviceToken: Data,
+        environment: PushGatewayEnvironment
+    ) -> PushGatewayConfigurationSummary? {
+        nil
+    }
+
+    func removeRegistration(for profileID: UUID) throws {
+        throw PushGatewayAPIError.unavailable
+    }
 }
 
 private actor FaultInjectingProfileRepository: ServerProfileRepository {

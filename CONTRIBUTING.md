@@ -9,6 +9,7 @@ Thank you for your interest in contributing to WootDesk! We welcome pull request
 1. **Prerequisites:**
    - macOS 15.0+ with Xcode 16.0 or later.
    - XcodeGen (`brew install xcodegen`).
+   - Node.js 22 or later for the dependency-free push gateway checks.
 
 2. **Branching Strategy:**
    - External contributors should branch from `main` using descriptive names:
@@ -21,7 +22,8 @@ Thank you for your interest in contributing to WootDesk! We welcome pull request
 
 3. **Running Checks Locally:**
    Before creating a pull request, run the validation suite. It builds both
-   platforms and runs the unit tests, and needs no Chatwoot server, credentials,
+   platforms, runs the Swift unit tests, and runs the push gateway tests and
+   dependency policy. It needs no Chatwoot server, Apple service, credentials,
    or signing identity:
    ```bash
    ./script/ci.sh

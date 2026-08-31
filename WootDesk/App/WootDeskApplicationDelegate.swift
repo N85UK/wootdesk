@@ -6,10 +6,19 @@ import UIKit
 @MainActor
 final class WootDeskApplicationDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     private weak var notificationState: PushNotificationState?
+    private let routeBuffer = PushNotificationRouteBuffer()
+
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
+    ) -> Bool {
+        UNUserNotificationCenter.current().delegate = self
+        return true
+    }
 
     func configureNotifications(using state: PushNotificationState) async {
         notificationState = state
-        UNUserNotificationCenter.current().delegate = self
+        routeBuffer.attach(to: state)
         await state.configure {
             UIApplication.shared.registerForRemoteNotifications()
         }
@@ -35,6 +44,20 @@ final class WootDeskApplicationDelegate: NSObject, UIApplicationDelegate, UNUser
     ) async -> UNNotificationPresentationOptions {
         [.banner, .badge, .sound]
     }
+
+    nonisolated func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse
+    ) async {
+        let userInfo = response.notification.request.content.userInfo
+        guard let route = PushNotificationRoute(userInfo: userInfo) else {
+            AppLogger.app.error("A remote notification with invalid routing metadata was ignored.")
+            return
+        }
+        await MainActor.run { [weak self] in
+            self?.routeBuffer.receive(route)
+        }
+    }
 }
 #elseif os(macOS)
 import AppKit
@@ -42,10 +65,15 @@ import AppKit
 @MainActor
 final class WootDeskApplicationDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
     private weak var notificationState: PushNotificationState?
+    private let routeBuffer = PushNotificationRouteBuffer()
+
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        UNUserNotificationCenter.current().delegate = self
+    }
 
     func configureNotifications(using state: PushNotificationState) async {
         notificationState = state
-        UNUserNotificationCenter.current().delegate = self
+        routeBuffer.attach(to: state)
         await state.configure {
             NSApplication.shared.registerForRemoteNotifications()
         }
@@ -70,6 +98,20 @@ final class WootDeskApplicationDelegate: NSObject, NSApplicationDelegate, UNUser
         willPresent notification: UNNotification
     ) async -> UNNotificationPresentationOptions {
         [.banner, .badge, .sound]
+    }
+
+    nonisolated func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse
+    ) async {
+        let userInfo = response.notification.request.content.userInfo
+        guard let route = PushNotificationRoute(userInfo: userInfo) else {
+            AppLogger.app.error("A remote notification with invalid routing metadata was ignored.")
+            return
+        }
+        await MainActor.run { [weak self] in
+            self?.routeBuffer.receive(route)
+        }
     }
 }
 #endif

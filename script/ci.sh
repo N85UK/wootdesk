@@ -6,7 +6,7 @@
 # identity are required.
 #
 # Usage:
-#   script/ci.sh                Toolchain info, macOS build, iOS Simulator build, unit tests
+#   script/ci.sh                Gateway tests, macOS build, iOS Simulator build, unit tests
 #   script/ci.sh --with-ui-tests  Stop WootDesk, then run ad-hoc signed macOS UI tests
 #
 set -euo pipefail
@@ -41,6 +41,24 @@ echo "--- Environment ---"
 xcodebuild -version
 swift --version
 echo "-------------------"
+
+echo "-> Running WootDesk Push Gateway checks..."
+if ! command -v node > /dev/null 2>&1; then
+    echo "Node.js 22 or later is required for Gateway checks." >&2
+    exit 1
+fi
+node_version="$(node --version)"
+node_major="${node_version#v}"
+node_major="${node_major%%.*}"
+if (( node_major < 22 )); then
+    echo "Node.js 22 or later is required. Found ${node_version}." >&2
+    exit 1
+fi
+(
+    cd Gateway
+    npm test
+    npm run check
+)
 
 if command -v xcodegen &> /dev/null; then
     echo "-> Regenerating the Xcode project with xcodegen..."

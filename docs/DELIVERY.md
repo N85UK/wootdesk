@@ -17,9 +17,11 @@ upload and display boundaries. The maintainer has confirmed a live connection
 to a self-hosted Chatwoot server, but the new message workflow has not yet
 completed dedicated invented-data server or TestFlight acceptance.
 
-Build 4 source adds native notification permission, local verification, and
-APNs registration state. It does not include the required authenticated push
-provider, so remote Chatwoot new-message delivery is not active.
+Build 4 source adds the native notification client, secure device enrolment,
+and the self-hostable authenticated WootDesk Push Gateway. Remote Chatwoot
+new-message delivery is not active because the Apple capability, refreshed
+profiles, gateway deployment, recipient-policy approval, and physical-device
+acceptance remain open.
 
 The source and local build 3 archives are suitable for release review. The iOS
 App Store package exports locally. It is not approved for a public App Store
@@ -45,6 +47,7 @@ predates the Milestone 2 source changes.
 | Physical TestFlight acceptance | `docs/TESTFLIGHT_TEST_PLAN.md` |
 | macOS UI-test host setup | `docs/MACOS_UI_TESTING.md` |
 | Push notification design and activation | `docs/PUSH_NOTIFICATIONS.md` |
+| Push gateway deployment and API contract | `Gateway/README.md` |
 
 ## Delivery gates
 
@@ -53,20 +56,21 @@ predates the Milestone 2 source changes.
 | G1 Repository foundation | Shared scheme, scripts, CI, documentation | Implemented |
 | G2 Secure connection | Profile validation, Keychain token, profile persistence | Implemented and locally verified |
 | G3 Conversation list | Real list, paging, filters, clear states | Implemented and locally verified |
-| G4 Automated quality | macOS and iOS builds, unit tests, UI tests | Builds and 93 unit tests pass; 3 iPhone and 3 iPad UI journeys pass; macOS host configuration gate documented |
+| G4 Automated quality | macOS and iOS builds, unit tests, UI tests | Build 4 macOS and iOS Simulator builds, 116 Swift tests, and 18 Node gateway tests pass; previously recorded iPhone, iPad, and macOS UI journeys also pass |
 | G5 Signed archives | iOS and macOS Organizer validation | Build 3 iOS and universal macOS archives pass local checks; iOS package export passes |
 | G6 TestFlight | Physical-device and Mac acceptance | Not started |
 | G7 Product completeness | Message history, replies, private notes, and attachments | Source implementation complete; live acceptance pending |
 | G8 Public release | Explicit product, security, and release approval | No-go |
-| G9 Remote notifications | Push provider, push-capable signing, and profile-safe physical-device delivery | Client foundation implemented; provider not implemented |
+| G9 Remote notifications | Push provider, push-capable signing, and profile-safe physical-device delivery | Client and gateway source implemented; capability, deployment, recipient policy, and physical acceptance pending |
 
 ## Immediate priorities
 
 1. Prepare a dedicated review-only Chatwoot environment with invented data.
 2. Run the opt-in live compatibility matrix for history, replies, private notes,
    and attachments.
-3. Implement and review the authenticated Chatwoot-to-APNs provider without
-   sending Chatwoot personal access tokens to it.
+3. Review and deploy the implemented Chatwoot-to-APNs gateway with approved
+   Apple credentials, host secret storage, proxy-log redaction, and a recipient
+   policy suitable for the deployment.
 4. Enable Push Notifications on the App ID and regenerate both platform
    profiles before creating a signed build 4 archive.
 5. Complete physical-device, remote-delivery, and Mac acceptance before

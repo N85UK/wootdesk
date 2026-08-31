@@ -2,13 +2,13 @@
 
 Document ID: `WOOT-TF-001`
 
-Status: Ready for build 3 tester execution, no tester assignment approved
+Status: Prepared for build 4, no signed candidate or tester assignment approved
 
 Last reviewed: 30 August 2026
 
 ## Purpose
 
-This plan records physical-device and Mac acceptance for WootDesk 1.0.0 (3).
+This plan records physical-device and Mac acceptance for WootDesk 1.0.0 (4).
 It does not authorise a build upload, tester invitation, App Review submission,
 or use of production Chatwoot data.
 
@@ -23,6 +23,10 @@ issue, or repository file.
 - The build is assigned only to approved internal testers.
 - Export compliance has no unresolved state.
 - The dedicated invented-data server passes the opt-in compatibility checks.
+- Push Notifications is enabled for the explicit App ID and the signed archive
+  contains the production APNs entitlement.
+- The reviewed gateway is deployed behind HTTPS with invented-data Chatwoot
+  webhook routing and approved recipient policy.
 - The tester has the server address and token through an approved private channel.
 - No production integrations, webhooks, email, social channels, or customer data
   are connected to the review server.
@@ -60,6 +64,13 @@ Record Pass, Fail, or Blocked for every case:
 15. Revalidate a profile, delete it, and confirm its credential no longer restores.
 16. Exercise loading, empty, authentication, offline, rate-limit, and malformed-response states.
 17. Check light and dark appearance, increased text sizes, VoiceOver labels, and reduced motion.
+18. Enrol the current profile with a gateway address and device API token supplied through an approved private channel.
+19. Trigger one invented public incoming message and confirm the generic alert contains no customer name or message body.
+20. Confirm outgoing replies and private notes produce no remote alert.
+21. Tap the alert from foreground, background, and terminated states and confirm the matching profile opens before its conversation data loads.
+22. Switch profiles and prove that an alert cannot expose another profile, account, user, or APNs environment.
+23. Refresh or reinstall the signed app as directed by the test owner and prove token rotation preserves delivery without creating a duplicate registration.
+24. Disable remote notifications, then delete the profile and prove later invented events no longer reach that device.
 
 ## iPhone and iPad cases
 
@@ -68,6 +79,8 @@ Record Pass, Fail, or Blocked for every case:
 - Rotate between portrait and landscape without losing the draft.
 - Attach a file from Files and cancel the picker once.
 - Move the app to the background and foreground without showing another server's data.
+- Receive and open an invented notification while the app is foregrounded,
+  backgrounded, and terminated.
 - Confirm the composer remains usable above the software keyboard.
 
 ## Mac cases
@@ -78,6 +91,8 @@ Record Pass, Fail, or Blocked for every case:
 - Use keyboard focus to reach the profile list, conversation list, composer, and attachment button.
 - Confirm the Settings scene opens independently.
 - Quit and relaunch, then confirm the Keychain-backed profile restores.
+- Receive and open an invented notification while the app is foregrounded,
+  backgrounded, and terminated.
 
 ## Evidence record
 
@@ -87,10 +102,10 @@ non-secret derived facts.
 
 | Tester | Platform and device | OS | Build | Result | Defect links | Date |
 |---|---|---|---|---|---|---|
-| To confirm | Physical iPhone | | 1.0.0 (3) | Pending | | |
-| To confirm | Physical iPad | | 1.0.0 (3) | Pending | | |
-| To confirm | Apple silicon Mac | | 1.0.0 (3) | Pending | | |
-| To confirm | Intel Mac | | 1.0.0 (3) | Pending | | |
+| To confirm | Physical iPhone | | 1.0.0 (4) | Pending | | |
+| To confirm | Physical iPad | | 1.0.0 (4) | Pending | | |
+| To confirm | Apple silicon Mac | | 1.0.0 (4) | Pending | | |
+| To confirm | Intel Mac | | 1.0.0 (4) | Pending | | |
 
 ## Exit criteria
 

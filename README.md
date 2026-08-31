@@ -31,12 +31,13 @@ on the Apple App Store, or intended for general rollout.
 - **Server Isolation:** Conversation and message state is cleared whenever the active server profile or selected conversation changes.
 - **Sandboxed on macOS:** The Mac app runs in the App Sandbox with outbound network access and read-only access to files the user explicitly selects for upload.
 - **Original App Identity:** Includes distinct iOS, iPadOS, and macOS app icon treatments based on a generic inbox and conversation symbol, without Chatwoot branding.
-- **Native Notification Foundation:** Provides an explicit notification-permission flow, APNs device registration, foreground presentation, and an invented local test alert. Remote Chatwoot delivery still requires the separately documented push provider and is not yet active.
+- **Native Notification Client:** Provides explicit notification permission, APNs device registration, foreground presentation, safe notification routing, an invented local test alert, and per-profile gateway enrolment and removal. Gateway credentials are stored in a separate Apple Keychain service.
+- **Self-Hostable Push Gateway Foundation:** Includes a dependency-free Node.js service that authenticates device mutations, encrypts APNs tokens at rest, accepts a narrow Chatwoot webhook policy, and sends generic APNs alerts. It is implemented and tested but not deployed, provisioned with Apple credentials, or approved for public operation.
 - **Strict Concurrency:** Built entirely in Swift 6 language mode with complete strict concurrency checking.
 
 ### Planned Functionality (Upcoming Milestones)
 - **Milestone 2 Completion:** Dedicated live-server acceptance and conversation workflow actions such as status, assignment, and labels.
-- **Milestone 3:** Complete the authenticated push provider, profile-safe notification routing, and WebSocket invalidation via ActionCable (`RoomChannel`).
+- **Milestone 3:** Deploy and accept the authenticated push gateway, add a reviewed per-agent recipient policy, complete signed physical-device notification testing, and add WebSocket invalidation via ActionCable (`RoomChannel`).
 - **Milestone 4:** Privacy-preserving WootDesk AI Gateway integration for conversation summarisation, smart draft replies, and cited deep research.
 - **Milestone 5:** Offline-first caching, outgoing mutation queue, and multi-tenant enterprise features.
 
@@ -59,7 +60,7 @@ WootDesk follows these security boundaries:
 3. **App Sandbox:** The macOS project requests outbound network access and read-only access to files selected through the system picker. It requests no broad file access.
 4. **No Embedded Third-Party Keys:** WootDesk contains no hardcoded API keys, tracking SDKs, or analytics.
 5. **Isolated AI Gateway Architecture:** Planned AI features would communicate with a user-controlled, authenticated gateway rather than embedding an OpenAI key in the client. No AI request is made by the app today.
-6. **Explicit Push Boundary:** APNs device tokens remain in memory and are not logged or sent to Chatwoot. Remote delivery stays disabled until an authenticated provider exists. That provider must never receive a Chatwoot personal access token.
+6. **Explicit Push Boundary:** APNs device tokens remain in app memory, are never logged or sent to Chatwoot, and leave the device only after deliberate enrolment with an authenticated WootDesk Push Gateway. The gateway credential is stored in Apple Keychain. The gateway never receives a Chatwoot personal access token and its encrypted registration store contains no message body or customer identity.
 
 See [SECURITY.md](SECURITY.md) for the full policy.
 See [PRIVACY.md](PRIVACY.md) for the current data-processing disclosure.
@@ -71,6 +72,7 @@ See [PRIVACY.md](PRIVACY.md) for the current data-processing disclosure.
 ### Prerequisites
 - macOS 15.0 or later
 - Xcode 16.0 or later.
+- Node.js 22 or later for the push gateway checks. The Apple app has no Node.js runtime dependency.
 - [XcodeGen](https://github.com/yonaskolb/XcodeGen) (`brew install xcodegen`) to regenerate `WootDesk.xcodeproj` from `project.yml`. The generated project is committed, so a clean clone builds without it.
 
 ### Quick Start
@@ -89,8 +91,9 @@ xcodegen generate
 ./script/build_and_run.sh --verify
 ```
 
-`script/ci.sh` builds the macOS and iOS Simulator destinations and runs the unit
-tests. It needs no Chatwoot server, credentials, or signing identity.
+`script/ci.sh` runs the gateway tests and dependency policy, builds the macOS
+and iOS Simulator destinations, and runs the Swift unit tests. It needs no
+Chatwoot server, Apple service, credentials, or signing identity.
 
 `script/build_and_run.sh` refreshes the project-local Launch Services entries
 before launching, so older Xcode build products cannot supply a stale Dock icon.
@@ -122,6 +125,7 @@ Detailed architectural and design documentation is available in [`docs/`](docs/)
 - [System Architecture and Data Flow](docs/ARCHITECTURE.md)
 - [Development Roadmap](docs/ROADMAP.md)
 - [Push Notification Architecture and Activation](docs/PUSH_NOTIFICATIONS.md)
+- [Push Gateway Deployment and API Contract](Gateway/README.md)
 - [App Store Submission Guide](docs/APP_STORE_SUBMISSION.md)
 - [Draft App Store Metadata](docs/APP_STORE_METADATA.md)
 - [Release Readiness](docs/RELEASE_READINESS.md)
@@ -140,17 +144,20 @@ Detailed architectural and design documentation is available in [`docs/`](docs/)
 
 ## App Store Position
 
-The App Store Connect record and signing path are in place. iOS build 2 has
+The App Store Connect record and historical build 3 signing evidence are in place. iOS build 2 has
 completed processing and is marked Ready to Submit in TestFlight. Build 1 is
 superseded and remains marked Missing Compliance. No testers have been added,
 and no build has been submitted for App Review. Fresh iOS and universal macOS
 build 3 archives pass local validation, and both platform packages export
 locally. Neither build 3 candidate has been uploaded. The notification changes
-start build 4 source and have not been archived or uploaded.
+start build 4 source and have not been signed, archived, or uploaded. The
+current command-line Keychain inventory contains no valid distribution identity
+or downloaded provisioning profile, so fresh distribution work is blocked
+until the approved signing material and push-capable profiles are available.
 
 The current uploaded iOS build 2 predates the Milestone 2 and notification
 source changes. Public submission remains a no-go until live acceptance,
-notification-provider completion, refreshed push-capable signing profiles,
+push gateway deployment and recipient-policy approval, refreshed push-capable signing profiles,
 privacy review, review access, physical-device testing, and explicit owner
 approvals are complete.
 

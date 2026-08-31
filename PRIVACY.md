@@ -19,8 +19,9 @@ organisation. The server operator's privacy policy applies to its processing.
 
 If the user enables notifications, the operating system registers WootDesk
 with Apple Push Notification service. The resulting device token remains in
-app memory and is not currently sent to N85 Dev, Chatwoot, or another push
-provider. Remote Chatwoot notification delivery is therefore not active.
+app memory unless the user deliberately enrols the active profile with a
+WootDesk Push Gateway they or their organisation selected. No public N85 Dev
+gateway is documented as deployed by this repository.
 
 ## Information processed by the app
 
@@ -55,6 +56,10 @@ request in the current release.
   Recovery copies do not contain the access token.
 - An APNs device token may be held in process memory after the user enables
   notifications. It is not written to application storage or logs.
+- A configured push gateway address, device API token, stable device UUID,
+  profile UUID, selected account ID, APNs environment, and update time are
+  stored together in a separate Apple Keychain item. They are not written to
+  the server-profile JSON.
 
 WootDesk does not place access tokens in `UserDefaults`, property lists, source
 code, logs, screenshots, or the profile JSON file.
@@ -72,10 +77,21 @@ to N85 Dev, OpenAI, an analytics provider, or an advertising provider.
 When notifications are enabled, Apple processes the platform registration and
 notification-permission state under Apple's platform terms. WootDesk can
 schedule an invented local test alert that contains no Chatwoot information.
-The current app does not transmit its APNs device token to a WootDesk service
-and cannot receive remote Chatwoot events while closed. The privacy policy and
-App Store answers must be updated before a push provider receives device
-registrations or Chatwoot event data.
+
+If the user configures remote delivery, the app sends the APNs device token,
+opaque device and profile UUIDs, selected Chatwoot account ID, bundle topic, and
+development or production environment to the selected gateway over HTTPS. It
+sends no Chatwoot personal access token, customer name, message body, email
+address, phone number, attachment, or custom attribute.
+
+A deployed gateway receives the Chatwoot webhook body at its network boundary
+because Chatwoot sends the event. The included implementation processes it in
+memory, stores only encrypted device routing and hashed idempotency values, and
+sends Apple a generic alert with opaque profile, account, and conversation
+identifiers. It does not log or persist the customer message body. The gateway
+operator controls its host logs, backups, retention, access, and deletion, so
+that operator's privacy information also applies. App Store privacy answers
+must describe the actual chosen production deployment before release.
 
 Received remote attachments are not fetched automatically. WootDesk shows safe
 metadata first and asks the user to confirm the destination host before opening
@@ -91,9 +107,12 @@ or off-device telemetry. WootDesk does not track users across apps or websites.
 
 ## Deletion
 
-Removing a server profile in WootDesk removes its saved profile metadata and
-deletes the corresponding Keychain token. Switching profiles clears the prior
-server's conversation state before loading the next profile.
+Removing a server profile in WootDesk first asks the configured push gateway to
+remove its device registration. Only after that succeeds does WootDesk remove
+the profile metadata, Chatwoot credential, and gateway Keychain item. A remote
+removal failure keeps the local profile so the user can retry. Switching
+profiles clears the prior server's conversation state before loading the next
+profile.
 
 Uninstalling the app removes its sandboxed application data according to the
 operating system's normal behaviour. Apple Keychain retention after uninstall

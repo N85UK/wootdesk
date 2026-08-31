@@ -72,8 +72,10 @@ implemented as part of Milestone 2:
 - [x] Native permission, local verification, and APNs registration lifecycle.
 - [x] iOS and macOS APNs entitlement templates with environment separation.
 - [x] Document the direct APNs provider boundary and reject incompatible FCM registration.
-- [ ] Implement and deploy the authenticated, self-hostable WootDesk Push Gateway.
-- [ ] Add per-profile gateway enrolment, rotation, deletion, and notification routing.
+- [x] Implement the authenticated, self-hostable WootDesk Push Gateway source and deterministic test harness.
+- [x] Add per-profile gateway enrolment, APNs token rotation, safe deletion, and opaque notification routing.
+- [ ] Deploy the gateway behind an approved HTTPS proxy and secret store.
+- [ ] Replace or approve the account-wide recipient policy with a reviewed per-agent authorisation policy.
 - [ ] Complete physical-device delivery acceptance with invented Chatwoot data.
 
 ---

@@ -80,6 +80,7 @@ flowchart TD
 
 ### 3. Secure Persistence
 - **Keychain (`KeychainCredentialStore`):** Stores personal access tokens as generic password items keyed by profile `UUID`. iOS and release builds use `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`. Ad-hoc macOS Debug builds without an authorised application identifier use the default local Keychain, because the data-protection Keychain rejects those builds with `errSecMissingEntitlement`.
+- **Push Gateway Configuration (`KeychainPushGatewayConfigurationStore`):** Stores the gateway address, gateway device API token, stable device UUID, profile routing, APNs environment, and update time as one JSON value in a separate Keychain service keyed by profile UUID. The gateway token never enters the Codable server profile.
 - **Profile Metadata (`FileServerProfileRepository`):** Stores non-secret server URLs, account names, and timestamps in an atomically written JSON file within `Application Support/WootDesk/`. Corrupted files are backed up automatically rather than causing app crashes.
 
 ### 4. Networking & Concurrency
@@ -119,14 +120,26 @@ flowchart TD
   so they never prompt or contact APNs.
 - `WootDeskApplicationDelegate` receives APNs registration callbacks on iOS
   and macOS. The token stays in process memory and is never logged or persisted.
+- `PushGatewayRegistrationManager` actor owns authenticated create, update, and
+  delete operations. It normalises gateway URLs, requires HTTPS outside debug
+  localhost, uses one idempotency key per mutation, refreshes rotated APNs
+  tokens, and removes remote registration before profile deletion.
+- `PushGatewayAPIClient` uses an injected `URLSession`, applies the bearer token
+  only in its central request builder, and maps transport and HTTP failures into
+  secret-free errors. Previews use an inert manager that never reports success.
+- `PushNotificationRoute` accepts only a valid saved profile UUID, positive
+  account ID, and positive conversation ID. `AppModel` verifies that the account
+  belongs to the saved profile before switching context or loading data.
 - Foreground notifications use native banner, badge, and sound presentation. A
   local verification notification contains invented copy only.
 - Chatwoot's current native subscription endpoint expects an FCM token. WootDesk
   does not send an APNs token to that incompatible endpoint.
-- End-to-end new-message delivery requires an authenticated, self-hostable push
-  provider. The provider receives signed Chatwoot webhooks and sends minimal
-  APNs payloads without receiving a Chatwoot personal access token. The full
-  boundary is in `docs/PUSH_NOTIFICATIONS.md`.
+- The self-hostable provider under `Gateway/` authenticates device mutations,
+  encrypts APNs tokens with AES-256-GCM, filters Chatwoot events, and sends a
+  generic APNs payload without receiving a Chatwoot personal access token.
+  Deployment, Apple credentials, signed capability, recipient-policy approval,
+  and physical-device acceptance remain external release gates. The full
+  boundary is in `docs/PUSH_NOTIFICATIONS.md` and `Gateway/README.md`.
 
 ### 6. Platform Navigation
 - **macOS:** a single three-column `NavigationSplitView` owned by `MainAppView`: sidebar (workspace, server profiles, settings), content (`ConversationListView`), and detail (`ConversationDetailView`). The conversation list and detail states are owned by `MainAppView`, so selection and profile transitions clear both layers together. Split views are never nested.
@@ -138,12 +151,19 @@ flowchart TD
 - `InMemoryServerProfileRepository` and `InMemoryCredentialStore` back `AppEnvironment.preview()`, so no test or preview touches the Keychain, Application Support, or the network.
 - `InMemoryNotificationPermissionClient` prevents previews and UI tests from
   requesting system permission or registering with APNs.
+- `DisabledPushGatewayRegistrationManager` prevents previews and UI tests from
+  contacting a gateway or simulating an enrolment. Unit tests use protocol fakes
+  and `MockURLProtocol` for request, Keychain, rotation, deletion, and routing
+  boundaries.
 - `MockURLProtocol` covers the real `URLSession` path in the API client tests.
 - Launching the app with `--uitesting` selects the in-memory environment, giving the UI tests a deterministic first-run state. `--uitesting-conversations` provides an invented saved profile, conversation, message page, and server-created reply without Keychain or network access.
 - `ChatwootLiveCompatibilityTests` are compiled into the test target but skip
   unless explicitly enabled. Read-only checks and separately confirmed mutating
   checks use process-only credentials against a dedicated invented-data server.
   Normal local and GitHub CI runs never contact Chatwoot.
+- Gateway tests use an in-memory HTTP harness, invented webhook data, a temporary
+  encrypted store, and an injected APNs sender. They never open a listener or
+  contact Apple.
 
 ### 8. Distribution and Privacy Metadata
 

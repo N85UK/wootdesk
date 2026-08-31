@@ -55,13 +55,23 @@ table when the project starts publishing releases.
 
 7. **Push Notification Boundary:**
    Notification permission is requested only after a user action. APNs device
-   tokens remain in process memory and are never logged or persisted. WootDesk
-   does not submit an APNs token to Chatwoot's incompatible FCM endpoint. A
-   future push provider must use authenticated per-profile enrolment, verify
-   Chatwoot webhook signatures and replay windows, store Apple credentials in
-   server secret storage, and operate without receiving a Chatwoot personal
-   access token. Remote delivery remains disabled until that boundary and
-   physical-device acceptance are complete.
+   tokens remain in app process memory and are never logged or persisted by the
+   Apple client. WootDesk does not submit an APNs token to Chatwoot's
+   incompatible FCM endpoint. After deliberate configuration, the token and
+   opaque profile routing identifiers are sent to the selected authenticated
+   WootDesk Push Gateway. Its address, device API token, and stable device ID
+   are stored in a separate device-only Apple Keychain item.
+
+   The gateway source under `Gateway/` requires authenticated mutations and a
+   high-entropy webhook route secret, encrypts APNs tokens at rest, filters for
+   public incoming messages, deduplicates delivery, and sends generic alerts.
+   Chatwoot personal access tokens are never accepted. Timestamped webhook HMAC
+   verification is optional because current account-webhook signature behaviour
+   varies. A deployment must still protect the secret route in proxy logs,
+   store Apple keys in an approved secret manager, define deletion and incident
+   procedures, and pass physical-device acceptance. The first account-wide
+   recipient policy must not be deployed where per-agent authorisation is
+   required.
 
 ---
 

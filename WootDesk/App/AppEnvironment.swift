@@ -6,6 +6,7 @@ public struct AppEnvironment: Sendable {
     public let apiClient: ChatwootAPIProtocol
     public let profileRepository: ServerProfileRepository
     public let credentialStore: CredentialStore
+    public let pushGatewayManager: PushGatewayRegistrationManaging
     public let aiProvider: AIProvider
     public let isDebug: Bool
 
@@ -13,12 +14,14 @@ public struct AppEnvironment: Sendable {
         apiClient: ChatwootAPIProtocol,
         profileRepository: ServerProfileRepository,
         credentialStore: CredentialStore,
+        pushGatewayManager: PushGatewayRegistrationManaging = DisabledPushGatewayRegistrationManager(),
         aiProvider: AIProvider = MockAIProvider(),
         isDebug: Bool = false
     ) {
         self.apiClient = apiClient
         self.profileRepository = profileRepository
         self.credentialStore = credentialStore
+        self.pushGatewayManager = pushGatewayManager
         self.aiProvider = aiProvider
         self.isDebug = isDebug
     }
@@ -31,10 +34,17 @@ public struct AppEnvironment: Sendable {
         let isDebug = false
         #endif
 
+        let pushGatewayManager = PushGatewayRegistrationManager(
+            api: PushGatewayAPIClient(),
+            store: KeychainPushGatewayConfigurationStore(),
+            isDebug: isDebug
+        )
+
         return AppEnvironment(
             apiClient: ChatwootAPIClient(isDebug: isDebug),
             profileRepository: FileServerProfileRepository(),
             credentialStore: KeychainCredentialStore(),
+            pushGatewayManager: pushGatewayManager,
             aiProvider: MockAIProvider(),
             isDebug: isDebug
         )
@@ -56,6 +66,7 @@ public struct AppEnvironment: Sendable {
                 initialActiveProfileID: activeProfileID
             ),
             credentialStore: InMemoryCredentialStore(initialTokens: tokens),
+            pushGatewayManager: DisabledPushGatewayRegistrationManager(),
             aiProvider: MockAIProvider(),
             isDebug: true
         )

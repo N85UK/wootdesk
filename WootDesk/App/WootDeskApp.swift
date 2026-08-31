@@ -40,7 +40,10 @@ struct WootDeskApp: App {
             SystemNotificationPermissionClient()
         }
         self._notificationState = State(
-            initialValue: PushNotificationState(permissionClient: notificationPermissionClient)
+            initialValue: PushNotificationState(
+                permissionClient: notificationPermissionClient,
+                gatewayManager: environment.pushGatewayManager
+            )
         )
     }
 
@@ -49,8 +52,12 @@ struct WootDeskApp: App {
             MainAppView(appModel: appModel, notificationState: notificationState)
                 .environment(\.appEnvironment, environment)
                 .task {
-                    await applicationDelegate.configureNotifications(using: notificationState)
                     await appModel.initialize()
+                    await notificationState.updateProfileContext(
+                        profiles: appModel.profiles,
+                        activeProfile: appModel.activeProfile
+                    )
+                    await applicationDelegate.configureNotifications(using: notificationState)
                 }
         }
         .commands {
@@ -115,6 +122,18 @@ struct MainAppView: View {
         .onChange(of: ActiveProfileDataContext(profile: appModel.activeProfile)) { _, _ in
             conversationState.clear()
             conversationDetailState.clear()
+            Task {
+                await notificationState.updateProfileContext(
+                    profiles: appModel.profiles,
+                    activeProfile: appModel.activeProfile
+                )
+            }
+        }
+        .onChange(of: notificationState.pendingRoute) { _, route in
+            guard let route else { return }
+            Task {
+                await openNotificationRoute(route)
+            }
         }
     }
 
@@ -134,6 +153,28 @@ struct MainAppView: View {
                             .accessibilityLabel("Connection error: \(error)")
                     }
                 }
+        }
+    }
+
+    private func openNotificationRoute(_ route: PushNotificationRoute) async {
+        defer { notificationState.clearPendingRoute() }
+        guard await appModel.activateNotificationRoute(route),
+              let profile = appModel.activeProfile,
+              let token = appModel.activeToken else {
+            return
+        }
+
+        conversationDetailState.clear()
+        conversationState.statusFilter = nil
+        await conversationState.loadConversations(
+            profile: profile,
+            token: token,
+            using: environment.apiClient
+        )
+        if conversationState.conversations.contains(where: { $0.id == route.conversationID }) {
+            conversationState.selectedConversationID = route.conversationID
+        } else if conversationState.errorMessage == nil {
+            conversationState.errorMessage = "The notified conversation was not present in the first loaded page. Refresh or search for conversation #\(route.conversationID)."
         }
     }
 
