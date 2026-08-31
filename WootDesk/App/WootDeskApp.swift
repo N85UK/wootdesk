@@ -2,23 +2,54 @@ import SwiftUI
 
 @main
 struct WootDeskApp: App {
+    #if os(iOS)
+    @UIApplicationDelegateAdaptor(WootDeskApplicationDelegate.self) private var applicationDelegate
+    #elseif os(macOS)
+    @NSApplicationDelegateAdaptor(WootDeskApplicationDelegate.self) private var applicationDelegate
+    #endif
+
     @State private var environment: AppEnvironment
     @State private var appModel: AppModel
+    @State private var notificationState: PushNotificationState
 
     init() {
         // `--uitesting` gives UI tests a deterministic first-run state: no saved
         // profiles, no Keychain access, and no network calls.
-        let isUITesting = ProcessInfo.processInfo.arguments.contains("--uitesting")
-        let environment = isUITesting ? AppEnvironment.preview() : AppEnvironment.live()
+        let arguments = ProcessInfo.processInfo.arguments
+        let isUITesting = arguments.contains("--uitesting")
+        let isConversationUITesting = arguments.contains("--uitesting-conversations")
+        let environment: AppEnvironment
+        if isConversationUITesting {
+            let profile = PreviewData.profile
+            environment = AppEnvironment.preview(
+                profiles: [profile],
+                activeProfileID: profile.id,
+                tokens: [profile.id: "test"],
+                apiClient: StubChatwootAPI()
+            )
+        } else if isUITesting {
+            environment = AppEnvironment.preview()
+        } else {
+            environment = AppEnvironment.live()
+        }
         self._environment = State(initialValue: environment)
         self._appModel = State(initialValue: AppModel(environment: environment))
+        let notificationPermissionClient: NotificationPermissionClient = if isUITesting || isConversationUITesting {
+            InMemoryNotificationPermissionClient(status: .notDetermined)
+        } else {
+            SystemNotificationPermissionClient()
+        }
+        self._notificationState = State(
+            initialValue: PushNotificationState(permissionClient: notificationPermissionClient)
+        )
     }
 
     var body: some Scene {
         WindowGroup {
-            MainAppView(appModel: appModel)
+            MainAppView(appModel: appModel, notificationState: notificationState)
                 .environment(\.appEnvironment, environment)
                 .task {
+                    await applicationDelegate.configureNotifications(using: notificationState)
                     await appModel.initialize()
                 }
         }
@@ -34,7 +65,7 @@ struct WootDeskApp: App {
 
         #if os(macOS)
         Settings {
-            SettingsView(appModel: appModel)
+            SettingsView(appModel: appModel, notificationState: notificationState)
                 .environment(\.appEnvironment, environment)
         }
         #endif
@@ -44,11 +75,13 @@ struct WootDeskApp: App {
 /// Root multiplatform container view.
 struct MainAppView: View {
     @Bindable var appModel: AppModel
+    let notificationState: PushNotificationState
     @Environment(\.appEnvironment) private var environment
 
     /// Owned here so that both the conversation list and the detail column read
     /// the same selection on macOS.
     @State private var conversationState = ConversationListState()
+    @State private var conversationDetailState = ConversationDetailState()
 
     var body: some View {
         Group {
@@ -78,6 +111,10 @@ struct MainAppView: View {
                 }
             )
             .environment(\.appEnvironment, environment)
+        }
+        .onChange(of: ActiveProfileDataContext(profile: appModel.activeProfile)) { _, _ in
+            conversationState.clear()
+            conversationDetailState.clear()
         }
     }
 
@@ -164,16 +201,24 @@ struct MainAppView: View {
             case .connections:
                 ConnectionListView(appModel: appModel)
             case .settings:
-                SettingsView(appModel: appModel)
+                SettingsView(appModel: appModel, notificationState: notificationState)
             case .conversations, .none:
                 ConversationListView(appModel: appModel, state: conversationState)
             }
         } detail: {
             switch appModel.selectedNavigationItem {
             case .conversations, .none:
-                ConversationDetailView(conversation: conversationState.selectedConversation)
+                ConversationDetailView(
+                    appModel: appModel,
+                    state: conversationDetailState,
+                    conversation: conversationState.selectedConversation
+                )
             default:
-                ConversationDetailView(conversation: nil)
+                ConversationDetailView(
+                    appModel: appModel,
+                    state: conversationDetailState,
+                    conversation: nil
+                )
             }
         }
         .navigationSplitViewStyle(.balanced)
@@ -247,6 +292,8 @@ struct MainAppView: View {
                 ConversationListView(appModel: appModel, state: conversationState)
                     .navigationDestination(item: $conversationState.selectedConversationID) { id in
                         ConversationDetailView(
+                            appModel: appModel,
+                            state: conversationDetailState,
                             conversation: conversationState.conversations.first { $0.id == id }
                         )
                     }
@@ -263,7 +310,7 @@ struct MainAppView: View {
             }
 
             NavigationStack {
-                SettingsView(appModel: appModel)
+                SettingsView(appModel: appModel, notificationState: notificationState)
             }
             .tabItem {
                 Label("Settings", systemImage: "gearshape")
@@ -271,4 +318,16 @@ struct MainAppView: View {
         }
     }
     #endif
+}
+
+private struct ActiveProfileDataContext: Equatable {
+    let profileID: UUID?
+    let baseURL: URL?
+    let accountID: Int?
+
+    init(profile: ServerProfile?) {
+        profileID = profile?.id
+        baseURL = profile?.baseURL
+        accountID = profile?.selectedAccountID
+    }
 }

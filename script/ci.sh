@@ -82,6 +82,15 @@ xcodebuild test \
     "${UNSIGNED[@]}"
 
 if [[ "${WITH_UI_TESTS}" -eq 1 ]]; then
+    if command -v automationmodetool > /dev/null 2>&1; then
+        automation_status="$(automationmodetool)"
+        if [[ "${automation_status}" == *"requires user authentication"* ]]; then
+            echo "macOS UI automation requires one-time administrator configuration." >&2
+            echo "See docs/MACOS_UI_TESTING.md before running --with-ui-tests." >&2
+            exit 3
+        fi
+    fi
+
     # macOS UI tests need a signed runner: an unsigned test runner is killed
     # before it can connect. Ad-hoc signing is enough and needs no certificate.
     # A running copy with the same bundle identifier can intercept the launch.
@@ -110,6 +119,7 @@ if [[ "${WITH_UI_TESTS}" -eq 1 ]]; then
         -configuration Debug \
         -derivedDataPath "${BUILD_ROOT}/ui-tests" \
         -parallel-testing-enabled NO \
+        CODE_SIGN_ENTITLEMENTS="WootDesk/Resources/WootDesk-Local.entitlements" \
         CODE_SIGN_IDENTITY="-" \
         CODE_SIGNING_REQUIRED=YES \
         CODE_SIGNING_ALLOWED=YES

@@ -22,12 +22,12 @@ This roadmap outlines the milestones for WootDesk development from initial found
 
 ### Deliberately Not in Milestone 1
 
-These are excluded on purpose, not overlooked, and no partial implementation of
-any of them is present in the code:
+These were excluded from the Milestone 1 release scope. Some are now being
+implemented as part of Milestone 2:
 
 | Excluded | Planned for |
 |---|---|
-| Message history, replies, private notes, attachments | Milestone 2 |
+| Message history, replies, private notes, attachments | Milestone 2, source implementation complete, live acceptance pending |
 | Assignment, labels, teams, status changes, canned responses | Milestone 2 |
 | ActionCable or any other real-time update mechanism | Milestone 3 |
 | Push notifications and background refresh | Milestone 3 |
@@ -39,18 +39,25 @@ any of them is present in the code:
 
 ---
 
-## Milestone 2: Conversation Detail, Message History & Replies (Next)
-- [ ] Interactive message timeline view (`GET /api/v1/accounts/{account_id}/conversations/{id}/messages`).
-- [ ] Rich markdown and HTML message rendering.
-- [ ] Reply composer supporting agent replies and private internal notes (`POST .../messages`).
-- [ ] Multipart file and image attachment uploading (`multipart/form-data`).
+## Milestone 2: Conversation Detail, Message History & Replies (In Progress)
+- [x] Interactive paginated message timeline view (`GET /api/v1/accounts/{account_id}/conversations/{id}/messages`).
+- [x] Safe processed-HTML conversion and inline Markdown presentation without active embedded links.
+- [x] Plain-text reply composer supporting agent replies and private internal notes (`POST .../messages`).
+- [x] In-memory draft retention after recoverable send failures and draft isolation between conversations and server profiles.
+- [x] Mocked API, decoding, feature-state, and launch UI coverage for message history and replies.
+- [x] Opt-in compatibility harness for supported Chatwoot versions, disabled in normal CI.
+- [ ] Dedicated invented-data Chatwoot compatibility and acceptance run.
+- [x] Multipart file and image attachment uploading (`multipart/form-data`).
+- [x] Safe received-attachment metadata, explicit remote-open confirmation, and no automatic remote fetch.
 - [ ] Conversation status management (Resolve, Reopen, Snooze, Pending).
 - [ ] Agent assignment and team reassignment.
 - [ ] Custom labels and priority triage.
 
 ### Distribution Gate After Milestone 2
 
-- [ ] Validate organisation-signed iOS and macOS archives.
+- [x] Create and locally validate organisation-signed iOS and universal macOS build 3 archives.
+- [x] Export the iOS build 3 App Store package locally.
+- [x] Create the required Mac Installer Distribution certificate and Mac App Store profile, then export the macOS package.
 - [ ] Complete a dedicated invented-data App Review environment.
 - [ ] Run physical-device and Mac TestFlight acceptance.
 - [ ] Approve final metadata, privacy, export compliance, age rating, and screenshots.
@@ -62,7 +69,12 @@ any of them is present in the code:
 - [ ] WebSocket connection via ActionCable (`RoomChannel`) using `pubsub_token`.
 - [ ] Low-latency inbox invalidation on new message events.
 - [ ] Reconnection state machine with automatic REST reconciliation.
-- [ ] Push relay design and APNs integration.
+- [x] Native permission, local verification, and APNs registration lifecycle.
+- [x] iOS and macOS APNs entitlement templates with environment separation.
+- [x] Document the direct APNs provider boundary and reject incompatible FCM registration.
+- [ ] Implement and deploy the authenticated, self-hostable WootDesk Push Gateway.
+- [ ] Add per-profile gateway enrolment, rotation, deletion, and notification routing.
+- [ ] Complete physical-device delivery acceptance with invented Chatwoot data.
 
 ---
 

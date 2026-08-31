@@ -17,6 +17,7 @@ public enum APIError: LocalizedError, Sendable, Equatable {
     case tlsFailure
     case networkError(String)
     case decodingError(String)
+    case invalidMessageContent
     case noAccountsAvailable
     case cancelled
 
@@ -52,6 +53,8 @@ public enum APIError: LocalizedError, Sendable, Equatable {
             return "Network connection error: \(details)"
         case .decodingError(let details):
             return "Failed to process the response from the Chatwoot server: \(details)"
+        case .invalidMessageContent:
+            return "Enter a reply or private note before sending."
         case .noAccountsAvailable:
             return "The validated user profile is not associated with any active Chatwoot accounts."
         case .cancelled:

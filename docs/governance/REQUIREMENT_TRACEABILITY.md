@@ -2,7 +2,7 @@
 
 Document ID: `WOOT-TRACE-001`
 
-Last reviewed: 30 August 2026
+Last reviewed: 31 August 2026
 
 | ID | Requirement | Implementation evidence | Verification evidence | Status |
 |---|---|---|---|---|
@@ -16,8 +16,13 @@ Last reviewed: 30 August 2026
 | REQ-DIST-001 | Provide valid platform app icons | `AppIcon.appiconset` | Debug and Release asset-catalog validation on both platforms | Verified |
 | REQ-PRIV-001 | Disclose current processing and declare no tracking | `PRIVACY.md`, `PrivacyInfo.xcprivacy` | Source and release-binary review | Implemented, release review pending |
 | REQ-DIST-002 | Document App Store preparation and release gates | App Store, metadata, branding, and readiness documents | Documentation review | Implemented |
-| REQ-MSG-001 | Show message history for a selected conversation | Milestone 2 | Not implemented | Blocked |
-| REQ-REPLY-001 | Send an agent reply or private note | Milestone 2 | Not implemented | Blocked |
+| REQ-MSG-001 | Show message history for a selected conversation | `ConversationDetailState`, `ConversationDetailView`, message DTO mapping, cursor paging | Mocked request, decoding, state, and UI journey tests; dedicated-server acceptance pending | Implemented, release review pending |
+| REQ-REPLY-001 | Send an agent reply or private note | `ConversationComposerView`, `ConversationDetailState`, `ChatwootAPIClient.createMessage` | Public and private request-body tests, draft-safety state tests, and UI journey; live acceptance pending | Implemented, release review pending |
+| REQ-ATTACH-001 | Upload and present attachments without automatic remote fetch | `ConversationAttachment`, `ConversationAttachmentView`, multipart API client, composer file importer | Multipart request, tolerant decoding, unsafe-URL, state-retention, and platform build tests; live acceptance pending | Implemented, release review pending |
+| REQ-MSG-SAFE-001 | Present processed HTML and inline Markdown without activating embedded links | `MessageTextFormatter`, `ConversationMessageRowView` | Formatting and unsafe-link unit tests | Implemented |
+| REQ-COMPAT-001 | Provide an opt-in live compatibility harness that normal CI cannot trigger | `ChatwootLiveCompatibilityTests`, `script/live_compatibility.sh`, compatibility runbook | Default test run skips both live cases; script requires two flags before writes | Implemented, matrix execution pending |
+| REQ-PUSH-CLIENT-001 | Request notification permission and register with APNs without pretending Chatwoot delivery is active | `PushNotificationState`, `SystemNotificationPermissionClient`, `WootDeskApplicationDelegate`, platform entitlements, notification Settings section | Six permission, registration, and local-verification state tests; macOS and iOS Simulator builds | Implemented, signed-device and provider work pending |
+| REQ-PUSH-PROVIDER-001 | Relay new incoming Chatwoot message events to the correct saved profile through APNs | `docs/PUSH_NOTIFICATIONS.md`, ADR 0004 | Gateway, signed entitlements, webhook, physical-device delivery, token rotation, deletion, and cross-profile evidence | Not implemented, release blocker |
 
 The final release commit must replace any pending verification entry with exact
 test, archive, or review evidence. Live server credentials and customer data are

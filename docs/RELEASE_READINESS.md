@@ -6,28 +6,33 @@ Status: Blocked for public App Store release
 
 Owner: N85 Dev
 
-Last reviewed: 30 August 2026
+Last reviewed: 31 August 2026
 
 ## Release details
 
 | Field | Detail |
 |---|---|
-| Proposed release | 1.0.0 (2) |
+| Proposed release | 1.0.0 (3 or later) |
 | Release channel | TestFlight first, then App Store after approval |
 | Platforms | iOS, iPadOS, macOS |
 | Release date | To confirm |
-| Repository branch | `codex/app-store-submission` |
+| Repository branch | `codex/milestone-2-conversation-detail` |
 | Public service | Not released |
 
 ## Current decision
 
 Public App Store release: **No-go**
 
-The foundation connection and conversation-list slice works, but message
-history and replies are not implemented. A signed iOS build 2 TestFlight
-candidate exists and is marked Ready to Submit, but it has no testers and is not
-approved for public release. Feature, privacy, demo access, physical-device,
-macOS distribution, and owner-approval gates remain open.
+The repository now contains paginated message history, plain-text public
+replies, private notes, safe in-memory draft and attachment handling, and
+privacy-first received-attachment presentation. Local iOS and macOS build 3
+archives contain those changes, but neither has been uploaded. The macOS
+archive now also exports as a signed Mac App Store installer with a matching
+embedded provisioning profile. The signed iOS
+build 2 TestFlight candidate predates them, has no testers, and is not approved
+for public release. Dedicated-server acceptance, physical-device testing,
+listing, privacy, review access, and owner approval gates
+remain open.
 
 ## Current App Store Connect build ledger
 
@@ -36,6 +41,8 @@ macOS distribution, and owner-approval gates remain open.
 | iOS and iPadOS | 1.0.0 (1) | Superseded | Missing Compliance | None recorded |
 | iOS and iPadOS | 1.0.0 (2) | Ready to Submit | `ITSAppUsesNonExemptEncryption = false` | None |
 | macOS | 1.0.0 (2) | Local archive only | Not uploaded | None |
+| iOS and iPadOS | 1.0.0 (3) | Local archive and App Store export package | Not uploaded | None |
+| macOS | 1.0.0 (3) | Local universal archive and signed App Store installer package | Not uploaded; embedded Mac App Store profile matches the bundle | None |
 
 No platform version has been submitted for App Review.
 
@@ -46,14 +53,19 @@ No platform version has been submitted for App Review.
 - `REQ-SEC-001`: Store access tokens only in Apple Keychain.
 - `REQ-PROFILE-001`: Restore, switch, edit, revalidate, and remove profiles.
 - `REQ-CONV-001`: Load and display a real conversation list.
+- `REQ-MSG-001`: Load and page message history for a selected conversation.
+- `REQ-REPLY-001`: Send a plain-text agent reply or private note with safe draft handling.
+- `REQ-ATTACH-001`: Upload files and present received attachment metadata without automatic remote fetch.
+- `REQ-MSG-SAFE-001`: Present processed HTML and inline Markdown without active embedded links.
+- `REQ-PUSH-CLIENT-001`: Request notification permission, register with APNs, and expose accurate local and provider-required states without persisting the device token.
 - `REQ-DIST-001`: Include valid iOS, iPadOS, and macOS app icons.
 - `REQ-PRIV-001`: Ship without analytics, tracking, or live AI requests.
 
 ## Excluded scope
 
-- Message history, replies, private notes, and attachments.
+- Arbitrary HTML, remote media previews, and active links inside message content.
 - Assignment, labels, teams, and status mutation.
-- Real-time updates, push notifications, and background refresh.
+- Real-time updates, the Chatwoot-to-APNs provider, remote new-message delivery, and background refresh.
 - Live AI features or an AI Gateway.
 - Offline conversation storage.
 - Developer ID distribution outside the Mac App Store.
@@ -62,16 +74,18 @@ No platform version has been submitted for App Review.
 
 | ID | Criterion | Evidence | Status |
 |---|---|---|---|
-| GO-001 | Foundation automated checks pass | `./script/ci.sh --with-ui-tests`, 61 unit tests and 2 UI tests on 30 August 2026 | Pass |
+| GO-001 | Automated source checks pass | `./script/ci.sh`, 93 unit tests, plus 3 iPhone and 3 iPad Simulator UI journeys on 30 August 2026 | Pass |
 | GO-002 | Live self-hosted connection works | Maintainer confirmed connection on 30 August 2026, no credential retained | Pass |
-| GO-003 | Message history and replies meet Milestone 2 acceptance | Milestone 2 test evidence | Blocked |
-| GO-004 | iOS and macOS archives validate locally | Signed iOS archive and App Store export passed; signed universal macOS archive, sandbox, runtime, icon, and privacy checks passed | Pass |
+| GO-003 | Message history, replies, private notes, and attachments meet Milestone 2 acceptance | Source implementation and mocked tests pass; opt-in live harness exists; dedicated-server and TestFlight acceptance remain | In progress |
+| GO-004 | iOS and macOS archives validate locally | Signed build 3 iOS archive and App Store export passed; signed universal build 3 macOS archive and installer export passed with the expected sandbox, runtime, icon, privacy, metadata, installer identity, and embedded profile | Pass |
 | GO-005 | Physical-device TestFlight checks pass | Test matrix and tester sign-off | Not started |
 | GO-006 | App Store metadata and screenshots are approved | Final platform metadata | Not started |
-| GO-007 | Privacy and export-compliance answers are approved | Build 2 export-compliance declaration is recorded; App Store privacy answers remain pending | In progress |
+| GO-007 | Privacy and export-compliance answers are approved | Builds 2 and 3 declare `ITSAppUsesNonExemptEncryption = false`; App Store privacy answers remain pending | In progress |
 | GO-008 | Dedicated App Review server and account are ready | Private review runbook | Not started |
 | GO-009 | App Store Connect agreements and roles are ready | App record and build upload succeeded; final agreement and role review remains pending | In progress |
 | GO-010 | Product, security, and release owners record Go | Signed decision table below | Not started |
+| GO-011 | macOS App Store package exports and validates | Xcode export succeeded; the Apple-issued installer signature validates, the embedded profile matches `dev.n85.wootdesk`, and the payload remains universal | Pass locally, upload pending |
+| GO-012 | Remote new-message notifications are private, profile-safe, and reliable | Push provider deployment, signed build 4 entitlements, physical-device delivery, token rotation, deletion, and cross-profile test evidence | Not started; client foundation only |
 
 ## Quality checks
 
@@ -79,15 +93,16 @@ No platform version has been submitted for App Review.
 |---|---|---|---|
 | macOS build | Debug app builds | Generic macOS build passed | Pass |
 | iOS build | Generic Simulator destination builds | Generic iOS Simulator build passed | Pass |
-| Unit tests | All deterministic tests pass without a live server | 61 tests in 8 suites passed | Pass |
-| UI tests | First-run setup is reachable without a live server | 2 XCTest UI tests passed | Pass |
+| Unit tests | All deterministic tests pass without a live server | 93 Swift Testing tests in 10 suites passed; 2 opt-in XCTest live cases skipped as designed | Pass |
+| UI tests | First-run setup and the message/reply journey work without a live server | 3 tests passed on an iPhone 17 Pro Simulator, 3 passed on an iPad Pro 13-inch Simulator, and 3 passed on this Apple silicon Mac after the controlled Automation Mode setup | Pass on iPhone, iPad, and this Mac |
 | Swift concurrency | Swift 6 complete strict checking | Project build settings | Configured |
 | Accessibility | Labels, keyboard flow, Dynamic Type, VoiceOver states | Code review and UI checks | In review |
 | Security | Keychain, HTTPS, sandbox, no secret logging | Security tests and local sandbox launch verification passed | Pass for source build |
 | Privacy | No analytics, tracking, or live AI | Manifest copied into macOS and iOS app bundles | Pass for source build |
+| Notification client | Permission, local verification, and APNs lifecycle use native APIs without persisting or logging tokens | Six deterministic state tests plus unsigned macOS and iOS Simulator builds | Pass for client foundation; provider blocked |
 | App icons | Asset catalogue validates on both platforms | Debug and Release platform builds passed | Pass |
-| iOS distribution | App Store package signs and processes | Build 2 uses Apple Distribution, App Store provisioning, and is Ready to Submit | Pass |
-| macOS distribution | Sandboxed universal archive validates locally | Build 2 archive passed local signing, hardened-runtime, icon, and privacy checks; export and upload pending | In progress |
+| iOS distribution | App Store package signs and exports | Build 3 local archive and App Store package export passed; build 2 remains the only uploaded build | Pass locally, upload pending |
+| macOS distribution | Sandboxed universal archive validates and exports | Build 3 archive and signed App Store installer export pass; upload has not started | Pass locally, upload pending |
 | Real devices | Supported-device behaviour | TestFlight matrix | Not started |
 
 ## Required release test matrix
@@ -96,20 +111,25 @@ No platform version has been submitted for App Review.
 |---|---|---|---|
 | iPhone | iOS 18 | Current supported iOS, small and large Dynamic Type | Not started |
 | iPad | iPadOS 18 | Compact and regular layouts, keyboard navigation | Not started |
-| Mac | macOS 15 | Apple silicon, keyboard shortcuts, window restoration | Local development only |
+| Mac | macOS 15 | Apple silicon, keyboard shortcuts, window restoration | Native build, unit tests, and 3 macOS UI tests pass on this Apple silicon host |
 | Mac | macOS 15 | Intel where available | Not started |
 
 ## Automated verification evidence
 
-The build 2 source and distribution validation used Xcode 27.0 beta 6, build
+The build 3 source and distribution validation used Xcode 27.0 beta 6, build
 27A5252f, with Apple Swift 6.4.
 
 | Command | Result |
 |---|---|
 | `xcodegen generate --spec project.yml` | Passed |
-| `./script/ci.sh` | macOS Debug build, generic iOS Simulator Debug build, and 61 unit tests in 8 suites passed |
-| Signed iOS Release archive and local App Store export | Passed, build 2 signed with Apple Distribution and App Store provisioning |
-| Signed macOS Release archive | Passed, universal archive with App Sandbox, hardened runtime, icon, and privacy manifest |
+| `./script/ci.sh` | Build 4 macOS Debug build, generic iOS Simulator Debug build, and 93 unit tests in 10 suites passed; 2 live cases skipped by default |
+| iPhone Simulator UI suite | 3 UI tests passed, including message history and a stub-confirmed reply without network access |
+| iPad Simulator UI suite | 3 UI tests passed after replacing a beta-runner element tap with a semantic centre-coordinate tap |
+| macOS UI suite | Passed 3 tests on 31 August 2026 after the documented one-time Automation Mode configuration; XCTest established the automation session without an authentication prompt |
+| Invented-data screenshot capture | Release UI built with `--uitesting-conversations`; iPhone images are 1284 by 2778 and iPad images are 2064 by 2752; no network or Keychain access occurred; images remain local and unsubmitted |
+| Signed iOS Release archive and local App Store export | Passed for build 3, arm64, iOS 18 minimum, privacy manifest present |
+| Signed macOS Release archive | Passed for build 3, universal arm64 and x86_64, macOS 15 minimum, App Sandbox with network and user-selected read-only file access, hardened runtime, icon, privacy manifest, and copyright metadata |
+| macOS local App Store package export | Passed on 31 August 2026; one Mac Installer Distribution identity has an accessible private key, the package signature validates, and the embedded Mac App Store profile matches the bundle |
 | App Store Connect upload | Build 2 processed and is Ready to Submit |
 
 Xcode emitted its normal destination-selection warning because the Mac can be
@@ -127,7 +147,9 @@ asset, privacy-manifest, or signing error.
 - [ ] Privacy manifest matches the exact release binary.
 - [ ] Public privacy-policy URL is accessible without authentication.
 - [ ] App Store privacy answers match all platforms and linked services.
-- [x] Build 2 export-compliance decision is recorded as
+- [ ] Push Notifications is enabled on the App ID and refreshed iOS and macOS profiles contain the production APNs entitlement.
+- [ ] The push provider, data handling, retention, deletion, and lock-screen content match the approved privacy answers.
+- [x] Builds 2 and 3 declare the export-compliance decision as
       `ITSAppUsesNonExemptEncryption = false`.
 - [ ] Demo environment contains invented data and no production integration.
 - [ ] App Review credentials are entered only in private App Store Connect fields.
@@ -135,11 +157,16 @@ asset, privacy-manifest, or signing error.
 ## Release risks
 
 The active risks and responses are maintained in
-`docs/governance/RISK_REGISTER.md`. The highest release blockers are incomplete
-Milestone 2 functionality, missing physical-device evidence, missing review-only
-server access, pending privacy answers, the unverified macOS upload path, and the
-current Apple documentation ambiguity around a single multiplatform target for
-universal purchase.
+`docs/governance/RISK_REGISTER.md`. The highest release blockers are missing
+Milestone 2 live acceptance, missing physical-device evidence, missing
+review-only server access, pending privacy answers, the pending macOS upload
+proof, and the current Apple documentation ambiguity around a single
+multiplatform target for universal purchase.
+
+Build 4 source adds the native notification permission, local verification,
+and APNs registration foundation. It does not include a Chatwoot-to-APNs
+provider, so remote new-message delivery remains blocked and must not be
+represented as active.
 
 ## Rollback and stop conditions
 
@@ -154,6 +181,8 @@ Stop the release if:
 - The privacy answer differs from observed network behaviour.
 - App Review cannot reach the dedicated demo environment.
 - Profile switching can display data from the wrong server.
+- A notification can route to the wrong profile, account, user, device, or APNs environment.
+- A build presents remote Chatwoot delivery as active before gateway enrolment and physical-device delivery succeed.
 - Keychain deletion or profile rollback fails.
 - A critical or high-severity defect remains open.
 

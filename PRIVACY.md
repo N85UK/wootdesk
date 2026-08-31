@@ -1,6 +1,6 @@
 # WootDesk Privacy Policy
 
-Last updated: 30 August 2026
+Last updated: 31 August 2026
 
 WootDesk is an independent native client that connects directly to a Chatwoot
 server selected by the user. This policy describes the current foundation
@@ -17,6 +17,11 @@ Network requests are sent directly from the device to the Chatwoot server the
 user chooses. That server may be self-hosted by the user or provided by another
 organisation. The server operator's privacy policy applies to its processing.
 
+If the user enables notifications, the operating system registers WootDesk
+with Apple Push Notification service. The resulting device token remains in
+app memory and is not currently sent to N85 Dev, Chatwoot, or another push
+provider. Remote Chatwoot notification delivery is therefore not active.
+
 ## Information processed by the app
 
 WootDesk processes the following information to provide its core features:
@@ -27,6 +32,10 @@ WootDesk processes the following information to provide its core features:
 - Conversation-list information returned by the selected Chatwoot account,
   including names, message previews, inbox information, status, priority,
   timestamps, and unread counts when available.
+- Conversation message content and attachment metadata returned by the selected
+  account.
+- Reply text, private-note text, and files the user deliberately selects for
+  upload to the chosen Chatwoot server.
 
 WootDesk does not ask for an OpenAI API key and does not make a live OpenAI
 request in the current release.
@@ -39,8 +48,13 @@ request in the current release.
   includes the display name, server address, selected account, and timestamps.
 - Conversation-list data is held in memory for the active app session. The
   foundation release does not create an offline conversation database.
+- Loaded messages, draft text, and selected attachment bytes are held in memory
+  only. They are discarded when their conversation or server context changes
+  and are not added to WootDesk application storage.
 - A corrupt profile metadata file may be retained locally as a recovery copy.
   Recovery copies do not contain the access token.
+- An APNs device token may be held in process memory after the user enables
+  notifications. It is not written to application storage or logs.
 
 WootDesk does not place access tokens in `UserDefaults`, property lists, source
 code, logs, screenshots, or the profile JSON file.
@@ -54,6 +68,21 @@ trust-all network delegate.
 The Chatwoot token is sent only to the selected server as an authentication
 header for Chatwoot Application API requests. WootDesk does not send the token
 to N85 Dev, OpenAI, an analytics provider, or an advertising provider.
+
+When notifications are enabled, Apple processes the platform registration and
+notification-permission state under Apple's platform terms. WootDesk can
+schedule an invented local test alert that contains no Chatwoot information.
+The current app does not transmit its APNs device token to a WootDesk service
+and cannot receive remote Chatwoot events while closed. The privacy policy and
+App Store answers must be updated before a push provider receives device
+registrations or Chatwoot event data.
+
+Received remote attachments are not fetched automatically. WootDesk shows safe
+metadata first and asks the user to confirm the destination host before opening
+an HTTPS attachment URL in the operating system. The app does not add the
+Chatwoot token to that attachment URL request. The destination host can receive
+normal network information such as the device's public IP address when the user
+chooses to open it.
 
 ## Analytics, advertising, and tracking
 

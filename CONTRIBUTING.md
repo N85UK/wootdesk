@@ -11,11 +11,13 @@ Thank you for your interest in contributing to WootDesk! We welcome pull request
    - XcodeGen (`brew install xcodegen`).
 
 2. **Branching Strategy:**
-   - Branch from `main` using descriptive names:
+   - External contributors should branch from `main` using descriptive names:
      - `feat/feature-name`
      - `fix/bug-description`
      - `docs/documentation-update`
-   - Never push directly to `main`.
+   - Submit contributor changes through a pull request. Maintainers may work
+     directly on `main` only when the repository owner has explicitly
+     authorised that workflow for the task.
 
 3. **Running Checks Locally:**
    Before creating a pull request, run the validation suite. It builds both
@@ -62,3 +64,9 @@ Thank you for your interest in contributing to WootDesk! We welcome pull request
 ## Code of Conduct
 
 Please note that this project is governed by the [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you agree to uphold its standards.
+
+## Security Reports
+
+Do not include vulnerabilities, credentials, customer data, or private server
+details in a public issue. Follow [SECURITY.md](SECURITY.md) and use GitHub's
+private vulnerability reporting flow.

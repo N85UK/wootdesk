@@ -37,6 +37,14 @@ This document provides context, design principles, and operational rules for AI 
 8. **Never Commit Real Data:**
    No access token, real server address, customer message, or personal detail belongs in source, fixtures, logs, screenshots, documentation, or CI output. Fixtures use invented values and `example.com` / `example.invalid` hosts.
 
+9. **Owner Branch Workflow:**
+   Remain on `main` for repository-owner work in this checkout. Do not create a
+   feature branch unless the user explicitly asks for one. This does not grant
+   standing permission to commit, push, release, deploy, or submit a build.
+   Perform those actions only when the user explicitly authorises the current
+   task. External contributors still use the pull-request workflow documented
+   in `CONTRIBUTING.md`.
+
 ---
 
 ## Key File Locations

@@ -73,7 +73,9 @@ BUILD_DIR="$(pwd)/build/macos"
 mkdir -p "${BUILD_DIR}"
 
 # Ad-hoc signing is used so that the App Sandbox entitlements are actually applied
-# to the local build. A fully unsigned build silently drops them.
+# to the local build. A fully unsigned build silently drops them. Apple permits
+# the APNs entitlement only with a development certificate and matching profile,
+# so this local path deliberately uses the sandbox-only entitlement file.
 echo "-> Building WootDesk for macOS..."
 xcodebuild build \
     -project WootDesk.xcodeproj \
@@ -81,6 +83,7 @@ xcodebuild build \
     -destination "platform=macOS" \
     -configuration Debug \
     -derivedDataPath "${BUILD_DIR}/DerivedData" \
+    CODE_SIGN_ENTITLEMENTS="WootDesk/Resources/WootDesk-Local.entitlements" \
     CODE_SIGN_IDENTITY="-" \
     CODE_SIGNING_REQUIRED=YES \
     CODE_SIGNING_ALLOWED=YES

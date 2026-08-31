@@ -10,7 +10,7 @@ settings:
     SWIFT_VERSION: "6.0"
     SWIFT_STRICT_CONCURRENCY: complete
     ENABLE_USER_SCRIPT_SANDBOXING: YES
-    CURRENT_PROJECT_VERSION: 2
+    CURRENT_PROJECT_VERSION: 4
     MARKETING_VERSION: 1.0.0
 
 targets:
@@ -34,8 +34,8 @@ targets:
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         CODE_SIGN_ENTITLEMENTS: ""
         "CODE_SIGN_ENTITLEMENTS[sdk=macosx*]": WootDesk/Resources/WootDesk.entitlements
-        "CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]": ""
-        "CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]": ""
+        "CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]": WootDesk/Resources/WootDesk-iOS.entitlements
+        "CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]": WootDesk/Resources/WootDesk-iOS.entitlements
         CODE_SIGN_STYLE: Automatic
         MACOSX_DEPLOYMENT_TARGET: "15.0"
         IPHONEOS_DEPLOYMENT_TARGET: "18.0"
@@ -43,18 +43,23 @@ targets:
         Debug:
           SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG
           INFOPLIST_FILE: WootDesk/Resources/Info-Debug.plist
+          APS_ENVIRONMENT: development
         Release:
           SWIFT_ACTIVE_COMPILATION_CONDITIONS: ""
           INFOPLIST_FILE: WootDesk/Resources/Info-Release.plist
+          APS_ENVIRONMENT: production
           "ENABLE_HARDENED_RUNTIME[sdk=macosx*]": YES
     # WootDesk runs sandboxed. It needs outbound network access to reach the user's
-    # Chatwoot server and nothing else: no file access, no camera, no microphone,
-    # no location, and no inbound network server.
+    # Chatwoot server and read-only access to files the user explicitly selects
+    # for attachment upload. It requests no broad file access, camera, microphone,
+    # location, or inbound network server.
     entitlements:
       path: WootDesk/Resources/WootDesk.entitlements
       properties:
         com.apple.security.app-sandbox: true
         com.apple.security.network.client: true
+        com.apple.security.files.user-selected.read-only: true
+        com.apple.developer.aps-environment: $(APS_ENVIRONMENT)
 
   WootDeskTests:
     type: bundle.unit-test

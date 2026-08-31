@@ -85,7 +85,8 @@ public enum APIRequest {
         url: URL,
         method: String = "GET",
         token: String,
-        body: Data? = nil
+        body: Data? = nil,
+        contentType: String = "application/json"
     ) -> URLRequest {
         var request = URLRequest(url: url)
         request.httpMethod = method
@@ -98,7 +99,7 @@ public enum APIRequest {
 
         if let body {
             request.httpBody = body
-            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue(contentType, forHTTPHeaderField: "Content-Type")
         }
 
         return request

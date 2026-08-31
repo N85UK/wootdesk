@@ -19,6 +19,14 @@ final class WootDeskLaunchUITests: XCTestCase {
     }
 
     @MainActor
+    private func launchWithInventedConversations() -> XCUIApplication {
+        let app = XCUIApplication()
+        app.launchArguments = ["--uitesting-conversations"]
+        app.launch()
+        return app
+    }
+
+    @MainActor
     func testFirstRunLaunchReachesSetupScreen() throws {
         let app = launchForFirstRun()
 
@@ -45,7 +53,8 @@ final class WootDeskLaunchUITests: XCTestCase {
         #if os(macOS)
         addServerButton.click()
         #else
-        addServerButton.tap()
+        XCTAssertTrue(addServerButton.isHittable)
+        addServerButton.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
         #endif
 
         let heading = app.staticTexts["Connect to Chatwoot"]
@@ -59,5 +68,64 @@ final class WootDeskLaunchUITests: XCTestCase {
 
         let tokenField = app.secureTextFields["Personal Access Token"]
         XCTAssertTrue(tokenField.exists, "The token must be entered in a secure field.")
+    }
+
+    @MainActor
+    func testConversationHistoryAndReplyWithoutNetwork() throws {
+        let app = launchWithInventedConversations()
+        #if os(macOS)
+        let conversationRow = app.descendants(matching: .any)
+            .matching(identifier: "conversation-row-1041")
+            .firstMatch
+        #else
+        let conversationRow = app.buttons["conversation-row-1041"]
+        #endif
+        XCTAssertTrue(
+            conversationRow.waitForExistence(timeout: 15),
+            "The invented conversation should load through the in-memory API stub."
+        )
+
+        #if os(macOS)
+        conversationRow.click()
+        #else
+        conversationRow.tap()
+        #endif
+
+        let existingMessage = app.descendants(matching: .any)["message-8001"]
+        XCTAssertTrue(
+            existingMessage.waitForExistence(timeout: 5),
+            "Selecting a conversation should load its message history."
+        )
+
+        let attachmentButton = app.buttons["Open sample-export.png"]
+        XCTAssertTrue(
+            attachmentButton.waitForExistence(timeout: 5),
+            "A received attachment must remain an independently accessible control."
+        )
+
+        let composer = app.descendants(matching: .any)["conversation-composer"]
+        XCTAssertTrue(composer.waitForExistence(timeout: 5))
+        #if os(macOS)
+        composer.coordinate(
+            withNormalizedOffset: CGVector(dx: 0.5, dy: 0.15)
+        ).click()
+        #else
+        composer.tap()
+        #endif
+        composer.typeText("An invented UI test reply")
+
+        let sendButton = app.buttons["send-message"]
+        XCTAssertTrue(sendButton.isEnabled)
+        #if os(macOS)
+        sendButton.click()
+        #else
+        sendButton.tap()
+        #endif
+
+        let createdMessage = app.descendants(matching: .any)["message-9999"]
+        XCTAssertTrue(
+            createdMessage.waitForExistence(timeout: 5),
+            "The reply should be appended only after the stub returns a created message."
+        )
     }
 }

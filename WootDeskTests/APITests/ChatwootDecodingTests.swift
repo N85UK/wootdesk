@@ -100,4 +100,101 @@ struct ChatwootDecodingTests {
         // Nil value
         #expect(DateParser.parse(nil) == nil)
     }
+
+    @Test("Maps message timestamps and private notes into domain values")
+    func testDecodeMessages() throws {
+        let data = try FixtureLoader.loadData(named: "messages_page.json")
+        let response = try JSONDecoder().decode(ChatwootMessageListResponseDTO.self, from: data)
+        let messages = try response.messages.map { try $0.toDomain() }
+
+        #expect(messages.count == 3)
+        #expect(messages[0].createdAt.timeIntervalSince1970 == 1_735_736_100)
+        #expect(messages[0].senderName == "Avery Example")
+        #expect(messages[0].kind == .incoming)
+        #expect(messages[0].attachmentCount == 1)
+        #expect(messages[0].attachments[0].fileType == .image)
+        #expect(messages[0].attachments[0].displayName == "sample-export.png")
+        #expect(messages[0].attachments[0].fileSize == 82_410)
+        #expect(messages[0].attachments[0].width == 1_200)
+        #expect(messages[0].attachments[0].dataURL?.scheme == "https")
+        #expect(messages[2].isPrivate)
+    }
+
+    @Test("Decodes a message with missing optional fields without crashing")
+    func testDecodeMessageMissingFields() throws {
+        let data = try FixtureLoader.loadData(named: "messages_missing_fields.json")
+        let response = try JSONDecoder().decode(ChatwootMessageListResponseDTO.self, from: data)
+        let messageDTO = try #require(response.messages.first)
+        let message = try messageDTO.toDomain()
+
+        #expect(message.id == 8301)
+        #expect(message.kind == .unknown(9))
+        #expect(message.createdAt == Date(timeIntervalSince1970: 0))
+        #expect(message.attachmentCount == 1)
+        #expect(message.displayContent == "File attachment")
+
+        let multipleAttachments = ConversationMessage(
+            id: 8302,
+            kind: .incoming,
+            createdAt: Date(timeIntervalSince1970: 0),
+            attachments: [
+                ConversationAttachment(id: "one", fileType: .file),
+                ConversationAttachment(id: "two", fileType: .image)
+            ]
+        )
+        #expect(multipleAttachments.displayContent == "2 attachments")
+    }
+
+    @Test("Rejects unsafe attachment addresses while retaining safe metadata")
+    func testUnsafeAttachmentURLIsNotExposed() throws {
+        let dto = ChatwootMessageDTO(
+            id: 9_001,
+            messageType: 0,
+            attachments: [
+                ChatwootMessageAttachmentDTO(
+                    id: 1,
+                    fileType: "file",
+                    dataURL: "http://files.example.invalid/invented.pdf",
+                    fileSize: 400,
+                    fileExtension: "pdf"
+                )
+            ]
+        )
+
+        let message = try dto.toDomain()
+        #expect(message.attachments[0].dataURL == nil)
+        #expect(message.attachments[0].fileSize == 400)
+        #expect(message.attachments[0].displayName == "File attachment.pdf")
+    }
+
+    @Test("Allows insecure localhost attachment addresses only for debug mapping")
+    func testLocalhostAttachmentURLPolicy() throws {
+        let dto = ChatwootMessageDTO(
+            id: 9_002,
+            messageType: 0,
+            attachments: [
+                ChatwootMessageAttachmentDTO(
+                    id: 2,
+                    fileType: "image",
+                    dataURL: "http://localhost:3000/rails/sample.png"
+                )
+            ]
+        )
+
+        #expect(try dto.toDomain().attachments[0].dataURL == nil)
+        #expect(try dto.toDomain(allowsInsecureLocalhost: true).attachments[0].dataURL?.scheme == "http")
+    }
+
+    @Test("Converts processed HTML to plain text and disables Markdown links")
+    func testSafeMessageFormatting() {
+        let html = MessageTextFormatter.plainText(
+            from: "<p>Hello &amp; welcome</p><p><strong>Invented</strong> reply</p>"
+        )
+        #expect(html == "Hello & welcome\nInvented reply")
+
+        let attributed = MessageTextFormatter.attributedText(
+            from: "**Important** [outside link](https://example.invalid)"
+        )
+        #expect(attributed.runs.allSatisfy { $0.link == nil })
+    }
 }

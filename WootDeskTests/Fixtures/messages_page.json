@@ -1,0 +1,65 @@
+{
+  "meta": {
+    "count": 3
+  },
+  "payload": [
+    {
+      "id": 8101,
+      "content": "Hello, the invented report export stops early.",
+      "processed_message_content": "Hello, the invented report export stops early.",
+      "message_type": 0,
+      "created_at": 1735736100,
+      "private": false,
+      "status": "sent",
+      "content_type": "text",
+      "sender_type": "Contact",
+      "sender": {
+        "id": 501,
+        "name": "Avery Example",
+        "type": "contact"
+      },
+      "attachments": [
+        {
+          "id": 91,
+          "file_type": "image",
+          "data_url": "https://files.example.invalid/sample-export.png",
+          "thumb_url": "https://files.example.invalid/sample-export-thumbnail.png",
+          "file_size": 82410,
+          "width": 1200,
+          "height": 800,
+          "extension": "png"
+        }
+      ]
+    },
+    {
+      "id": 8102,
+      "content": "Thank you. I am checking the sample export now.",
+      "message_type": 1,
+      "created_at": 1735736280,
+      "private": false,
+      "status": "sent",
+      "content_type": "text",
+      "sender_type": "User",
+      "sender": {
+        "id": 61,
+        "name": "Sample Agent",
+        "type": "user"
+      }
+    },
+    {
+      "id": 8103,
+      "content": "Internal sample note for the support team.",
+      "message_type": 1,
+      "created_at": 1735736340,
+      "private": true,
+      "status": "sent",
+      "content_type": "text",
+      "sender_type": "User",
+      "sender": {
+        "id": 61,
+        "name": "Sample Agent",
+        "type": "user"
+      }
+    }
+  ]
+}

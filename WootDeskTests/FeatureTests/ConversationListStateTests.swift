@@ -201,4 +201,26 @@ private struct DelayedConversationAPI: ChatwootAPIProtocol {
         }
         return fastResult
     }
+
+    func fetchMessages(
+        baseURL: URL,
+        token: String,
+        accountID: Int,
+        conversationID: Int,
+        beforeMessageID: Int?
+    ) async throws -> ConversationMessagePage {
+        ConversationMessagePage(messages: [], hasOlderMessages: false)
+    }
+
+    func createMessage(
+        baseURL: URL,
+        token: String,
+        accountID: Int,
+        conversationID: Int,
+        content: String,
+        isPrivate: Bool,
+        attachments: [OutgoingMessageAttachment]
+    ) async throws -> ConversationMessage {
+        throw APIError.notFound
+    }
 }

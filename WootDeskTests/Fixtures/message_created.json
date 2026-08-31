@@ -1,0 +1,15 @@
+{
+  "id": 8201,
+  "content": "This is an invented reply.",
+  "message_type": 1,
+  "created_at": 1735737000,
+  "private": false,
+  "status": "sent",
+  "content_type": "text",
+  "sender_type": "User",
+  "sender": {
+    "id": 61,
+    "name": "Sample Agent",
+    "type": "user"
+  }
+}

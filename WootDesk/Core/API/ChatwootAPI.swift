@@ -29,4 +29,24 @@ public protocol ChatwootAPIProtocol: Sendable {
         status: ConversationStatus?,
         page: Int
     ) async throws -> [Conversation]
+
+    /// Fetches the newest message page, or an older page before a message ID.
+    func fetchMessages(
+        baseURL: URL,
+        token: String,
+        accountID: Int,
+        conversationID: Int,
+        beforeMessageID: Int?
+    ) async throws -> ConversationMessagePage
+
+    /// Creates a public outgoing reply or a private note.
+    func createMessage(
+        baseURL: URL,
+        token: String,
+        accountID: Int,
+        conversationID: Int,
+        content: String,
+        isPrivate: Bool,
+        attachments: [OutgoingMessageAttachment]
+    ) async throws -> ConversationMessage
 }

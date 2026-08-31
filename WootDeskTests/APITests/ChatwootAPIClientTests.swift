@@ -6,18 +6,48 @@ import Foundation
 struct ChatwootAPIClientTests {
     private final class RequestRecorder: @unchecked Sendable {
         private let lock = NSLock()
-        private var recordedURL: URL?
+        private var recordedRequest: URLRequest?
+        private var recordedBody: Data?
 
         func record(_ request: URLRequest) {
+            let body = request.httpBody ?? Self.readBody(from: request.httpBodyStream)
             lock.lock()
-            recordedURL = request.url
+            recordedRequest = request
+            recordedBody = body
             lock.unlock()
         }
 
         func url() -> URL? {
             lock.lock()
             defer { lock.unlock() }
-            return recordedURL
+            return recordedRequest?.url
+        }
+
+        func request() -> URLRequest? {
+            lock.lock()
+            defer { lock.unlock() }
+            return recordedRequest
+        }
+
+        func body() -> Data? {
+            lock.lock()
+            defer { lock.unlock() }
+            return recordedBody
+        }
+
+        private static func readBody(from stream: InputStream?) -> Data? {
+            guard let stream else { return nil }
+            stream.open()
+            defer { stream.close() }
+
+            var data = Data()
+            var buffer = [UInt8](repeating: 0, count: 1_024)
+            while stream.hasBytesAvailable {
+                let count = stream.read(&buffer, maxLength: buffer.count)
+                guard count > 0 else { break }
+                data.append(buffer, count: count)
+            }
+            return data.isEmpty ? nil : data
         }
     }
 
@@ -369,6 +399,222 @@ struct ChatwootAPIClientTests {
             #expect(Bool(false), "Expected .unauthorized")
         } catch let apiError as APIError {
             #expect(apiError == .unauthorized)
+        }
+    }
+
+    @Test("Builds the message history endpoint without a cursor")
+    func testMessageEndpointWithoutCursor() async throws {
+        let recorder = RequestRecorder()
+        MockURLProtocol.setHandler { request in
+            recorder.record(request)
+            let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            return (response, Data("{\"payload\": []}".utf8))
+        }
+
+        let (client, baseURL) = makeClient()
+        _ = try await client.fetchMessages(
+            baseURL: baseURL,
+            token: "test",
+            accountID: 14,
+            conversationID: 901,
+            beforeMessageID: nil
+        )
+
+        let request = try #require(recorder.request())
+        #expect(request.url?.path == "/api/v1/accounts/14/conversations/901/messages")
+        #expect(request.url?.query == nil)
+        #expect(request.httpMethod == "GET")
+        #expect(request.value(forHTTPHeaderField: "api_access_token") == "test")
+    }
+
+    @Test("Adds the before cursor when loading older messages")
+    func testMessageEndpointWithBeforeCursor() async throws {
+        let recorder = RequestRecorder()
+        MockURLProtocol.setHandler { request in
+            recorder.record(request)
+            let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            return (response, Data("{\"payload\": []}".utf8))
+        }
+
+        let (client, baseURL) = makeClient()
+        _ = try await client.fetchMessages(
+            baseURL: baseURL,
+            token: "test",
+            accountID: 14,
+            conversationID: 901,
+            beforeMessageID: 8101
+        )
+
+        let url = try #require(recorder.url())
+        let components = try #require(URLComponents(url: url, resolvingAgainstBaseURL: false))
+        #expect(components.queryItems == [URLQueryItem(name: "before", value: "8101")])
+    }
+
+    @Test("Decodes a message history page")
+    func testFetchMessagesDecodesPage() async throws {
+        let body = try FixtureLoader.loadData(named: "messages_page.json")
+        MockURLProtocol.setHandler { request in
+            let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            return (response, body)
+        }
+
+        let (client, baseURL) = makeClient()
+        let page = try await client.fetchMessages(
+            baseURL: baseURL,
+            token: "test",
+            accountID: 1,
+            conversationID: 1041,
+            beforeMessageID: nil
+        )
+
+        #expect(page.messages.map(\.id) == [8101, 8102, 8103])
+        #expect(page.messages[0].kind == .incoming)
+        #expect(page.messages[2].isPrivate)
+        #expect(page.hasOlderMessages == false)
+    }
+
+    @Test("Maps malformed message history to a decoding error")
+    func testMalformedMessageResponse() async throws {
+        let body = try FixtureLoader.loadData(named: "malformed_response.json")
+        MockURLProtocol.setHandler { request in
+            let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            return (response, body)
+        }
+
+        let (client, baseURL) = makeClient()
+        do {
+            _ = try await client.fetchMessages(
+                baseURL: baseURL,
+                token: "test",
+                accountID: 1,
+                conversationID: 1041,
+                beforeMessageID: nil
+            )
+            Issue.record("Expected malformed message data to fail")
+        } catch let error as APIError {
+            guard case .decodingError = error else {
+                Issue.record("Expected a decoding error, got \(error)")
+                return
+            }
+        }
+    }
+
+    @Test("Creates a public outgoing text reply with the documented body")
+    func testCreatePublicReply() async throws {
+        let recorder = RequestRecorder()
+        let body = try FixtureLoader.loadData(named: "message_created.json")
+        MockURLProtocol.setHandler { request in
+            recorder.record(request)
+            let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            return (response, body)
+        }
+
+        let (client, baseURL) = makeClient()
+        let created = try await client.createMessage(
+            baseURL: baseURL,
+            token: "test",
+            accountID: 1,
+            conversationID: 1041,
+            content: "  This is an invented reply.  ",
+            isPrivate: false,
+            attachments: []
+        )
+
+        let request = try #require(recorder.request())
+        let requestBody = try #require(recorder.body())
+        let json = try #require(JSONSerialization.jsonObject(with: requestBody) as? [String: Any])
+        #expect(request.httpMethod == "POST")
+        #expect(request.value(forHTTPHeaderField: "Content-Type") == "application/json")
+        #expect(json["content"] as? String == "This is an invented reply.")
+        #expect(json["message_type"] as? String == "outgoing")
+        #expect(json["private"] as? Bool == false)
+        #expect(json["content_type"] as? String == "text")
+        #expect((json["content_attributes"] as? [String: String])?.isEmpty == true)
+        #expect(created.id == 8201)
+        #expect(created.kind == .outgoing)
+    }
+
+    @Test("Creates a private note only when explicitly requested")
+    func testCreatePrivateNote() async throws {
+        let recorder = RequestRecorder()
+        let responseBody = try FixtureLoader.loadData(named: "message_created.json")
+        MockURLProtocol.setHandler { request in
+            recorder.record(request)
+            let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            return (response, responseBody)
+        }
+
+        let (client, baseURL) = makeClient()
+        _ = try await client.createMessage(
+            baseURL: baseURL,
+            token: "test",
+            accountID: 1,
+            conversationID: 1041,
+            content: "Internal invented note",
+            isPrivate: true,
+            attachments: []
+        )
+
+        let body = try #require(recorder.body())
+        let json = try #require(JSONSerialization.jsonObject(with: body) as? [String: Any])
+        #expect(json["private"] as? Bool == true)
+    }
+
+    @Test("Uploads attachments as documented multipart form data")
+    func testCreateMessageWithAttachment() async throws {
+        let recorder = RequestRecorder()
+        let responseBody = try FixtureLoader.loadData(named: "message_created.json")
+        MockURLProtocol.setHandler { request in
+            recorder.record(request)
+            let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+            return (response, responseBody)
+        }
+        let attachment = try OutgoingMessageAttachment(
+            fileName: "invented sample.txt",
+            mimeType: "text/plain",
+            data: Data("invented attachment bytes".utf8)
+        )
+
+        let (client, baseURL) = makeClient()
+        _ = try await client.createMessage(
+            baseURL: baseURL,
+            token: "test-token",
+            accountID: 1,
+            conversationID: 1041,
+            content: "",
+            isPrivate: true,
+            attachments: [attachment]
+        )
+
+        let request = try #require(recorder.request())
+        let contentType = try #require(request.value(forHTTPHeaderField: "Content-Type"))
+        let body = try #require(recorder.body())
+        let bodyText = try #require(String(data: body, encoding: .utf8))
+        #expect(contentType.hasPrefix("multipart/form-data; boundary=WootDesk-"))
+        #expect(request.value(forHTTPHeaderField: "api_access_token") == "test-token")
+        #expect(bodyText.contains("name=\"message_type\"\r\n\r\noutgoing"))
+        #expect(bodyText.contains("name=\"private\"\r\n\r\ntrue"))
+        #expect(bodyText.contains("name=\"attachments[]\"; filename=\"invented sample.txt\""))
+        #expect(bodyText.contains("Content-Type: text/plain"))
+        #expect(bodyText.contains("invented attachment bytes"))
+    }
+
+    @Test("Rejects an empty outgoing message before networking")
+    func testRejectsEmptyMessage() async throws {
+        let (client, baseURL) = makeClient()
+        do {
+            _ = try await client.createMessage(
+                baseURL: baseURL,
+                token: "test",
+                accountID: 1,
+                conversationID: 1041,
+                content: "  \n ",
+                isPrivate: false,
+                attachments: []
+            )
+            Issue.record("Expected empty content to fail")
+        } catch let error as APIError {
+            #expect(error == .invalidMessageContent)
         }
     }
 }

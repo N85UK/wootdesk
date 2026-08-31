@@ -7,18 +7,25 @@ Last verified against Apple documentation: 30 August 2026
 ## Release position
 
 WootDesk has a registered App ID, an App Store Connect record, local Apple
-Distribution signing, validated iOS and macOS build 2 archives, and an uploaded
-iOS TestFlight candidate. It is not ready for public App Store submission
-because message history and replies are deliberately outside the foundation
-milestone. The recommended sequence is:
+Distribution and Mac Installer Distribution signing, fresh iOS and macOS build
+3 archives, and an uploaded iOS build 2 TestFlight candidate. Both build 3
+platforms now export locally as App Store packages. Uploaded build 2 does not
+contain the Milestone 2 history,
+reply, note, or attachment changes. WootDesk is not ready for public App Store
+submission. The recommended sequence is:
 
 1. Keep iOS build 2 unassigned while release documentation is reviewed.
-2. Complete conversation detail, message history, and replies.
-3. Create a dedicated review-only Chatwoot environment with invented data.
-4. Export and upload the macOS build, then verify platform association.
-5. Add approved internal testers and complete the physical-device matrix.
-6. Approve privacy, metadata, screenshots, and release-readiness gates.
-7. Submit the iOS and macOS versions for App Review only after an explicit Go.
+2. Review and accept conversation history, replies, and private notes against a
+   dedicated review-only Chatwoot environment with invented data.
+3. Review the validated build 3 iOS and macOS archives against the exact source
+   and entitlements recorded in the release-readiness document.
+4. Retain the validated Mac Installer Distribution certificate, matching Mac
+   App Store profile, and locally exported macOS package as release evidence.
+5. Obtain explicit upload approval, upload the build 3 candidates, and verify
+   platform association. Do not reuse build number 2.
+6. Add approved internal testers and complete the physical-device and Mac matrix.
+7. Approve privacy, metadata, screenshots, and release-readiness gates.
+8. Submit the iOS and macOS versions for App Review only after an explicit Go.
 
 Apple account credentials, team identifiers, signing identities, and private
 review access are never stored in this repository.
@@ -30,11 +37,11 @@ review access are never stored in this repository.
 | Product | WootDesk | Shared product name |
 | Bundle ID | `dev.n85.wootdesk` | Registered explicit App ID and App Store Connect bundle ID |
 | Version | `1.0.0` | Marketing version, change only through reviewed release work |
-| Build | `2` | Increment for every uploaded build |
+| Build | `3` in source | Local Milestone 2 candidate, not uploaded |
 | Platforms | iOS, iPadOS, macOS | One native SwiftUI multiplatform target |
 | Minimum versions | iOS 18, iPadOS 18, macOS 15 | Must match App Store metadata and testing |
 | Signing style | Automatic | A team is selected locally, not committed |
-| macOS sandbox | Enabled | Outbound network client only |
+| macOS sandbox | Enabled | Outbound network plus user-selected read-only files |
 | App icon | Complete | Separate iOS and macOS platform treatments |
 | Privacy manifest | Present | Declares no tracking, collection, or required-reason API use in this build |
 
@@ -49,6 +56,9 @@ review access are never stored in this repository.
 | iOS build 2 | Uploaded, processed, Ready to Submit |
 | Build 2 export compliance | `ITSAppUsesNonExemptEncryption = false` |
 | macOS build 2 | Signed universal archive validated locally, not exported or uploaded |
+| iOS build 3 | Signed local archive and App Store export package validated, not uploaded |
+| macOS build 3 | Signed universal local archive and signed App Store installer package validated, not uploaded |
+| Mac Installer Distribution identity | One installed identity with an accessible private key |
 | TestFlight testers | None added |
 | App Review | Not submitted |
 
@@ -76,9 +86,16 @@ An explicit App ID for `dev.n85.wootdesk` is registered in Certificates,
 Identifiers and Profiles. Apple supports a single App ID across iOS and macOS.
 Enable only the capabilities the release build uses.
 
-The foundation build needs no CloudKit, push notification, associated domain,
-in-app purchase, Sign in with Apple, camera, microphone, or location capability.
-Do not enable capabilities speculatively.
+Build 4 source uses the Push Notifications capability on iOS, iPadOS, and
+macOS. Enable Push Notifications for `dev.n85.wootdesk`, then regenerate the
+iOS App Store and Mac App Store provisioning profiles. The app does not use
+CloudKit, associated domains, in-app purchase, Sign in with Apple, camera,
+microphone, location, background fetch, or remote-notification background mode.
+Do not enable those capabilities speculatively.
+
+Build 3 archives predate this capability. Do not reuse build 3 for a new push
+candidate. See `docs/PUSH_NOTIFICATIONS.md` for the provider and acceptance
+requirements. The entitlement alone does not activate Chatwoot delivery.
 
 Reference:
 [Register an App ID](https://developer.apple.com/help/account/identifiers/register-an-app-id/).
@@ -87,9 +104,9 @@ Reference:
 
 `project.yml` enables automatic signing but intentionally contains no
 `DEVELOPMENT_TEAM` value. This keeps personal and organisation team identifiers
-out of the public repository. One Apple Distribution identity with an accessible
-private key is installed on the release Mac; no certificate material is stored
-in Git.
+out of the public repository. One Apple Distribution identity and one Mac
+Installer Distribution identity have accessible private keys on the release
+Mac; no certificate material is stored in Git.
 
 On the release Mac:
 
@@ -97,11 +114,14 @@ On the release Mac:
 2. Select the WootDesk target and open Signing & Capabilities.
 3. Select the organisation's Apple Developer team.
 4. Confirm Automatically manage signing is enabled for iOS and macOS.
-5. Confirm the macOS build contains only the App Sandbox and outgoing network
-   client entitlements.
+5. Confirm the macOS build contains the App Sandbox, outgoing network client,
+   and user-selected read-only file entitlements, with no broader file access.
 6. Confirm the iOS build uses the default app Keychain access group created by
    its provisioning profile.
-7. Do not commit the resulting personal team selection if Xcode writes it into
+7. Confirm the signed iOS archive resolves `aps-environment` to `production`
+   and the signed macOS archive resolves
+   `com.apple.developer.aps-environment` to `production`.
+8. Do not commit the resulting personal team selection if Xcode writes it into
    project settings.
 
 Apple's preparation guide explains team selection and supported destinations:
@@ -159,6 +179,9 @@ Before public App Review submission:
    app. The current source contains no analytics, advertising, or telemetry.
 6. Reassess the answer if push, crash reporting, hosted AI, or another SDK is
    added.
+7. Before remote push is enabled, document whether the chosen provider receives
+   device identifiers or notification content, its purpose, linkage, retention,
+   and deletion behaviour. The current app does not transmit its APNs token.
 
 Apple requires a privacy policy URL and accurate privacy answers:
 [Manage app privacy](https://developer.apple.com/help/app-store-connect/manage-app-information/manage-app-privacy/).
@@ -199,9 +222,12 @@ dedicated review environment that:
 - Uses HTTPS with a certificate trusted by Apple devices.
 - Has a dedicated least-privilege agent account.
 - Has a token that remains valid for the full review window.
-- Supports the exact account-selection and conversation-list flows in the
-  submitted build.
+- Supports the exact account-selection, conversation-list, message-history,
+  public-reply, and private-note flows in the submitted build.
 - Can be disabled after review without affecting customers.
+
+Provision and test it with `docs/CHATWOOT_COMPATIBILITY.md`. Do not use a
+production or customer environment as a shortcut.
 
 Enter the server address and token only in private App Review information. Do
 not commit them, put them in screenshots, or send them in public issue text.
@@ -215,8 +241,12 @@ Start from a clean checkout of the reviewed release commit:
 
 ```bash
 xcodegen generate
-./script/ci.sh --with-ui-tests
+./script/ci.sh
 ```
+
+Run `./script/ci.sh --with-ui-tests` only after the controlled Mac satisfies
+`docs/MACOS_UI_TESTING.md`. The script exits before XCTest when the required
+Automation Mode setting is absent.
 
 Then inspect the release configuration:
 
@@ -240,17 +270,21 @@ entitlement path, and absence of debug-only transport exceptions.
 
 ## Create archives
 
-Build 2 has signed iOS and macOS archives. The iOS archive was exported with
-Apple Distribution signing and App Store provisioning. Its release package has
-debug entitlement disabled, an arm64 executable, iOS 18 minimum deployment,
-launch and orientation metadata, app-icon assets, and `PrivacyInfo.xcprivacy`.
+Build 3 now has fresh signed iOS and macOS archives containing the current
+Milestone 2 source. The iOS archive exported locally with Apple Distribution
+signing and App Store provisioning. Its release package has debug entitlement
+disabled, an arm64 executable, iOS 18 minimum deployment, launch and orientation
+metadata, app-icon assets, and `PrivacyInfo.xcprivacy`.
 
-The macOS archive contains arm64 and x86_64 executables, a macOS 15 minimum
-deployment, hardened runtime, App Sandbox with outbound network access only,
-app-icon assets, and `PrivacyInfo.xcprivacy`. It remains a local archive until
-the Mac App Store export and upload path is completed.
+The macOS build 3 archive contains arm64 and x86_64 executables, a macOS 15
+minimum deployment, hardened runtime, App Sandbox with outbound network access
+and user-selected read-only files, app-icon assets, release copyright, and
+`PrivacyInfo.xcprivacy`. On 31 August 2026, Xcode automatic provisioning created
+and embedded the matching Mac App Store profile, and local package export
+succeeded with the approved Mac Installer Distribution identity. The package
+has not been uploaded.
 
-For later builds, Xcode Organizer can manage distribution certificates,
+For later builds, Xcode Organizer can manage approved distribution certificates,
 profiles, validation, and upload diagnostics:
 
 1. Select the WootDesk scheme and a generic iOS device destination.
@@ -267,8 +301,10 @@ codesign -dvvv --entitlements :- /path/to/WootDesk.app
 spctl -a -vv /path/to/WootDesk.app
 ```
 
-The expected App Store archive uses Apple distribution signing, not the ad-hoc
-signature used by `script/build_and_run.sh`.
+The archive must identify the approved team. The exported iOS app uses Apple
+Distribution signing, and the exported Mac App Store installer requires the Mac
+Installer Distribution identity. Neither uses the ad-hoc signature from
+`script/build_and_run.sh`.
 
 ## Upload and TestFlight
 
@@ -278,20 +314,25 @@ Compliance. The build 2 package contains
 `ITSAppUsesNonExemptEncryption = false`, so no separate Missing Compliance state
 is shown for it.
 
-No TestFlight group or tester has been added. The macOS build has not been
-exported or uploaded. For each future archive, choose Distribute App, App Store
-Connect, and Upload, then wait for processing to complete before assigning the
-build.
+Build 3 has not been uploaded on either platform. An existing internal group is
+present in App Store Connect, but build 3 is not assigned to it. After explicit
+upload confirmation, upload both packages and wait for processing to complete
+before assigning build 3 to any tester.
 
 Release through TestFlight first:
 
 1. Add internal testers with the minimum App Store Connect access needed.
 2. Test connection creation, account selection, restore, conversation loading,
+   message paging, public replies, private notes, failed-send draft retention,
    profile switching, revalidation, and deletion on physical devices.
 3. Test an Intel or Apple silicon Mac where available.
 4. Add external testers only after the beta information and any required Beta
    App Review are complete.
 5. Record defects and repeat with a higher build number.
+
+Use `docs/TESTFLIGHT_TEST_PLAN.md` as the required evidence record. Simulator
+tests and a universal archive do not replace physical iPhone, iPad, Apple
+silicon Mac, and Intel Mac coverage.
 
 References:
 
@@ -337,8 +378,6 @@ owner:
 - Confirm current legal agreements, roles, and EU trader status.
 - Approve price, territories, age rating, and App Store privacy answers.
 - Approve platform metadata and screenshots containing invented data only.
-- Create or approve the Mac Installer Distribution signing asset if required by
-  the macOS App Store export.
 - Provide private review contact and dedicated demo credentials.
 - Approve TestFlight tester access.
 - Submit either platform for App Review.

@@ -28,6 +28,8 @@
 	<string>AccentColor</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Connect to a Chatwoot server on your local network.</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright © 2026 N85 Dev. All rights reserved.</string>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UISupportedInterfaceOrientations</key>

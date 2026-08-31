@@ -85,4 +85,61 @@ public enum PreviewData {
             createdAt: Date().addingTimeInterval(-60 * 60 * 120)
         )
     ]
+
+    public static let messages: [ConversationMessage] = [
+        ConversationMessage(
+            id: 8_001,
+            content: "Hello, the sample export stops before it finishes.",
+            kind: .incoming,
+            createdAt: Date(timeIntervalSince1970: 1_735_736_100),
+            senderName: "Ada Sample",
+            senderType: "Contact",
+            deliveryStatus: "sent",
+            contentType: "text"
+        ),
+        ConversationMessage(
+            id: 8_002,
+            content: "Thanks for the clear report. I am checking the export job now.",
+            kind: .outgoing,
+            createdAt: Date(timeIntervalSince1970: 1_735_736_280),
+            senderName: "Sample Agent",
+            senderType: "User",
+            deliveryStatus: "sent",
+            contentType: "text"
+        ),
+        ConversationMessage(
+            id: 8_003,
+            content: "Internal check: compare the worker timeout with the sample job size.",
+            kind: .outgoing,
+            isPrivate: true,
+            createdAt: Date(timeIntervalSince1970: 1_735_736_340),
+            senderName: "Sample Agent",
+            senderType: "User",
+            deliveryStatus: "sent",
+            contentType: "text"
+        ),
+        ConversationMessage(
+            id: 8_004,
+            content: "The export still times out when I select the **full date range**.",
+            kind: .incoming,
+            createdAt: Date(timeIntervalSince1970: 1_735_736_520),
+            senderName: "Ada Sample",
+            senderType: "Contact",
+            deliveryStatus: "sent",
+            contentType: "text",
+            attachments: [
+                ConversationAttachment(
+                    id: "preview-attachment-1",
+                    serverID: 91,
+                    fileType: .image,
+                    dataURL: URL(string: "https://files.example.invalid/sample-export.png"),
+                    thumbnailURL: URL(string: "https://files.example.invalid/sample-export-thumbnail.png"),
+                    fileSize: 82_410,
+                    width: 1_200,
+                    height: 800,
+                    fileExtension: "png"
+                )
+            ]
+        )
+    ]
 }

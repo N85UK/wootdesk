@@ -1,12 +1,14 @@
 # Draft App Store Metadata
 
-Status: Draft listing metadata, iOS build 2 uploaded, not submitted for review
+Status: Draft listing metadata, build 3 local candidate, not submitted for review
 
-Last reviewed: 30 August 2026
+Last reviewed: 31 August 2026
 
 This file provides non-secret draft copy for App Store Connect. The release
-owner must verify every field against the exact uploaded build. Do not add demo
-credentials, customer data, or a real server address to this repository.
+owner must verify every field against the exact uploaded build. Uploaded build
+2 remains the foundation build and does not contain the Milestone 2 source
+changes. Build 3 is a local candidate only. Do not add demo credentials,
+customer data, or a real server address to this repository.
 
 ## Shared product information
 
@@ -34,9 +36,11 @@ confirmed accessible from the public default branch without authentication.
 | iOS build 1 | Superseded, Missing Compliance |
 | iOS build 2 | Uploaded, Ready to Submit |
 | Export compliance | `ITSAppUsesNonExemptEncryption = false` in build 2 |
+| iOS build 3 | Local archive and App Store export package, not uploaded |
+| macOS build 3 | Local universal archive and signed App Store installer package, not uploaded |
 | TestFlight testers | None added |
 | App Review | Not submitted |
-| macOS distribution | Archive validated locally, not exported or uploaded |
+| macOS distribution | Archive and installer package validated locally, not uploaded |
 
 This is a process snapshot, not a public-release approval. The release remains
 blocked by the criteria in `docs/RELEASE_READINESS.md`.
@@ -46,7 +50,7 @@ blocked by the criteria in `docs/RELEASE_READINESS.md`.
 Connect directly to the Chatwoot servers you control with a native app for
 iPhone, iPad, and Mac.
 
-## Description for the current foundation build
+## Description draft for the build 3 candidate
 
 WootDesk is an independent native client for Chatwoot installations.
 
@@ -62,13 +66,18 @@ Current features include:
 - Account selection for users who belong to several accounts.
 - Conversation lists with status, priority, inbox, activity, message preview,
   and unread information when the server provides it.
+- Paginated conversation message history.
+- Plain-text public replies and private internal notes with recoverable in-memory drafts.
+- File uploads and safe received-attachment metadata without automatic remote downloads.
+- Processed HTML converted to readable text and inline Markdown shown without active embedded links.
 - Native navigation, keyboard support, Dynamic Type, VoiceOver-friendly labels,
   pull to refresh, and light and dark appearance support.
 - No analytics, advertising, or off-device telemetry.
 
-The current foundation build does not show full message history and cannot send
-replies or private notes. Public App Store submission is therefore gated on the
-next conversation-detail milestone.
+The uploaded foundation build 2 does not show full message history and cannot
+send replies or private notes. Local build 3 adds those flows and attachment
+handling, but this copy must not describe them as shipped until a processed
+build containing the reviewed source is selected for the platform version.
 
 WootDesk is an independent project. It is not affiliated with, maintained by,
 or endorsed by Chatwoot. The Chatwoot name and marks belong to their respective
@@ -83,12 +92,15 @@ character limit before submission.
 
 ## What's New
 
-Build 2 TestFlight foundation candidate:
+Proposed build 3 TestFlight candidate:
 
 - Add and validate a Chatwoot server securely.
 - Select an account and restore the saved connection.
 - Switch between saved servers and remove them safely.
 - Load a live conversation list from the selected account.
+- Read paginated message history.
+- Send public replies and private notes with recoverable drafts.
+- Upload attachments and review safe received-attachment metadata.
 
 Do not use this text for a public release until the release-readiness gate is
 approved.
@@ -122,13 +134,25 @@ access token, customer name, email address, phone number, or attachment.
 | Order | Screen | Suggested caption |
 |---:|---|---|
 | 1 | Native conversation list | Your support conversations, natively organised |
-| 2 | Server profile sidebar | Switch safely between the servers you control |
-| 3 | Secure connection setup | Validate your Chatwoot connection before saving |
-| 4 | Multiple-account picker | Choose the right account for each server |
-| 5 | Empty and retry state | Clear states when a server needs attention |
+| 2 | Invented conversation timeline | Read the full context and older history |
+| 3 | Reply and private-note composer | Reply publicly or keep a note within your support team |
+| 4 | Invented attachment metadata | Review files without automatic remote downloads |
+| 5 | Server profile sidebar | Switch safely between the servers you control |
+| 6 | Secure connection setup | Validate your Chatwoot connection before saving |
+| 7 | Multiple-account picker | Choose the right account for each server |
+| 8 | Empty and retry state | Clear states when a server needs attention |
 
-Do not create fake screenshots that imply message history, replies, attachments,
-AI results, push notifications, or other unfinished features.
+Do not use build 2 to create screenshots that imply message history or replies.
+After build 3 is processed and passes acceptance, screenshots may show message
+history, public replies, private notes, and invented attachment metadata from
+the dedicated review server. AI results, push notifications, automatic previews,
+and other unfinished features must never be implied.
+
+Local screenshot candidates were captured on 31 August 2026 through the
+in-memory `StubChatwootAPI`. The iPhone set uses the accepted 1284 by 2778 size,
+and the iPad set uses 2064 by 2752. They contain invented names, messages, and
+attachment metadata only. They remain outside the repository and have not been
+uploaded or approved for publication.
 
 ## App privacy draft
 
@@ -145,11 +169,12 @@ flows are explained in `PRIVACY.md` even though N85 Dev does not receive them.
 ## Export compliance draft
 
 WootDesk uses operating-system HTTPS and Keychain services and does not
-implement its own encryption algorithm. Build 2 therefore declares
-`ITSAppUsesNonExemptEncryption = false`. App Store Connect processed that build
-without the Missing Compliance state shown for build 1. Retain this declaration
-only while the app continues to use exempt Apple operating-system cryptography,
-and reassess it if the encryption implementation or linked services change.
+implement its own encryption algorithm. Builds 2 and 3 therefore declare
+`ITSAppUsesNonExemptEncryption = false`. App Store Connect processed build 2
+without the Missing Compliance state shown for build 1. Build 3 has not been
+uploaded, so its server-side compliance state is not yet known. Retain this
+declaration only while the app continues to use exempt Apple operating-system
+cryptography, and reassess it if the implementation or linked services change.
 
 ## Age rating
 

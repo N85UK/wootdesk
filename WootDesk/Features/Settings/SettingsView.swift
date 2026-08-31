@@ -3,9 +3,11 @@ import SwiftUI
 /// Settings and diagnostics view for WootDesk.
 public struct SettingsView: View {
     @Bindable var appModel: AppModel
+    let notificationState: PushNotificationState
 
-    public init(appModel: AppModel) {
+    public init(appModel: AppModel, notificationState: PushNotificationState) {
         self.appModel = appModel
+        self.notificationState = notificationState
     }
 
     public var body: some View {
@@ -46,6 +48,8 @@ public struct SettingsView: View {
                 }
                 .padding(.vertical, 4)
             }
+
+            NotificationSettingsSection(state: notificationState)
 
             Section("AI Research & Intelligence") {
                 VStack(alignment: .leading, spacing: 6) {
@@ -102,7 +106,12 @@ public struct SettingsView: View {
     appModel.applyPreviewState(profiles: [profile], activeProfile: profile, token: "test")
 
     return NavigationStack {
-        SettingsView(appModel: appModel)
+        SettingsView(
+            appModel: appModel,
+            notificationState: PushNotificationState(
+                permissionClient: InMemoryNotificationPermissionClient(status: .authorised)
+            )
+        )
     }
     .environment(\.appEnvironment, environment)
 }

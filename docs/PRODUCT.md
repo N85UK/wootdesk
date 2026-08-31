@@ -44,7 +44,7 @@ WootDesk is an independent native Apple client for [Chatwoot](https://www.chatwo
 ## Release Scope & Milestones
 
 - **Milestone 1 (Foundation):** Multiplatform app shell, connection setup, profile validation, multi-account selection, Keychain token storage, conversation listing, and filtering.
-- **Milestone 2 (Conversation Detail & Replies):** Interactive timeline, markdown message rendering, agent reply composer, private notes, and file attachments.
+- **Milestone 2 (Conversation Detail & Replies):** Interactive paginated timeline, safe agent reply composer, private notes, richer message rendering, and file attachments.
 - **Milestone 3 (Real-Time Synchronisation):** ActionCable WebSocket connection, low-latency invalidation, push relay integration.
 - **Milestone 4 (AI Intelligence & Deep Research):** Privacy-first WootDesk AI Gateway integration for summaries, reply drafting, and cited deep research.
 - **Milestone 5 (Offline First & Enterprise):** SwiftData persistent caching, offline mutation queue, and organisation profile policies.
@@ -52,10 +52,15 @@ WootDesk is an independent native Apple client for [Chatwoot](https://www.chatwo
 ## Current Release Position
 
 Milestone 1 is an early-development foundation, not a production or App Store
-release. It proves the secure multi-server connection and live conversation-list
-journey. Public distribution remains blocked until Milestone 2 adds message
-history and replies, signed archives validate, TestFlight acceptance passes,
-and the named release owners record an explicit Go decision.
+release. The Milestone 2 source now adds paginated message history, plain-text
+replies, private notes, safe inline formatting, attachment upload, and
+privacy-first attachment presentation. Milestone 3 now includes the native
+notification permission and APNs registration foundation, but remote Chatwoot
+delivery is not active until the authenticated push provider is implemented.
+Public distribution remains blocked until this work passes dedicated
+invented-data server and TestFlight acceptance,
+the remaining distribution and listing gates close, and the named release
+owners record an explicit Go decision.
 
 The original WootDesk app icon, privacy manifest, draft listing metadata, and
 submission runbook prepare the repository for that work without claiming an

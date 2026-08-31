@@ -83,6 +83,7 @@ public struct ConversationRowView: View {
         }
         .padding(.vertical, 4)
         .accessibilityElement(children: .combine)
+        .accessibilityIdentifier("conversation-row-\(conversation.id)")
     }
 
     private func statusBadge(_ status: ConversationStatus) -> some View {

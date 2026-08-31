@@ -28,7 +28,15 @@ table when the project starts publishing releases.
    - System certificate trust evaluation is used unmodified. There is no `URLSessionDelegate` that overrides trust evaluation, so a self-hosted server needs a certificate the system already trusts, which may be one the user has installed and trusted themselves.
 
 3. **macOS App Sandbox:**
-   The project entitlement file requests `com.apple.security.app-sandbox` and `com.apple.security.network.client`. It requests no file, camera, microphone, location, or inbound network access. Xcode adds its standard `com.apple.security.get-task-allow` entitlement to a locally signed Debug build so the debugger can attach; WootDesk does not request that entitlement in its source file.
+   The project entitlement file requests `com.apple.security.app-sandbox`,
+   `com.apple.security.network.client`, and
+   `com.apple.security.files.user-selected.read-only`. The file entitlement
+   permits only read access to files a user deliberately chooses through the
+   system picker. WootDesk requests no broad file, camera, microphone, location,
+   or inbound network access. Xcode adds its standard
+   `com.apple.security.get-task-allow` entitlement to a locally signed Debug
+   build so the debugger can attach; WootDesk does not request that entitlement
+   in its source file.
 
 4. **Logging:**
    Logs are written with `OSLog`. Request headers, access tokens, and message bodies are never logged. Error descriptions shown to the user never embed the token.
@@ -37,6 +45,23 @@ table when the project starts publishing releases.
    - WootDesk contains no analytics SDKs or remote telemetry.
    - AI features require an authenticated, user-controlled gateway. Internal notes, contact emails, and phone numbers are excluded from AI contexts by default.
    - The current user-facing data-processing disclosure is maintained in [PRIVACY.md](PRIVACY.md), and the release privacy manifest must be reviewed against every distribution binary.
+
+6. **Attachment Safety:**
+   Selected files are copied into bounded in-memory values, with a maximum of 15
+   files and 25 MB per message. Upload filenames and MIME types are sanitised.
+   Received attachment URLs must use HTTPS outside a debug-only localhost path.
+   Remote content is never fetched automatically, and the user confirms the
+   destination host before WootDesk opens it without the Chatwoot token.
+
+7. **Push Notification Boundary:**
+   Notification permission is requested only after a user action. APNs device
+   tokens remain in process memory and are never logged or persisted. WootDesk
+   does not submit an APNs token to Chatwoot's incompatible FCM endpoint. A
+   future push provider must use authenticated per-profile enrolment, verify
+   Chatwoot webhook signatures and replay windows, store Apple credentials in
+   server secret storage, and operate without receiving a Chatwoot personal
+   access token. Remote delivery remains disabled until that boundary and
+   physical-device acceptance are complete.
 
 ---
 

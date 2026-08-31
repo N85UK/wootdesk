@@ -3,6 +3,7 @@ import os
 
 /// Actor-backed implementation of `ChatwootAPIProtocol` using `URLSession`.
 public actor ChatwootAPIClient: ChatwootAPIProtocol {
+    private static let messagePageSize = 20
     private let session: URLSession
     private let isDebug: Bool
 
@@ -74,6 +75,111 @@ public actor ChatwootAPIClient: ChatwootAPIProtocol {
         } catch {
             AppLogger.network.error("The Chatwoot conversation response could not be decoded.")
             throw APIError.decodingError("The server returned conversation data in an unsupported format.")
+        }
+    }
+
+    public func fetchMessages(
+        baseURL: URL,
+        token: String,
+        accountID: Int,
+        conversationID: Int,
+        beforeMessageID: Int? = nil
+    ) async throws -> ConversationMessagePage {
+        let queryItems = beforeMessageID.map { [URLQueryItem(name: "before", value: String($0))] }
+        let endpoint = try APIRequest.endpointURL(
+            baseURL: baseURL,
+            path: "api/v1/accounts/\(accountID)/conversations/\(conversationID)/messages",
+            queryItems: queryItems
+        )
+        let request = APIRequest.makeRequest(url: endpoint, method: "GET", token: token)
+
+        AppLogger.network.debug("Fetching a page of Chatwoot conversation messages.")
+        let data = try await perform(request: request)
+
+        do {
+            let envelope = try JSONDecoder().decode(ChatwootMessageListResponseDTO.self, from: data)
+            let messages = try envelope.messages.map {
+                try $0.toDomain(allowsInsecureLocalhost: isDebug)
+            }
+            return ConversationMessagePage(
+                messages: messages,
+                hasOlderMessages: messages.count >= Self.messagePageSize
+            )
+        } catch let apiError as APIError {
+            throw apiError
+        } catch {
+            AppLogger.network.error("The Chatwoot message response could not be decoded.")
+            throw APIError.decodingError("The server returned message data in an unsupported format.")
+        }
+    }
+
+    public func createMessage(
+        baseURL: URL,
+        token: String,
+        accountID: Int,
+        conversationID: Int,
+        content: String,
+        isPrivate: Bool,
+        attachments: [OutgoingMessageAttachment]
+    ) async throws -> ConversationMessage {
+        let trimmedContent = content.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedContent.isEmpty || !attachments.isEmpty else {
+            throw APIError.invalidMessageContent
+        }
+
+        guard attachments.count <= OutgoingMessageAttachment.maximumCount else {
+            throw AttachmentSelectionError.tooManyFiles
+        }
+        guard attachments.reduce(0, { $0 + $1.data.count }) <= OutgoingMessageAttachment.maximumTotalBytes else {
+            throw AttachmentSelectionError.totalSizeExceeded
+        }
+
+        let endpoint = try APIRequest.endpointURL(
+            baseURL: baseURL,
+            path: "api/v1/accounts/\(accountID)/conversations/\(conversationID)/messages"
+        )
+        let request: URLRequest
+        if attachments.isEmpty {
+            let payload = CreateMessageRequestDTO(
+                content: trimmedContent,
+                messageType: "outgoing",
+                isPrivate: isPrivate,
+                contentType: "text",
+                contentAttributes: [:]
+            )
+            let body = try JSONEncoder().encode(payload)
+            request = APIRequest.makeRequest(
+                url: endpoint,
+                method: "POST",
+                token: token,
+                body: body
+            )
+        } else {
+            let multipart = MultipartMessageBody(
+                content: trimmedContent,
+                isPrivate: isPrivate,
+                attachments: attachments
+            )
+            request = APIRequest.makeRequest(
+                url: endpoint,
+                method: "POST",
+                token: token,
+                body: multipart.data,
+                contentType: "multipart/form-data; boundary=\(multipart.boundary)"
+            )
+        }
+
+        AppLogger.network.debug("Creating a Chatwoot conversation message.")
+        let data = try await perform(request: request)
+
+        do {
+            let response = try JSONDecoder().decode(ChatwootCreatedMessageResponseDTO.self, from: data)
+            return try response.message.toDomain(allowsInsecureLocalhost: isDebug)
+        } catch let apiError as APIError {
+            throw apiError
+        } catch {
+            AppLogger.network.error("The created Chatwoot message response could not be decoded.")
+            throw APIError.decodingError("The server returned the created message in an unsupported format.")
         }
     }
 
@@ -160,5 +266,78 @@ public actor ChatwootAPIClient: ChatwootAPIProtocol {
             .trimmingCharacters(in: .whitespacesAndNewlines)
         guard !flattened.isEmpty else { return nil }
         return String(flattened.prefix(300))
+    }
+}
+
+private struct CreateMessageRequestDTO: Encodable, Sendable {
+    let content: String
+    let messageType: String
+    let isPrivate: Bool
+    let contentType: String
+    let contentAttributes: [String: String]
+
+    enum CodingKeys: String, CodingKey {
+        case content
+        case messageType = "message_type"
+        case isPrivate = "private"
+        case contentType = "content_type"
+        case contentAttributes = "content_attributes"
+    }
+}
+
+private struct MultipartMessageBody: Sendable {
+    let boundary: String
+    let data: Data
+
+    init(
+        content: String,
+        isPrivate: Bool,
+        attachments: [OutgoingMessageAttachment]
+    ) {
+        let boundary = "WootDesk-\(UUID().uuidString)"
+        var body = Data()
+        body.appendMultipartField(name: "content", value: content, boundary: boundary)
+        body.appendMultipartField(name: "message_type", value: "outgoing", boundary: boundary)
+        body.appendMultipartField(name: "private", value: isPrivate ? "true" : "false", boundary: boundary)
+        body.appendMultipartField(name: "content_type", value: "text", boundary: boundary)
+
+        for attachment in attachments {
+            body.appendMultipartFile(
+                name: "attachments[]",
+                fileName: attachment.fileName,
+                mimeType: attachment.mimeType,
+                fileData: attachment.data,
+                boundary: boundary
+            )
+        }
+
+        body.append(Data("--\(boundary)--\r\n".utf8))
+        self.boundary = boundary
+        self.data = body
+    }
+}
+
+private extension Data {
+    mutating func appendMultipartField(name: String, value: String, boundary: String) {
+        append(Data("--\(boundary)\r\n".utf8))
+        append(Data("Content-Disposition: form-data; name=\"\(name)\"\r\n\r\n".utf8))
+        append(Data(value.utf8))
+        append(Data("\r\n".utf8))
+    }
+
+    mutating func appendMultipartFile(
+        name: String,
+        fileName: String,
+        mimeType: String,
+        fileData: Data,
+        boundary: String
+    ) {
+        append(Data("--\(boundary)\r\n".utf8))
+        append(Data(
+            "Content-Disposition: form-data; name=\"\(name)\"; filename=\"\(fileName)\"\r\n".utf8
+        ))
+        append(Data("Content-Type: \(mimeType)\r\n\r\n".utf8))
+        append(fileData)
+        append(Data("\r\n".utf8))
     }
 }

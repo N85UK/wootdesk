@@ -26,10 +26,18 @@ Examples of unacceptable behaviour include:
 
 Community leaders are responsible for clarifying and enforcing our standards of acceptable behaviour and will take appropriate and fair corrective action in response to any behaviour that they deem inappropriate, threatening, offensive, or harmful.
 
+Reports should be made privately to the repository maintainers using a private
+contact method listed by the [N85UK GitHub organisation](https://github.com/N85UK).
+Do not include personal information in a public issue. Maintainers will respect
+the privacy and security of reporters and affected community members as far as
+the investigation permits.
+
 ## Scope
 
 This Code of Conduct applies within all community spaces, and also applies when an individual is officially representing the community in public spaces.
 
 ## Attribution
 
-This Code of Conduct is adapted from the Contributor Covenant, version 2.1, available at https://www.contributor-covenant.org/version/2/1/code_of_conduct.html
+This Code of Conduct is adapted from the Contributor Covenant, version 2.1,
+available at
+[contributor-covenant.org](https://www.contributor-covenant.org/version/2/1/code_of_conduct.html).

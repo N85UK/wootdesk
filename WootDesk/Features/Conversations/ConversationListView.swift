@@ -42,6 +42,8 @@ public struct ConversationListView: View {
         .task(
             id: ConversationLoadContext(
                 profileID: appModel.activeProfile?.id,
+                baseURL: appModel.activeProfile?.baseURL,
+                accountID: appModel.activeProfile?.selectedAccountID,
                 status: state.statusFilter
             )
         ) {
@@ -216,6 +218,8 @@ public struct ConversationListView: View {
 
 private struct ConversationLoadContext: Equatable {
     let profileID: UUID?
+    let baseURL: URL?
+    let accountID: Int?
     let status: ConversationStatus?
 }
 

@@ -1,0 +1,14 @@
+{
+  "payload": [
+    {
+      "id": 8301,
+      "message_type": 9,
+      "attachments": [
+        {
+          "id": 91,
+          "file_type": "file"
+        }
+      ]
+    }
+  ]
+}
