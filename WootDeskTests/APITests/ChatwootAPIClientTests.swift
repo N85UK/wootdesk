@@ -310,6 +310,44 @@ struct ChatwootAPIClientTests {
         #expect(accounts.count == 3)
     }
 
+    @Test("Updates availability using the account-scoped profile endpoint")
+    func testUpdateAvailabilityRequest() async throws {
+        let recorder = RequestRecorder()
+        MockURLProtocol.setHandler { request in
+            recorder.record(request)
+            let response = HTTPURLResponse(
+                url: request.url!,
+                statusCode: 200,
+                httpVersion: nil,
+                headerFields: nil
+            )!
+            return (response, Data())
+        }
+
+        let session = MockURLProtocol.makeMockSession()
+        let client = ChatwootAPIClient(session: session, isDebug: true)
+        let baseURL = URL(string: "https://chatwoot.example.com/support")!
+
+        try await client.updateAvailability(
+            baseURL: baseURL,
+            token: "test-token",
+            accountID: 42,
+            availability: .online
+        )
+
+        let request = try #require(recorder.request())
+        let data = try #require(recorder.body())
+        let json = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let profile = try #require(json["profile"] as? [String: Any])
+
+        #expect(request.url?.path == "/support/api/v1/profile/availability")
+        #expect(request.httpMethod == "POST")
+        #expect(request.value(forHTTPHeaderField: "api_access_token") == "test-token")
+        #expect(request.value(forHTTPHeaderField: "Content-Type") == "application/json")
+        #expect(profile["account_id"] as? Int == 42)
+        #expect(profile["availability"] as? String == "online")
+    }
+
     @Test("No error description ever contains the access token")
     func testErrorsNeverLeakTheToken() async throws {
         let credential = String(repeating: "s", count: 32)

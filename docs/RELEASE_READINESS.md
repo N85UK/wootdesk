@@ -76,7 +76,7 @@ No platform version has been submitted for App Review.
 
 | ID | Criterion | Evidence | Status |
 |---|---|---|---|
-| GO-001 | Automated source checks pass | `./script/ci.sh`, 18 Node gateway tests, 116 Swift tests, plus the previously recorded iPhone, iPad, and macOS UI journeys | Pass |
+| GO-001 | Automated source checks pass | A source-only snapshot passed `./script/ci.sh --with-ui-tests`, including 18 Node gateway tests, 126 Swift tests, and 3 macOS UI tests; the previously recorded iPhone and iPad UI journeys also pass | Pass |
 | GO-002 | Live self-hosted connection works | Maintainer confirmed connection on 30 August 2026, no credential retained | Pass |
 | GO-003 | Message history, replies, private notes, and attachments meet Milestone 2 acceptance | Source implementation and mocked tests pass; opt-in live harness exists; dedicated-server and TestFlight acceptance remain | In progress |
 | GO-004 | iOS and macOS archives validate locally | Signed build 3 iOS archive and App Store export passed; signed universal build 3 macOS archive and installer export passed with the expected sandbox, runtime, icon, privacy, metadata, installer identity, and embedded profile | Pass |
@@ -95,7 +95,7 @@ No platform version has been submitted for App Review.
 |---|---|---|---|
 | macOS build | Debug app builds | Generic macOS build passed | Pass |
 | iOS build | Generic Simulator destination builds | Generic iOS Simulator build passed | Pass |
-| Unit tests | All deterministic tests pass without a live server | 116 Swift tests in 13 suites and 18 Node gateway tests passed | Pass |
+| Unit tests | All deterministic tests pass without a live server | 126 Swift tests in 14 suites and 18 Node gateway tests passed; the two opt-in live compatibility tests were skipped by design | Pass |
 | UI tests | First-run setup and the message/reply journey work without a live server | 3 tests passed on an iPhone 17 Pro Simulator, 3 passed on an iPad Pro 13-inch Simulator, and 3 passed on this Apple silicon Mac after the controlled Automation Mode setup | Pass on iPhone, iPad, and this Mac |
 | Swift concurrency | Swift 6 complete strict checking | Project build settings | Configured |
 | Accessibility | Labels, keyboard flow, Dynamic Type, VoiceOver states | Code review and UI checks | In review |
@@ -125,7 +125,8 @@ that build 4 is signable with the refreshed push capability.
 | Command | Result |
 |---|---|
 | `xcodegen generate --spec project.yml` | Passed |
-| `./script/ci.sh` | Build 4 generic macOS and iOS Simulator Debug builds, 116 Swift tests in 13 suites, 18 Node gateway tests, and the dependency policy check passed |
+| `./script/ci.sh --with-ui-tests` from a source-only snapshot | Build 4 generic macOS and iOS Simulator Debug builds, 126 Swift tests in 14 suites, 18 Node gateway tests, the dependency policy check, and 3 macOS UI tests passed; the two opt-in live compatibility tests were skipped by design |
+| Focused availability regression suite | Eight tests passed, including a confirmed availability mutation followed by profile switching and relaunch, immediate state clearing during the switch, and rejection of a delayed response from the previous profile |
 | iPhone Simulator UI suite | 3 UI tests passed, including message history and a stub-confirmed reply without network access |
 | iPad Simulator UI suite | 3 UI tests passed after replacing a beta-runner element tap with a semantic centre-coordinate tap |
 | macOS UI suite | Passed 3 tests on 31 August 2026 after the documented one-time Automation Mode configuration; XCTest established the automation session without an authentication prompt |

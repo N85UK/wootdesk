@@ -19,6 +19,10 @@ struct ChatwootDecodingTests {
         #expect(account?.id == 1)
         #expect(account?.name == "Acme Support Global")
         #expect(account?.role == "administrator")
+        #expect(account?.availability == .online)
+        #expect(account?.availabilityStatus == .online)
+        #expect(account?.effectiveAvailability == .online)
+        #expect(account?.autoOffline == true)
     }
 
     @Test("Decodes profile response with multiple accounts")
@@ -30,6 +34,23 @@ struct ChatwootDecodingTests {
         let domainAccounts = profileDTO.accounts?.map { $0.toDomain() } ?? []
         #expect(domainAccounts.map(\.id) == [1, 2, 3])
         #expect(domainAccounts[1].name == "Acme Americas Tier 2")
+        #expect(domainAccounts[0].effectiveAvailability == .busy)
+        #expect(domainAccounts[1].effectiveAvailability == .offline)
+        #expect(domainAccounts[2].effectiveAvailability == nil)
+    }
+
+    @Test("Ignores an unknown availability value without rejecting the profile")
+    func testUnknownAvailabilityIsTolerated() {
+        let account = ChatwootAccountDTO(
+            id: 41,
+            name: "Invented Support",
+            availability: "scheduled",
+            availabilityStatus: "future-value"
+        ).toDomain()
+
+        #expect(account.availability == nil)
+        #expect(account.availabilityStatus == nil)
+        #expect(account.effectiveAvailability == nil)
     }
 
     @Test("Decodes wrapped conversation list response")

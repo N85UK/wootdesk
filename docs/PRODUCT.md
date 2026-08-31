@@ -44,7 +44,7 @@ WootDesk is an independent native Apple client for [Chatwoot](https://www.chatwo
 ## Release Scope & Milestones
 
 - **Milestone 1 (Foundation):** Multiplatform app shell, connection setup, profile validation, multi-account selection, Keychain token storage, conversation listing, and filtering.
-- **Milestone 2 (Conversation Detail & Replies):** Interactive paginated timeline, safe agent reply composer, private notes, richer message rendering, and file attachments.
+- **Milestone 2 (Conversation Detail & Replies):** Interactive paginated timeline, safe agent reply composer, private notes, richer message rendering, file attachments, and account-specific agent availability.
 - **Milestone 3 (Real-Time Synchronisation):** ActionCable WebSocket connection, low-latency invalidation, push relay integration.
 - **Milestone 4 (AI Intelligence & Deep Research):** Privacy-first WootDesk AI Gateway integration for summaries, reply drafting, and cited deep research.
 - **Milestone 5 (Offline First & Enterprise):** SwiftData persistent caching, offline mutation queue, and organisation profile policies.
@@ -54,7 +54,8 @@ WootDesk is an independent native Apple client for [Chatwoot](https://www.chatwo
 Milestone 1 is an early-development foundation, not a production or App Store
 release. The Milestone 2 source now adds paginated message history, plain-text
 replies, private notes, safe inline formatting, attachment upload, and
-privacy-first attachment presentation. Milestone 3 now includes the native
+privacy-first attachment presentation. It also includes an account-specific
+Online, Busy, and Offline selector. Milestone 3 now includes the native
 notification client, secure per-profile device enrolment, and a self-hostable
 authenticated push gateway. Remote Chatwoot delivery is not active until Apple
 capabilities and profiles are refreshed, the gateway recipient policy is

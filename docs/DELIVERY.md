@@ -56,7 +56,7 @@ predates the Milestone 2 source changes.
 | G1 Repository foundation | Shared scheme, scripts, CI, documentation | Implemented |
 | G2 Secure connection | Profile validation, Keychain token, profile persistence | Implemented and locally verified |
 | G3 Conversation list | Real list, paging, filters, clear states | Implemented and locally verified |
-| G4 Automated quality | macOS and iOS builds, unit tests, UI tests | Build 4 macOS and iOS Simulator builds, 116 Swift tests, and 18 Node gateway tests pass; previously recorded iPhone, iPad, and macOS UI journeys also pass |
+| G4 Automated quality | macOS and iOS builds, unit tests, UI tests | A source-only Build 4 snapshot passed macOS and iOS Simulator builds, 126 Swift tests in 14 suites, 18 Node gateway tests, and 3 macOS UI tests; the two opt-in live compatibility tests are skipped by design, and previously recorded iPhone and iPad UI journeys also pass |
 | G5 Signed archives | iOS and macOS Organizer validation | Build 3 iOS and universal macOS archives pass local checks; iOS package export passes |
 | G6 TestFlight | Physical-device and Mac acceptance | Not started |
 | G7 Product completeness | Message history, replies, private notes, and attachments | Source implementation complete; live acceptance pending |

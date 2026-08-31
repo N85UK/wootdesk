@@ -42,6 +42,34 @@ public actor ChatwootAPIClient: ChatwootAPIProtocol {
         }
     }
 
+    public func updateAvailability(
+        baseURL: URL,
+        token: String,
+        accountID: Int,
+        availability: AgentAvailability
+    ) async throws {
+        let endpoint = try APIRequest.endpointURL(
+            baseURL: baseURL,
+            path: "api/v1/profile/availability"
+        )
+        let payload = UpdateAvailabilityRequestDTO(
+            profile: .init(
+                accountID: accountID,
+                availability: availability.chatwootValue
+            )
+        )
+        let body = try JSONEncoder().encode(payload)
+        let request = APIRequest.makeRequest(
+            url: endpoint,
+            method: "POST",
+            token: token,
+            body: body
+        )
+
+        AppLogger.network.debug("Updating Chatwoot agent availability.")
+        _ = try await perform(request: request)
+    }
+
     public func fetchConversations(
         baseURL: URL,
         token: String,
@@ -282,6 +310,20 @@ private struct CreateMessageRequestDTO: Encodable, Sendable {
         case isPrivate = "private"
         case contentType = "content_type"
         case contentAttributes = "content_attributes"
+    }
+}
+
+private struct UpdateAvailabilityRequestDTO: Encodable, Sendable {
+    let profile: Profile
+
+    struct Profile: Encodable, Sendable {
+        let accountID: Int
+        let availability: String
+
+        enum CodingKeys: String, CodingKey {
+            case accountID = "account_id"
+            case availability
+        }
     }
 }
 

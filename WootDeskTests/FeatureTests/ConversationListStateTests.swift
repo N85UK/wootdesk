@@ -188,6 +188,15 @@ private struct DelayedConversationAPI: ChatwootAPIProtocol {
         ("Sample Agent", [ChatwootAccount(id: 1, name: "Sample Account")])
     }
 
+    func updateAvailability(
+        baseURL: URL,
+        token: String,
+        accountID: Int,
+        availability: AgentAvailability
+    ) async throws {
+        throw APIError.notFound
+    }
+
     func fetchConversations(
         baseURL: URL,
         token: String,

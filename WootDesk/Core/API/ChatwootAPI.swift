@@ -13,6 +13,14 @@ public protocol ChatwootAPIProtocol: Sendable {
         token: String
     ) async throws -> (profileName: String, accounts: [ChatwootAccount])
 
+    /// Updates the authenticated agent's availability for one account.
+    func updateAvailability(
+        baseURL: URL,
+        token: String,
+        accountID: Int,
+        availability: AgentAvailability
+    ) async throws
+
     /// Fetches a page of conversations for a specific account.
     ///
     /// - Parameters:

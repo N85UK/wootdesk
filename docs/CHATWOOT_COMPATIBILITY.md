@@ -2,7 +2,7 @@
 
 Status: Harness available, dedicated-server execution pending
 
-Last reviewed: 30 August 2026
+Last reviewed: 31 August 2026
 
 ## Purpose
 
@@ -14,6 +14,7 @@ record in Git or CI output.
 The harness covers:
 
 - Personal access token validation through `GET /api/v1/profile`.
+- Profile decoding for account-specific availability and auto-offline metadata.
 - Account-scoped conversation decoding.
 - Conversation message history decoding and stable identifiers.
 - An outgoing public reply.
@@ -85,6 +86,14 @@ tag as compatibility evidence. Re-run the matrix before changing the documented
 minimum supported Chatwoot release.
 
 ## Response differences handled by WootDesk
+
+Current Chatwoot source accepts account-specific agent availability changes at
+`POST /api/v1/profile/availability` using `online`, `busy`, or `offline`.
+WootDesk sends those current values and does not retry the mutation
+automatically. Profile responses using either `online` or the documented
+`available` spelling map to Online. An unknown future spelling is treated as a
+missing optional value, so it does not prevent profile validation or account
+selection.
 
 WootDesk accepts the current `{ "meta": ..., "payload": [...] }` message
 envelope, a nested `data.payload` variant, and a direct array used by some older

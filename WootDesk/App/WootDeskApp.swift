@@ -11,6 +11,7 @@ struct WootDeskApp: App {
     @State private var environment: AppEnvironment
     @State private var appModel: AppModel
     @State private var notificationState: PushNotificationState
+    @State private var availabilityState: AgentAvailabilityState
 
     init() {
         // `--uitesting` gives UI tests a deterministic first-run state: no saved
@@ -34,6 +35,9 @@ struct WootDeskApp: App {
         }
         self._environment = State(initialValue: environment)
         self._appModel = State(initialValue: AppModel(environment: environment))
+        self._availabilityState = State(
+            initialValue: AgentAvailabilityState(apiClient: environment.apiClient)
+        )
         let notificationPermissionClient: NotificationPermissionClient = if isUITesting || isConversationUITesting {
             InMemoryNotificationPermissionClient(status: .notDetermined)
         } else {
@@ -49,13 +53,21 @@ struct WootDeskApp: App {
 
     var body: some Scene {
         WindowGroup {
-            MainAppView(appModel: appModel, notificationState: notificationState)
+            MainAppView(
+                appModel: appModel,
+                notificationState: notificationState,
+                availabilityState: availabilityState
+            )
                 .environment(\.appEnvironment, environment)
                 .task {
                     await appModel.initialize()
                     await notificationState.updateProfileContext(
                         profiles: appModel.profiles,
                         activeProfile: appModel.activeProfile
+                    )
+                    await availabilityState.load(
+                        profile: appModel.activeProfile,
+                        token: appModel.activeToken
                     )
                     await applicationDelegate.configureNotifications(using: notificationState)
                 }
@@ -72,7 +84,11 @@ struct WootDeskApp: App {
 
         #if os(macOS)
         Settings {
-            SettingsView(appModel: appModel, notificationState: notificationState)
+            SettingsView(
+                appModel: appModel,
+                notificationState: notificationState,
+                availabilityState: availabilityState
+            )
                 .environment(\.appEnvironment, environment)
         }
         #endif
@@ -83,6 +99,7 @@ struct WootDeskApp: App {
 struct MainAppView: View {
     @Bindable var appModel: AppModel
     let notificationState: PushNotificationState
+    let availabilityState: AgentAvailabilityState
     @Environment(\.appEnvironment) private var environment
 
     /// Owned here so that both the conversation list and the detail column read
@@ -122,10 +139,15 @@ struct MainAppView: View {
         .onChange(of: ActiveProfileDataContext(profile: appModel.activeProfile)) { _, _ in
             conversationState.clear()
             conversationDetailState.clear()
+            availabilityState.clear()
             Task {
                 await notificationState.updateProfileContext(
                     profiles: appModel.profiles,
                     activeProfile: appModel.activeProfile
+                )
+                await availabilityState.load(
+                    profile: appModel.activeProfile,
+                    token: appModel.activeToken
                 )
             }
         }
@@ -242,7 +264,11 @@ struct MainAppView: View {
             case .connections:
                 ConnectionListView(appModel: appModel)
             case .settings:
-                SettingsView(appModel: appModel, notificationState: notificationState)
+                SettingsView(
+                    appModel: appModel,
+                    notificationState: notificationState,
+                    availabilityState: availabilityState
+                )
             case .conversations, .none:
                 ConversationListView(appModel: appModel, state: conversationState)
             }
@@ -308,6 +334,14 @@ struct MainAppView: View {
                 Label("Settings", systemImage: "gearshape")
                     .tag(AppModel.NavigationItem.settings)
             }
+
+            Section("Agent") {
+                AgentAvailabilityMenu(
+                    state: availabilityState,
+                    profile: appModel.activeProfile,
+                    token: appModel.activeToken
+                )
+            }
         }
         .listStyle(.sidebar)
         .navigationSplitViewColumnWidth(min: 200, ideal: 240, max: 320)
@@ -351,7 +385,11 @@ struct MainAppView: View {
             }
 
             NavigationStack {
-                SettingsView(appModel: appModel, notificationState: notificationState)
+                SettingsView(
+                    appModel: appModel,
+                    notificationState: notificationState,
+                    availabilityState: availabilityState
+                )
             }
             .tabItem {
                 Label("Settings", systemImage: "gearshape")

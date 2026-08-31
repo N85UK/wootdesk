@@ -23,6 +23,7 @@ on the Apple App Store, or intended for general rollout.
 - **Keychain-Only Credentials:** Access tokens are stored solely in Apple Keychain. iOS and release builds use the device-only protection class `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`. Ad-hoc macOS Debug builds use the default local Keychain because the data-protection Keychain requires an authorised application identifier. Tokens are never written to application storage in plain text or marked as synchronisable.
 - **Resilient Profile Management:** Non-secret profile metadata persists atomically in Application Support with automatic recovery from corrupted configurations.
 - **Multi-Server Management:** Add, switch, edit and revalidate, or safely remove saved Chatwoot installations.
+- **Agent Availability:** View and set Online, Busy, or Offline for the selected account from native settings on every platform, with a quick selector in the macOS sidebar.
 - **Real Conversation Browser:** Live conversation listing with status filtering (Open, Pending, Resolved, Snoozed, All), paging, unread counts, priority indicators, and local search.
 - **Message Timeline:** Load the newest Chatwoot messages for a selected conversation and page backwards through older messages.
 - **Replies and Private Notes:** Send plain-text agent replies or private notes through the Chatwoot Application API. Drafts remain in memory only and are cleared only after the server confirms creation.

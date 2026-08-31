@@ -6,6 +6,7 @@ import Testing
 struct PushGatewayAPIClientTests {
     private let deviceID = UUID(uuidString: "11111111-1111-4111-8111-111111111111")!
     private let profileID = UUID(uuidString: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa")!
+    private let idempotencyKey = "22222222-2222-4222-8222-222222222222"
 
     @Test("Gateway URL policy trims input and preserves a path prefix")
     func normalisesGatewayURL() throws {
@@ -52,7 +53,7 @@ struct PushGatewayAPIClientTests {
             baseURL: URL(string: "https://push.example.com/service")!,
             apiToken: "gateway-secret",
             registration: request(),
-            idempotencyKey: "idempotency-key-0001"
+            idempotencyKey: idempotencyKey
         )
 
         #expect(registration.deviceId == deviceID)
@@ -60,7 +61,7 @@ struct PushGatewayAPIClientTests {
         #expect(observed.url?.absoluteString == "https://push.example.com/service/v1/devices")
         #expect(observed.httpMethod == "POST")
         #expect(observed.value(forHTTPHeaderField: "Authorization") == "Bearer gateway-secret")
-        #expect(observed.value(forHTTPHeaderField: "Idempotency-Key") == "idempotency-key-0001")
+        #expect(observed.value(forHTTPHeaderField: "Idempotency-Key") == idempotencyKey)
         let body = try #require(recorder.body())
         let decoded = try JSONDecoder().decode(PushGatewayDeviceRegistrationRequest.self, from: body)
         #expect(decoded == request())
@@ -89,7 +90,7 @@ struct PushGatewayAPIClientTests {
             baseURL: URL(string: "https://push.example.com")!,
             apiToken: "gateway-secret",
             registration: request(),
-            idempotencyKey: "idempotency-key-0002"
+            idempotencyKey: idempotencyKey
         )
 
         let observed = try #require(recorder.request())
@@ -123,7 +124,7 @@ struct PushGatewayAPIClientTests {
             baseURL: URL(string: "https://push.example.com")!,
             apiToken: "gateway-secret",
             deviceID: deviceID,
-            idempotencyKey: "idempotency-key-0003"
+            idempotencyKey: idempotencyKey
         )
     }
 
@@ -154,7 +155,7 @@ struct PushGatewayAPIClientTests {
                 baseURL: URL(string: "https://push.example.com")!,
                 apiToken: "never-exposed",
                 registration: request(),
-                idempotencyKey: "idempotency-key-0004"
+                idempotencyKey: idempotencyKey
             )
             Issue.record("Expected gateway error")
         } catch let error as PushGatewayAPIError {
@@ -181,7 +182,7 @@ struct PushGatewayAPIClientTests {
                 baseURL: URL(string: "https://push.example.com")!,
                 apiToken: "never-exposed",
                 registration: request(),
-                idempotencyKey: "idempotency-key-0005"
+                idempotencyKey: idempotencyKey
             )
             Issue.record("Expected gateway network error")
         } catch let error as PushGatewayAPIError {
@@ -214,7 +215,7 @@ struct PushGatewayAPIClientTests {
                 baseURL: URL(string: "https://push.example.com")!,
                 apiToken: "gateway-secret",
                 registration: request(),
-                idempotencyKey: "idempotency-key-0006"
+                idempotencyKey: idempotencyKey
             )
             Issue.record("Expected malformed response error")
         } catch let error as PushGatewayAPIError {

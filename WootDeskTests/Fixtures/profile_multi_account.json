@@ -7,13 +7,19 @@
       "id": 1,
       "name": "Acme EMEA Customer Care",
       "role": "agent",
-      "status": "active"
+      "status": "active",
+      "availability": "busy",
+      "availability_status": "busy",
+      "auto_offline": false
     },
     {
       "id": 2,
       "name": "Acme Americas Tier 2",
       "role": "administrator",
-      "status": "active"
+      "status": "active",
+      "availability": "offline",
+      "availability_status": "offline",
+      "auto_offline": true
     },
     {
       "id": 3,

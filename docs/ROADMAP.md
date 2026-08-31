@@ -49,6 +49,7 @@ implemented as part of Milestone 2:
 - [ ] Dedicated invented-data Chatwoot compatibility and acceptance run.
 - [x] Multipart file and image attachment uploading (`multipart/form-data`).
 - [x] Safe received-attachment metadata, explicit remote-open confirmation, and no automatic remote fetch.
+- [x] Account-specific agent availability selector for Online, Busy, and Offline (`POST /api/v1/profile/availability`).
 - [ ] Conversation status management (Resolve, Reopen, Snooze, Pending).
 - [ ] Agent assignment and team reassignment.
 - [ ] Custom labels and priority triage.

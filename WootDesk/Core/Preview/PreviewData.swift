@@ -10,7 +10,10 @@ public enum PreviewData {
         id: 1,
         name: "Sample Support Desk",
         role: "administrator",
-        status: "active"
+        status: "active",
+        availability: .online,
+        availabilityStatus: .online,
+        autoOffline: true
     )
 
     public static let multipleAccounts: [ChatwootAccount] = [

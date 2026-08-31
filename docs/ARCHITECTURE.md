@@ -70,6 +70,7 @@ flowchart TD
 ### 1. State Management & Modern Observation
 - **Root State (`AppModel`):** Manages top-level application state, active profile selection, and credential restoration on `@MainActor`.
 - **Feature State (`ConversationListState`, `ConversationDetailState`, `ConnectionViewState`):** Manages local screen state, search query filtering, message pagination, in-memory drafts, sends, and transient validation lifecycles.
+- **Shared Agent State (`AgentAvailabilityState`):** Loads and mutates the selected account's agent availability on `@MainActor`. A profile and account revision prevents a delayed response from one server from appearing after a profile switch.
 - **Message Isolation:** `ConversationDetailState` binds every load and send to a profile, account, and conversation context. A context revision prevents a delayed response from a prior server or conversation from appearing after selection changes.
 - **Dependency Injection:** Shared services are injected into the SwiftUI hierarchy via `AppEnvironment` using SwiftUI environment values.
 
@@ -89,6 +90,7 @@ flowchart TD
 - Requests pass through `APIRequest` to normalise URLs, enforce HTTPS, and attach `api_access_token` and `Accept: application/json` headers.
 - The same credential is sent as `api-access-token`. Chatwoot reads this wire header through Rack as `HTTP_API_ACCESS_TOKEN`, supporting reverse proxies that reject underscore header names while retaining the documented header.
 - Conversation requests always send a `status` query item. `ConversationStatus?.none` means the user selected "All", so the client sends Chatwoot's documented `status=all` value rather than omitting the parameter and falling back to Chatwoot's documented `open` default.
+- Agent availability loads from the selected account returned by `GET /api/v1/profile` and changes through `POST /api/v1/profile/availability` with a nested `profile.account_id` and `profile.availability` payload. WootDesk sends `online`, `busy`, or `offline`, never retries this mutation automatically, and changes the displayed value only after a successful response.
 - Conversation paging is a page counter on `ConversationListState`. The next page is requested when the last loaded row appears, and paging stops when a page returns nothing new. A failed page keeps the rows already shown.
 - Message history follows Chatwoot's cursor contract. The initial request loads the newest page, and older history uses the smallest loaded message ID as the `before` cursor. Pages are deduplicated by stable message ID and sorted in ascending timeline order.
 - Text-only reply and private-note creation sends `content`, `message_type`,
@@ -202,6 +204,13 @@ top-level `payload`, with `before` returning up to 20 older messages and `after`
 returning up to 100 newer messages. Message creation documents a direct message
 object. WootDesk follows those contracts while accepting a small set of
 response variants seen across self-hosted versions.
+
+Current Chatwoot source exposes `POST /api/v1/profile/availability` and stores
+the account-membership values as `online`, `busy`, or `offline`. Some public
+profile examples use `available` for an online agent. WootDesk accepts both
+`online` and `available` when reading a profile, but sends the current source
+value `online` when changing the status. Unknown future values remain unset
+rather than making the whole profile undecodable.
 
 Server errors are tolerated when they use `message`, `error`, or a string
 `errors` array. Each known shape is covered by local mocked tests. The normal

@@ -4,10 +4,16 @@ import SwiftUI
 public struct SettingsView: View {
     @Bindable var appModel: AppModel
     let notificationState: PushNotificationState
+    let availabilityState: AgentAvailabilityState
 
-    public init(appModel: AppModel, notificationState: PushNotificationState) {
+    public init(
+        appModel: AppModel,
+        notificationState: PushNotificationState,
+        availabilityState: AgentAvailabilityState
+    ) {
         self.appModel = appModel
         self.notificationState = notificationState
+        self.availabilityState = availabilityState
     }
 
     public var body: some View {
@@ -24,6 +30,12 @@ public struct SettingsView: View {
                         .foregroundStyle(.secondary)
                 }
             }
+
+            AgentAvailabilitySettingsSection(
+                state: availabilityState,
+                profile: appModel.activeProfile,
+                token: appModel.activeToken
+            )
 
             Section("Security & Privacy") {
                 VStack(alignment: .leading, spacing: 6) {
@@ -103,6 +115,7 @@ public struct SettingsView: View {
         tokens: [profile.id: "test"]
     )
     let appModel = AppModel(environment: environment)
+    let availabilityState = AgentAvailabilityState(apiClient: environment.apiClient)
     appModel.applyPreviewState(profiles: [profile], activeProfile: profile, token: "test")
 
     return NavigationStack {
@@ -110,7 +123,8 @@ public struct SettingsView: View {
             appModel: appModel,
             notificationState: PushNotificationState(
                 permissionClient: InMemoryNotificationPermissionClient(status: .authorised)
-            )
+            ),
+            availabilityState: availabilityState
         )
     }
     .environment(\.appEnvironment, environment)

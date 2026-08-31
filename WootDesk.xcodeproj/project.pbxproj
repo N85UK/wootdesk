@@ -10,8 +10,10 @@
 		0123D84AEBCCDA04B2A616C1 /* ChatwootConversationDTO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E110E9C5B071CB77B301E92 /* ChatwootConversationDTO.swift */; };
 		048776DDCDE39A159A77E3D2 /* PushGatewayRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1A84818AC4734ECA3F441B6 /* PushGatewayRequest.swift */; };
 		05E8B42E191EE80DB90E0ABA /* AppModelAndFeatureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F62BC26DE5079831E2732E84 /* AppModelAndFeatureTests.swift */; };
+		07FB5A384CC8D9134EEFEDC3 /* AgentAvailabilityState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76BDE6BF9AA06A672B564B8F /* AgentAvailabilityState.swift */; };
 		08352AFF85173811F64775BA /* ChatwootAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD410DC52010B791DC6E4ED5 /* ChatwootAPI.swift */; };
 		0B9072950315C01B397310FA /* PushNotificationStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20D336DA6B9977F1021ED29F /* PushNotificationStateTests.swift */; };
+		0D08F728CE42265B831F6323 /* AgentAvailabilityControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88226096382E27E199E37551 /* AgentAvailabilityControl.swift */; };
 		10E37443A0986697182E34D5 /* KeychainCredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77597DDC0A70396B081B1FB3 /* KeychainCredentialStore.swift */; };
 		1853E4B87367CA150A2DF2E9 /* ConversationListStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40CA499C6587E5AE02328016 /* ConversationListStateTests.swift */; };
 		1A5BA6FA6AD9333101270040 /* PushGatewayAPIClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4344678EBFCA3A7D5704E2A7 /* PushGatewayAPIClientTests.swift */; };
@@ -21,9 +23,11 @@
 		287F64B77671227563C1D507 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1AF3FC964E7CF17BFD5C26CC /* Assets.xcassets */; };
 		29CA318BBB12AA4F0F5F0347 /* InMemoryCredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C44F4D5548D0987670BE2DC /* InMemoryCredentialStore.swift */; };
 		2A0023956C8E9C60A8B08834 /* ServerProfilePersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F1B6FCBD99A2625A662D059 /* ServerProfilePersistenceTests.swift */; };
+		2BB0A2A9A54D0803BA3F78E6 /* AgentAvailability.swift in Sources */ = {isa = PBXBuildFile; fileRef = C0E9EADD09CC58502B1C5418 /* AgentAvailability.swift */; };
 		2DECF936DE967C18E6CBDD91 /* WootDeskLaunchUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0253A820B5AA6DC4814F192D /* WootDeskLaunchUITests.swift */; };
 		30B9FBC8C7FC24A0C6357A2C /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E51BC0BA46C49E63A850960 /* AppLogger.swift */; };
 		30C706C16982AD3B85ADFCC2 /* PushNotificationRouteBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4A554DF14CF5FD3BD497CD5 /* PushNotificationRouteBuffer.swift */; };
+		314A44E002EEF5BB072353B4 /* AgentAvailabilityStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 234F22DFEDBDDE7A9779A784 /* AgentAvailabilityStateTests.swift */; };
 		37774D271A20C1681059E4D2 /* APIError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CC6D95A358294D3F3094BD7 /* APIError.swift */; };
 		37F600AAD2258BD3E23718A9 /* ChatwootDecodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E43134BC865AA51D2A6BF049 /* ChatwootDecodingTests.swift */; };
 		38FBCB266E00BEA5320B15C6 /* Conversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83672B33B090BDB1D0D26F7A /* Conversation.swift */; };
@@ -137,6 +141,7 @@
 		20AA8837D796BEB927E93EEA /* malformed_response.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = malformed_response.json; sourceTree = "<group>"; };
 		20B0174C4792ED8C7B52864E /* ChatwootAccountDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatwootAccountDTO.swift; sourceTree = "<group>"; };
 		20D336DA6B9977F1021ED29F /* PushNotificationStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationStateTests.swift; sourceTree = "<group>"; };
+		234F22DFEDBDDE7A9779A784 /* AgentAvailabilityStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentAvailabilityStateTests.swift; sourceTree = "<group>"; };
 		25EADC1AC61D20A17ED6A221 /* WootDeskUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WootDeskUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		270FCFE8599BB4F93D456A17 /* WootDeskApplicationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WootDeskApplicationDelegate.swift; sourceTree = "<group>"; };
 		2863E9B54DBEDB6FBA8ABBEC /* conversations_missing_fields.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = conversations_missing_fields.json; sourceTree = "<group>"; };
@@ -164,16 +169,18 @@
 		5E8223996B54134E21948EA4 /* ChatwootContactDTO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatwootContactDTO.swift; sourceTree = "<group>"; };
 		65760805D1F97A1A6A331A89 /* message_created.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = message_created.json; sourceTree = "<group>"; };
 		673794FEBDEED96440DCABEE /* profile_single_account.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = profile_single_account.json; sourceTree = "<group>"; };
-		6A52EDDED3BB4EF8B817FDC6 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		6A52EDDED3BB4EF8B817FDC6 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		6E004D0D68D207396E39EC8D /* ConversationMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationMessage.swift; sourceTree = "<group>"; };
 		6EAED0EA01F665EA9BA56FFE /* ServerProfileRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerProfileRepository.swift; sourceTree = "<group>"; };
 		766E33A07DBC0E0BA4873BB7 /* ServerProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerProfile.swift; sourceTree = "<group>"; };
+		76BDE6BF9AA06A672B564B8F /* AgentAvailabilityState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentAvailabilityState.swift; sourceTree = "<group>"; };
 		77597DDC0A70396B081B1FB3 /* KeychainCredentialStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainCredentialStore.swift; sourceTree = "<group>"; };
 		786DD4D3961318911640C379 /* PushNotificationState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationState.swift; sourceTree = "<group>"; };
 		7C318A473973FC12DA44698C /* Contact.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Contact.swift; sourceTree = "<group>"; };
 		810F0EA0ABB63D0B85B209ED /* CredentialStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialStoreTests.swift; sourceTree = "<group>"; };
 		83672B33B090BDB1D0D26F7A /* Conversation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Conversation.swift; sourceTree = "<group>"; };
 		865343BEA74AB7F4508D9BD3 /* APIRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIRequest.swift; sourceTree = "<group>"; };
+		88226096382E27E199E37551 /* AgentAvailabilityControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentAvailabilityControl.swift; sourceTree = "<group>"; };
 		886D8C188E6F5C43276F26CE /* WootDesk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WootDesk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8AC721DB14E31745E375D2CF /* profile_no_accounts.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = profile_no_accounts.json; sourceTree = "<group>"; };
 		8CC6D95A358294D3F3094BD7 /* APIError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIError.swift; sourceTree = "<group>"; };
@@ -196,6 +203,7 @@
 		B7D59F58FA193FE6330A5365 /* FileServerProfileRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileServerProfileRepository.swift; sourceTree = "<group>"; };
 		B846E408193BBE70F89EF6F3 /* WootDesk-iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "WootDesk-iOS.entitlements"; sourceTree = "<group>"; };
 		BB5EE0FACCE47AC5DB38EB27 /* MockAIProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAIProvider.swift; sourceTree = "<group>"; };
+		C0E9EADD09CC58502B1C5418 /* AgentAvailability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentAvailability.swift; sourceTree = "<group>"; };
 		C4A554DF14CF5FD3BD497CD5 /* PushNotificationRouteBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationRouteBuffer.swift; sourceTree = "<group>"; };
 		C603EAE13E552E3526FEFD4C /* PushGatewayRegistrationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushGatewayRegistrationManager.swift; sourceTree = "<group>"; };
 		C8251393573697DEBC96FB29 /* MockURLProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockURLProtocol.swift; sourceTree = "<group>"; };
@@ -371,6 +379,7 @@
 		7090999DB32D59200EFB2666 /* FeatureTests */ = {
 			isa = PBXGroup;
 			children = (
+				234F22DFEDBDDE7A9779A784 /* AgentAvailabilityStateTests.swift */,
 				F62BC26DE5079831E2732E84 /* AppModelAndFeatureTests.swift */,
 				41626B5FF8F6C0B42AF9F505 /* ConnectionFlowTests.swift */,
 				1678C91B7726EA8DBA2F69D8 /* ConversationDetailStateTests.swift */,
@@ -379,6 +388,15 @@
 				20D336DA6B9977F1021ED29F /* PushNotificationStateTests.swift */,
 			);
 			path = FeatureTests;
+			sourceTree = "<group>";
+		};
+		7F8D7658909F020DE8F8C66C /* Availability */ = {
+			isa = PBXGroup;
+			children = (
+				88226096382E27E199E37551 /* AgentAvailabilityControl.swift */,
+				76BDE6BF9AA06A672B564B8F /* AgentAvailabilityState.swift */,
+			);
+			path = Availability;
 			sourceTree = "<group>";
 		};
 		817387E4922173888C8173BB /* Products */ = {
@@ -439,6 +457,7 @@
 		C85C27552E30E0BC267F5E75 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				C0E9EADD09CC58502B1C5418 /* AgentAvailability.swift */,
 				19E73B82E07D7FA521266112 /* ChatwootAccount.swift */,
 				7C318A473973FC12DA44698C /* Contact.swift */,
 				83672B33B090BDB1D0D26F7A /* Conversation.swift */,
@@ -481,6 +500,7 @@
 		EB8168812D0FE7ECE988FB5C /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				7F8D7658909F020DE8F8C66C /* Availability */,
 				2A69E39668A71AB4F9652C9D /* Connections */,
 				3B1F9D39EF99B0E4DF14340F /* Conversations */,
 				C5B450C530799614D608F5F8 /* Settings */,
@@ -610,7 +630,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 1430;
+				LastUpgradeCheck = 2700;
 				TargetAttributes = {
 					1AE147478B62F861F3F83F5A = {
 						TestTargetID = BCD6BFE39A3AD3C3873828EF;
@@ -683,6 +703,9 @@
 				4C07B15EA84DD84A3326261F /* APIRequest.swift in Sources */,
 				4D809F371345D75AAFD21C53 /* AccountPickerView.swift in Sources */,
 				F35B90103569FFA56BC94EA6 /* AddConnectionView.swift in Sources */,
+				2BB0A2A9A54D0803BA3F78E6 /* AgentAvailability.swift in Sources */,
+				0D08F728CE42265B831F6323 /* AgentAvailabilityControl.swift in Sources */,
+				07FB5A384CC8D9134EEFEDC3 /* AgentAvailabilityState.swift in Sources */,
 				67B658B77FCC64C24B431443 /* AppEnvironment.swift in Sources */,
 				30B9FBC8C7FC24A0C6357A2C /* AppLogger.swift in Sources */,
 				FDB2B9B8E8B86BA4160B6A5D /* AppModel.swift in Sources */,
@@ -752,6 +775,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				314A44E002EEF5BB072353B4 /* AgentAvailabilityStateTests.swift in Sources */,
 				05E8B42E191EE80DB90E0ABA /* AppModelAndFeatureTests.swift in Sources */,
 				DAF9D5D554201198D2F3E94D /* ChatwootAPIClientTests.swift in Sources */,
 				37F600AAD2258BD3E23718A9 /* ChatwootDecodingTests.swift in Sources */,
@@ -791,6 +815,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -822,6 +847,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 4;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -841,6 +867,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_STRICT_CONCURRENCY = complete;
@@ -856,8 +883,12 @@
 				"BUNDLE_LOADER[sdk=macosx*]" = "$(TEST_HOST)";
 				CODE_SIGNING_ALLOWED = NO;
 				CODE_SIGNING_REQUIRED = NO;
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = Z85CK5CNS3;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -867,6 +898,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.n85.wootdesk.tests;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
 				SUPPORTS_MACCATALYST = NO;
@@ -885,13 +917,29 @@
 				APS_ENVIRONMENT = production;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				AUTOMATION_APPLE_EVENTS = YES;
 				CODE_SIGN_ENTITLEMENTS = WootDesk/Resources/WootDesk.entitlements;
 				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = "WootDesk/Resources/WootDesk-iOS.entitlements";
 				"CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]" = "WootDesk/Resources/WootDesk-iOS.entitlements";
 				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = WootDesk/Resources/WootDesk.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = Z85CK5CNS3;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = NO;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = YES;
+				ENABLE_RESOURCE_ACCESS_CAMERA = YES;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = YES;
+				ENABLE_RESOURCE_ACCESS_LOCATION = YES;
+				ENABLE_RESOURCE_ACCESS_PHOTO_LIBRARY = YES;
+				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
+				ENABLE_RESOURCE_ACCESS_USB = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "WootDesk/Resources/Info-Release.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
@@ -902,6 +950,12 @@
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.n85.wootdesk;
 				PRODUCT_NAME = WootDesk;
+				RUNTIME_EXCEPTION_ALLOW_DYLD_ENVIRONMENT_VARIABLES = NO;
+				RUNTIME_EXCEPTION_ALLOW_JIT = NO;
+				RUNTIME_EXCEPTION_ALLOW_UNSIGNED_EXECUTABLE_MEMORY = NO;
+				RUNTIME_EXCEPTION_DEBUGGING_TOOL = NO;
+				RUNTIME_EXCEPTION_DISABLE_EXECUTABLE_PAGE_PROTECTION = NO;
+				RUNTIME_EXCEPTION_DISABLE_LIBRARY_VALIDATION = NO;
 				SDKROOT = macosx;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
 				SUPPORTS_MACCATALYST = NO;
@@ -918,8 +972,12 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGNING_ALLOWED = NO;
 				CODE_SIGNING_REQUIRED = NO;
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = Z85CK5CNS3;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -929,6 +987,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.n85.wootdesk.uitests;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
 				SUPPORTS_MACCATALYST = NO;
@@ -943,6 +1002,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -974,6 +1034,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 4;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -1000,6 +1061,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_STRICT_CONCURRENCY = complete;
@@ -1013,8 +1075,12 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGNING_ALLOWED = NO;
 				CODE_SIGNING_REQUIRED = NO;
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = Z85CK5CNS3;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1024,6 +1090,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.n85.wootdesk.uitests;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
 				SUPPORTS_MACCATALYST = NO;
@@ -1042,8 +1109,12 @@
 				"BUNDLE_LOADER[sdk=macosx*]" = "$(TEST_HOST)";
 				CODE_SIGNING_ALLOWED = NO;
 				CODE_SIGNING_REQUIRED = NO;
-				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = Z85CK5CNS3;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1053,6 +1124,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.n85.wootdesk.tests;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
 				SUPPORTS_MACCATALYST = NO;
@@ -1078,6 +1150,19 @@
 				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = WootDesk/Resources/WootDesk.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = Z85CK5CNS3;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = NO;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = YES;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = YES;
+				ENABLE_RESOURCE_ACCESS_LOCATION = YES;
+				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
+				ENABLE_RESOURCE_ACCESS_USB = NO;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = "WootDesk/Resources/Info-Debug.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;

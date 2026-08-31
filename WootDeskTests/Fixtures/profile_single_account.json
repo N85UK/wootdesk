@@ -7,7 +7,10 @@
       "id": 1,
       "name": "Acme Support Global",
       "role": "administrator",
-      "status": "active"
+      "status": "active",
+      "availability": "online",
+      "availability_status": "available",
+      "auto_offline": true
     }
   ]
 }

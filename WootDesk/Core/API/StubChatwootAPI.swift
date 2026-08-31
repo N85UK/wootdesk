@@ -33,6 +33,7 @@ public struct StubChatwootAPI: ChatwootAPIProtocol {
     public var conversationsOutcome: Outcome<[Conversation]>
     public var messagesOutcome: Outcome<ConversationMessagePage>
     public var createdMessageOutcome: Outcome<ConversationMessage>?
+    public var availabilityUpdateOutcome: Outcome<Void>
 
     public init(
         profileOutcome: Outcome<ProfileResult> = .success(
@@ -42,12 +43,23 @@ public struct StubChatwootAPI: ChatwootAPIProtocol {
         messagesOutcome: Outcome<ConversationMessagePage> = .success(
             ConversationMessagePage(messages: PreviewData.messages, hasOlderMessages: false)
         ),
-        createdMessageOutcome: Outcome<ConversationMessage>? = nil
+        createdMessageOutcome: Outcome<ConversationMessage>? = nil,
+        availabilityUpdateOutcome: Outcome<Void> = .success(())
     ) {
         self.profileOutcome = profileOutcome
         self.conversationsOutcome = conversationsOutcome
         self.messagesOutcome = messagesOutcome
         self.createdMessageOutcome = createdMessageOutcome
+        self.availabilityUpdateOutcome = availabilityUpdateOutcome
+    }
+
+    public func updateAvailability(
+        baseURL: URL,
+        token: String,
+        accountID: Int,
+        availability: AgentAvailability
+    ) async throws {
+        try await resolve(availabilityUpdateOutcome)
     }
 
     public func fetchProfile(
