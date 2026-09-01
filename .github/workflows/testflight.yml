@@ -1,0 +1,137 @@
+# Delivers every green build on main to TestFlight for end-to-end testing.
+#
+# TestFlight accepts binaries built with a beta Xcode, so this pipeline can run
+# ahead of the stable-toolchain requirement that only App Store review imposes.
+#
+# One-time setup and the required secrets are documented in
+# docs/TESTFLIGHT_DELIVERY.md.
+
+name: TestFlight
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: Platform to deliver
+        required: true
+        default: ios
+        type: choice
+        options: [ios, macos, all]
+
+concurrency:
+  # Uploads must not race: two runs would claim the same build number.
+  group: testflight-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deliver:
+    name: Build and upload to TestFlight
+    runs-on: macos-15
+    # Without the signing secrets this job cannot do anything useful, so it is
+    # skipped rather than failing every push on a fork or before setup.
+    if: ${{ github.repository == 'N85UK/wootdesk' }}
+    timeout-minutes: 60
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Confirm the delivery secrets are configured
+        id: secrets
+        env:
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          CERT: ${{ secrets.APPLE_DISTRIBUTION_CERT_P12 }}
+          KEY_ID: ${{ secrets.ASC_KEY_ID }}
+        run: |
+          if [[ -z "${TEAM_ID}" || -z "${CERT}" || -z "${KEY_ID}" ]]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::TestFlight delivery secrets are not configured yet. See docs/TESTFLIGHT_DELIVERY.md. Skipping."
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install XcodeGen
+        if: steps.secrets.outputs.configured == 'true'
+        run: brew install xcodegen
+
+      - name: Configure Node.js
+        if: steps.secrets.outputs.configured == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # A build only reaches testers if the suite is green, so the same checks
+      # that gate main also gate delivery.
+      - name: Run the full check suite
+        if: steps.secrets.outputs.configured == 'true'
+        run: ./script/ci.sh
+
+      - name: Import the distribution signing certificate
+        if: steps.secrets.outputs.configured == 'true'
+        env:
+          CERT_P12: ${{ secrets.APPLE_DISTRIBUTION_CERT_P12 }}
+          CERT_PASSWORD: ${{ secrets.APPLE_DISTRIBUTION_CERT_PASSWORD }}
+        run: |
+          set -euo pipefail
+          KEYCHAIN="$RUNNER_TEMP/wootdesk-signing.keychain-db"
+          KEYCHAIN_PASSWORD="$(openssl rand -hex 24)"
+          echo "SIGNING_KEYCHAIN=$KEYCHAIN" >> "$GITHUB_ENV"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 3600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+
+          echo "$CERT_P12" | base64 --decode > "$RUNNER_TEMP/distribution.p12"
+          security import "$RUNNER_TEMP/distribution.p12" \
+            -k "$KEYCHAIN" -P "$CERT_PASSWORD" \
+            -T /usr/bin/codesign -T /usr/bin/security
+          rm -f "$RUNNER_TEMP/distribution.p12"
+
+          # Lets codesign use the key without an interactive prompt.
+          security set-key-partition-list -S apple-tool:,apple:,codesign: \
+            -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN" > /dev/null
+          security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | tr -d '"')
+
+      - name: Install the App Store Connect API key
+        if: steps.secrets.outputs.configured == 'true'
+        env:
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+        run: |
+          set -euo pipefail
+          # altool discovers keys in this directory by key id, and xcodebuild is
+          # given the explicit path.
+          mkdir -p "$HOME/.appstoreconnect/private_keys"
+          KEY_PATH="$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8"
+          echo "$ASC_KEY_P8" | base64 --decode > "$KEY_PATH"
+          chmod 600 "$KEY_PATH"
+          echo "ASC_KEY_PATH=$KEY_PATH" >> "$GITHUB_ENV"
+
+      - name: Archive, export and upload to TestFlight
+        if: steps.secrets.outputs.configured == 'true'
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          PLATFORM: ${{ github.event.inputs.platform || 'ios' }}
+        run: |
+          set -euo pipefail
+          # The run number is monotonic per workflow, which gives every upload a
+          # unique, increasing build number without editing project.yml.
+          ./script/release_archive.sh \
+            --team "${{ secrets.APPLE_TEAM_ID }}" \
+            --platform "$PLATFORM" \
+            --build-number "${{ github.run_number }}" \
+            --allow-beta-xcode \
+            --upload \
+            --authorised-build "${{ github.sha }}"
+
+      - name: Remove the signing keychain
+        if: always() && steps.secrets.outputs.configured == 'true'
+        run: |
+          security delete-keychain "$SIGNING_KEYCHAIN" 2>/dev/null || true
+          rm -f "$HOME/.appstoreconnect/private_keys/"*.p8 2>/dev/null || true
