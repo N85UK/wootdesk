@@ -9,6 +9,11 @@
 # Usage:
 #   script/release_archive.sh --team <TEAM_ID> [--platform ios|macos|all]
 #   script/release_archive.sh --preflight-only --team <TEAM_ID>
+#   script/release_archive.sh --team <TEAM_ID> --upload --authorised-build <ref>
+#
+# Uploading is opt-in and requires --authorised-build to name the build the
+# release owner has authorised, so a build is never uploaded merely because it
+# archived successfully.
 #
 # The preflight checks the signing assets before spending time on a build, and
 # reports the exact missing capability rather than a generic signing failure.
@@ -24,12 +29,16 @@ ARCHIVE_ROOT="$(pwd)/build/release"
 TEAM_ID="${DEVELOPMENT_TEAM:-}"
 PLATFORM="all"
 PREFLIGHT_ONLY=0
+DO_UPLOAD=0
+AUTHORISED_BUILD=""
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --team) TEAM_ID="$2"; shift 2 ;;
         --platform) PLATFORM="$2"; shift 2 ;;
         --preflight-only) PREFLIGHT_ONLY=1; shift ;;
+        --upload) DO_UPLOAD=1; shift ;;
+        --authorised-build) AUTHORISED_BUILD="$2"; shift 2 ;;
         -h|--help) sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
         *) echo "Unknown option: $1" >&2; exit 2 ;;
     esac
@@ -38,6 +47,12 @@ done
 if [[ -z "${TEAM_ID}" ]]; then
     echo "A development team is required. Pass --team <TEAM_ID> or set DEVELOPMENT_TEAM." >&2
     echo "The team identifier is deliberately not committed, so a clean clone builds unsigned." >&2
+    exit 2
+fi
+
+if [[ "${DO_UPLOAD}" -eq 1 && -z "${AUTHORISED_BUILD}" ]]; then
+    echo "--upload requires --authorised-build <ref> naming the build you are authorising." >&2
+    echo "N85-18 AC6: a build is not uploaded unless an explicit current authorisation names it." >&2
     exit 2
 fi
 
@@ -242,13 +257,72 @@ case "${PLATFORM}" in
     *) echo "Unknown platform: ${PLATFORM}" >&2; exit 2 ;;
 esac
 
+if [[ "${DO_UPLOAD}" -eq 0 ]]; then
+    cat <<'DONE'
+
+=========================================
+ Archives created and exported. Nothing was uploaded.
+
+ To upload, re-run with:
+   --upload --authorised-build <ref>
+
+ where <ref> names the build the release owner has authorised, for example a
+ commit SHA or a build number. Uploading also needs App Store Connect
+ credentials: either an API key, or a signed-in Xcode whose session altool can
+ use.
+=========================================
+DONE
+    exit 0
+fi
+
+echo ""
+echo "-> Uploading, authorised build: ${AUTHORISED_BUILD}"
+echo "   Recording this reference against the release story is the operator's responsibility."
+
+upload_package() {
+    local label="$1"
+    local export_path="${ARCHIVE_ROOT}/WootDesk-${label}-export"
+    local package
+    package="$(find "${export_path}" -maxdepth 1 \( -name "*.ipa" -o -name "*.pkg" \) | head -1)"
+    [[ -n "${package}" ]] || fail "No uploadable package was found in ${export_path}."
+
+    echo "-> Validating the ${label} package..."
+    # Credentials come from the environment so no secret is passed on the
+    # command line, where it would appear in the process list and shell history.
+    if [[ -n "${ASC_KEY_ID:-}" && -n "${ASC_ISSUER_ID:-}" ]]; then
+        xcrun altool --validate-app -f "${package}" -t "${label}" \
+            --apiKey "${ASC_KEY_ID}" --apiIssuer "${ASC_ISSUER_ID}"
+        echo "-> Uploading the ${label} package..."
+        xcrun altool --upload-app -f "${package}" -t "${label}" \
+            --apiKey "${ASC_KEY_ID}" --apiIssuer "${ASC_ISSUER_ID}"
+    elif [[ -n "${ASC_USERNAME:-}" && -n "${ASC_APP_PASSWORD:-}" ]]; then
+        xcrun altool --validate-app -f "${package}" -t "${label}" \
+            -u "${ASC_USERNAME}" -p "@env:ASC_APP_PASSWORD"
+        echo "-> Uploading the ${label} package..."
+        xcrun altool --upload-app -f "${package}" -t "${label}" \
+            -u "${ASC_USERNAME}" -p "@env:ASC_APP_PASSWORD"
+    else
+        fail "No App Store Connect credentials are available." \
+            "Set either ASC_KEY_ID and ASC_ISSUER_ID for an API key, or" \
+            "ASC_USERNAME and ASC_APP_PASSWORD for an app-specific password." \
+            "Alternatively upload the exported package through the Xcode Organizer."
+    fi
+    echo "   ${label} uploaded."
+}
+
+case "${PLATFORM}" in
+    ios) upload_package "ios" ;;
+    macos) upload_package "macos" ;;
+    all) upload_package "ios"; upload_package "macos" ;;
+esac
+
 cat <<'DONE'
 
 =========================================
- Archives created and exported.
+ Upload complete.
 
- This script does not upload. Uploading requires an explicit current
- authorisation naming this build, recorded against the release story, plus
- App Store Connect credentials held by the release owner.
+ The build is now in App Store Connect. It has NOT been submitted for App
+ Review. Submission is a separate, deliberate step that requires the recorded
+ product, security and release-owner approvals under N85-18 AC7.
 =========================================
 DONE
