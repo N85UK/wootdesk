@@ -14,6 +14,16 @@ public enum ConversationListPresentation: Sendable {
 /// A segmented control cannot lay out five readable labels at an accessibility
 /// text size without clipping, so the filter becomes a menu instead of shrinking
 /// or truncating its options.
+///
+/// The decision is deliberately made on text size alone, not on available
+/// width. In the iPad split view the conversation column is narrow enough to
+/// truncate "Resolved" to "Resolv…" at the default text size, and the obvious
+/// remedy, wrapping both styles in `ViewThatFits(in: .horizontal)`, does not
+/// work: a segmented `Picker` reports a greedy ideal width, so `ViewThatFits`
+/// rejects it at every size and the menu wins even on a full-width iPhone
+/// list where the segmented control fits comfortably. Measured on both, 1
+/// September 2026. Losing the segmented control everywhere is a worse outcome
+/// than two truncated characters in one column, so the truncation stands.
 public enum ConversationFilterPickerLayout: Sendable {
     case segmented
     case menu

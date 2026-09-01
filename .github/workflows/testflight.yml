@@ -16,6 +16,15 @@ name: TestFlight
 on:
   push:
     branches: [ main ]
+    # A documentation change cannot alter the binary, so it should not consume a
+    # build number, six minutes of runner time, and a slot in the tester's
+    # update list. Builds 35 and 36 were both spent this way. GitHub evaluates
+    # these against the whole push, so a commit touching docs alongside code
+    # still delivers.
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+      - 'LICENSE'
   workflow_dispatch:
     inputs:
       platform:
