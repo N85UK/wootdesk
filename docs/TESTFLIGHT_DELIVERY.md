@@ -2,7 +2,7 @@
 
 Document ID: `WOOT-TF-001`
 
-Status: Pipeline implemented and verified; secrets present in Infisical, absent from GitHub Actions, so the job skips
+Status: Pipeline armed and working end to end; uploads blocked by an unsigned or expired App Store Connect agreement
 
 Owner: N85 Dev
 
@@ -91,6 +91,32 @@ present, every subsequent green push to `main` archives and uploads a new
 build to TestFlight automatically. That is an outward-facing distribution
 change and needs the release owner's explicit decision, not just the
 credentials.
+
+## Current blocker: an unsigned or expired App Store Connect agreement
+
+Run 33543635103 built, exported, and verified a distribution-signed package on
+the corrected runner, then failed at the upload:
+
+```text
+A required agreement is missing or has expired. (403)
+This request requires an in-effect agreement that has not been signed or has expired.
+code: FORBIDDEN.REQUIRED_AGREEMENTS_MISSING_OR_EXPIRED
+```
+
+Everything the pipeline controls now works. Build number 33 from the commit
+count, Xcode 26.6 with the iOS 26 SDK, `ARCHIVE SUCCEEDED`, `EXPORT SUCCEEDED`,
+and the exported package confirmed distribution signed. The refusal is at the
+account level, not the build.
+
+Worth noting for the timeline: build 24 uploaded successfully at 11:52 on
+1 September 2026 and is still `VALID`. The same credentials were refused at
+19:32 the same day, so the agreement lapsed or a new one was issued between
+those two points rather than this being a long-standing gap. API **reads**
+still return HTTP 200; agreements gate uploads only.
+
+Only the Account Holder can clear this, by signing the outstanding agreement in
+App Store Connect under Business, then Agreements, Tax, and Banking. It is not
+something the build tooling can or should do.
 
 ## Where the secrets live
 
