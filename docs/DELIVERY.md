@@ -72,6 +72,7 @@ predates the Milestone 2 source changes.
 | macOS UI-test host setup | `docs/MACOS_UI_TESTING.md` |
 | Push notification design and activation | `docs/PUSH_NOTIFICATIONS.md` |
 | Performance baseline and thresholds | `docs/PERFORMANCE_BASELINE.md` |
+| App Store screenshots | `docs/screenshots/README.md` |
 | Push gateway deployment and API contract | `Gateway/README.md` |
 
 ## Delivery gates
@@ -82,15 +83,76 @@ predates the Milestone 2 source changes.
 | G2 Secure connection | Profile validation, Keychain token, profile persistence | Implemented and locally verified |
 | G3 Conversation list | Real list, paging, filters, clear states | Implemented and locally verified |
 | G4 Automated quality | macOS and iOS builds, unit tests, UI tests, performance checks | The current source passes macOS and iOS Simulator builds, 192 Swift tests in 19 suites including the performance regression checks, 18 Node gateway tests, and the 4 macOS UI tests including the conversation journey and the cold-launch metric; the three opt-in live compatibility tests are skipped by design. The recorded iPhone and iPad UI journeys have not been re-run on hardware since the conversation actions and the iPad split layout were added |
-| G5 Signed archives | iOS and macOS Organizer validation | Build 3 iOS and universal macOS archives pass local checks; iOS package export passes |
+| G5 Signed archives | iOS and macOS Organizer validation | Blocked. Both the iOS and macOS App Store distribution profiles for `dev.n85.wootdesk` lack the Push Notifications capability, so neither platform can produce a distributable archive. See "Signing blocker" below |
 | G6 TestFlight | Physical-device and Mac acceptance | Not started |
 | G7 Product completeness | Message history, replies, private notes, attachments, and conversation triage | Source implementation complete; live acceptance pending |
 | G8 Public release | Explicit product, security, and release approval | No-go |
 | G9 Remote notifications | Push provider, push-capable signing, and profile-safe physical-device delivery | Client and gateway source implemented; capability, deployment, recipient policy, and physical acceptance pending |
 
+## Signing blocker
+
+WootDesk cannot currently produce a distributable archive on either platform,
+and the failure is silent rather than obvious.
+
+`xcodebuild archive` **succeeds** and reports `ARCHIVE SUCCEEDED`. The archive it
+produces is signed with the Apple Development certificate and carries
+`get-task-allow` and `aps-environment: development`. App Store Connect rejects
+such a build. Nothing in the build output says the archive is not
+distributable.
+
+The cause is that WootDesk declares the Push Notifications capability, and
+neither App Store distribution profile includes it:
+
+| Profile | Kind | `aps-environment` |
+|---|---|---|
+| `iOS Team Store Provisioning Profile: dev.n85.wootdesk` | App Store distribution | absent |
+| `Mac Team Store Provisioning Profile: dev.n85.wootdesk` | App Store distribution | absent |
+| `iOS Team Provisioning Profile: dev.n85.wootdesk` | development | `development` |
+| `Mac Team Provisioning Profile: dev.n85.wootdesk` | development | absent |
+
+Automatic signing therefore cannot satisfy the entitlements from a distribution
+profile and falls back to the development profile. Forcing distribution signing
+reports the real cause:
+
+```text
+error: Provisioning profile "iOS Team Store Provisioning Profile: dev.n85.wootdesk"
+doesn't include the aps-environment entitlement.
+```
+
+`script/release_archive.sh` now checks this before building and reports the
+missing capability directly. It also re-checks the archive afterwards and fails
+if the result is development signed, so the fallback cannot pass unnoticed.
+
+Removing the push capability to force a build through is not an acceptable
+workaround. It would ship a build whose notification features silently do
+nothing, which contradicts the delivered behaviour recorded under N85-10 and
+N85-15.
+
+### To clear the blocker
+
+1. Enable Push Notifications on the `dev.n85.wootdesk` App ID.
+2. Regenerate the iOS and macOS App Store distribution provisioning profiles.
+3. Download both profiles to the build machine.
+4. Run `script/release_archive.sh --preflight-only --team <TEAM_ID>` and confirm
+   it passes before spending time on a build.
+
+## Upload and submission position
+
+No build has been uploaded. Uploading additionally requires App Store Connect
+credentials, which are not present on this machine: there is no App Store
+Connect API key, no Xcode account session, and no stored upload credential.
+Those belong to the release owner and are not something the build tooling
+should hold.
+
+Submission to App Review also remains gated on N85-18 AC7, which requires
+recorded product, security, and release-owner approvals, and on AC6, which
+requires an explicit current authorisation naming the specific build.
+
 ## Immediate priorities
 
-1. Prepare a dedicated review-only Chatwoot environment with invented data.
+1. Enable Push Notifications on the App ID and regenerate both App Store
+   distribution profiles, so a distributable archive can be created at all.
+2. Prepare a dedicated review-only Chatwoot environment with invented data.
 2. Run the opt-in live compatibility matrix for history, replies, private notes,
    attachments, availability, and triage.
 3. Review and deploy the implemented Chatwoot-to-APNs gateway with approved
