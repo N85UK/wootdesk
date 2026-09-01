@@ -30,6 +30,29 @@ requires a stable toolchain. The pipeline therefore passes
 `script/release_archive.sh` still refuses a beta toolchain for an App Store
 submission build.
 
+### A separate requirement: the SDK, not the toolchain channel
+
+Beta versus stable is not the only toolchain constraint, and conflating the two
+cost a build. Apple rejects **any** upload built against an SDK earlier than
+iOS 26, TestFlight included:
+
+```text
+Validation failed (409) SDK version issue. This app was built with the iOS 18.5
+SDK. All iOS and iPadOS apps must be built with the iOS 26 SDK or later,
+included in Xcode 26 or later, in order to be uploaded to App Store Connect or
+submitted for distribution.
+```
+
+This surfaced on run 33542933506. The `macos-15` runner image carries only the
+iOS 18.5 SDK, so the archive built and exported cleanly and was then refused at
+validation, several minutes in, as an opaque 409. Local delivery of build 24
+succeeded because this machine runs Xcode 27 with the iOS 27 SDK.
+
+The job now runs on `macos-26` and selects the newest installed Xcode, then
+checks the iOS SDK is 26 or later and fails immediately with a readable message
+if it is not. That converts a late, cryptic rejection into an early, obvious
+one.
+
 An App Store Connect API key also lets `xcodebuild` create and refresh
 Xcode-managed provisioning profiles unattended. That sidesteps the stale
 distribution profiles described in `docs/DELIVERY.md`, because the profile is

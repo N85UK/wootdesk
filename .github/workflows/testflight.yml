@@ -3,6 +3,11 @@
 # TestFlight accepts binaries built with a beta Xcode, so this pipeline can run
 # ahead of the stable-toolchain requirement that only App Store review imposes.
 #
+# It does not accept an old SDK. Apple rejects any upload built against an SDK
+# earlier than iOS 26 with a 409 at the validation step, TestFlight included, so
+# this job needs a runner image carrying Xcode 26 or later. That is a separate
+# requirement from beta versus stable and it applies to both.
+#
 # One-time setup and the required secrets are documented in
 # docs/TESTFLIGHT_DELIVERY.md.
 
@@ -31,7 +36,7 @@ permissions:
 jobs:
   deliver:
     name: Build and upload to TestFlight
-    runs-on: macos-15
+    runs-on: macos-26
     # Without the signing secrets this job cannot do anything useful, so it is
     # skipped rather than failing every push on a fork or before setup.
     if: ${{ github.repository == 'N85UK/wootdesk' }}
@@ -56,6 +61,29 @@ jobs:
             echo "::notice::TestFlight delivery secrets are not configured yet. See docs/TESTFLIGHT_DELIVERY.md. Skipping."
           else
             echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Apple rejects an upload built against an SDK older than iOS 26, and it
+      # does so at validation, minutes into the run, as an opaque 409. Checking
+      # here turns that into an immediate, readable failure. Selecting the
+      # newest Xcode also stops an image that ships several from defaulting to
+      # an older one.
+      - name: Select an Xcode with a current iOS SDK
+        if: steps.secrets.outputs.configured == 'true'
+        run: |
+          set -euo pipefail
+          newest="$(find /Applications -maxdepth 1 -name 'Xcode*.app' | sort -V | tail -1)"
+          if [[ -z "$newest" ]]; then
+            echo "::error::No Xcode found on the runner image."
+            exit 1
+          fi
+          sudo xcode-select -s "$newest/Contents/Developer"
+          xcodebuild -version
+          sdk="$(xcodebuild -showsdks | sed -n 's/.*-sdk iphoneos\([0-9][0-9]*\).*/\1/p' | sort -n | tail -1)"
+          echo "Newest iOS SDK: ${sdk:-none}"
+          if [[ -z "$sdk" || "$sdk" -lt 26 ]]; then
+            echo "::error::This runner's newest iOS SDK is ${sdk:-none}. Apple requires iOS 26 or later for any App Store Connect upload, TestFlight included. Use a runner image with Xcode 26 or later."
+            exit 1
           fi
 
       - name: Install XcodeGen
