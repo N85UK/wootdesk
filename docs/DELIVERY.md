@@ -119,30 +119,60 @@ error: Provisioning profile "iOS Team Store Provisioning Profile: dev.n85.wootde
 doesn't include the aps-environment entitlement.
 ```
 
-`script/release_archive.sh` now checks this before building and reports the
-missing capability directly. It also re-checks the archive afterwards and fails
-if the result is development signed, so the fallback cannot pass unnoticed.
+### Root cause: Xcode has no signed-in Apple Developer account
+
+All four profiles above are Xcode-managed, not manually created. Two facts
+establish this: their names use Xcode's managed-profile convention
+("Team Provisioning Profile", "Team Store Provisioning Profile"), and the
+Profiles list in the Apple Developer portal for this team is **empty**, which is
+what a team with only Xcode-managed profiles looks like.
+
+Xcode-managed profiles are refreshed by Xcode itself, not downloaded from the
+portal. Refreshing requires a signed-in Apple Developer account, and this build
+machine has none: there is no Xcode account session and no App Store Connect API
+key. `xcodebuild -allowProvisioningUpdates` therefore cannot regenerate the
+managed distribution profile, so it silently reuses the stale cached one and
+falls back to the development profile that does satisfy the entitlements.
+
+Push Notifications is already enabled on the `dev.n85.wootdesk` App ID. The
+managed iOS development profile carries `aps-environment: development`, and
+Apple only writes a capability's entitlement into a profile when the App ID
+holds that capability. The two Store profiles are simply stale: they were issued
+before the capability was added and have never been refreshed.
+
+### To clear the blocker
+
+1. Sign in to Xcode with the Apple Developer account for team `Z85CK5CNS3`,
+   under Xcode, Settings, Accounts. This is the missing piece.
+2. Run `script/release_archive.sh --preflight-only --team Z85CK5CNS3`. Automatic
+   signing regenerates the managed App Store profiles with the push entitlement
+   on the next signed build.
+3. If the preflight still reports the missing capability, confirm Push
+   Notifications on the App ID at
+   `developer.apple.com/account/resources/identifiers`, then retry.
 
 Removing the push capability to force a build through is not an acceptable
 workaround. It would ship a build whose notification features silently do
 nothing, which contradicts the delivered behaviour recorded under N85-10 and
 N85-15.
 
-### To clear the blocker
-
-1. Enable Push Notifications on the `dev.n85.wootdesk` App ID.
-2. Regenerate the iOS and macOS App Store distribution provisioning profiles.
-3. Download both profiles to the build machine.
-4. Run `script/release_archive.sh --preflight-only --team <TEAM_ID>` and confirm
-   it passes before spending time on a build.
+`script/release_archive.sh` checks all of this before building and reports the
+missing capability directly. It also re-checks the archive afterwards and fails
+if the result is development signed, so the fallback cannot pass unnoticed.
 
 ## Upload and submission position
 
-No build has been uploaded. Uploading additionally requires App Store Connect
-credentials, which are not present on this machine: there is no App Store
-Connect API key, no Xcode account session, and no stored upload credential.
-Those belong to the release owner and are not something the build tooling
-should hold.
+No build has been uploaded, and no upload path currently exists.
+
+App Store Connect API access is **not granted for this Apple account**. The
+Keys page under Access, Integrations reports "Permission is required to access
+the App Store Connect API" with a Request Access action, so no API key issuer
+exists for this team and no key-based upload is possible. There is also no
+Xcode account session and no stored upload credential on this machine.
+
+Clearing this needs the release owner to either request and be granted App Store
+Connect API access and create a key, or sign in to Xcode and upload through the
+Organizer. Neither is something the build tooling should hold or perform.
 
 Submission to App Review also remains gated on N85-18 AC7, which requires
 recorded product, security, and release-owner approvals, and on AC6, which
@@ -150,8 +180,9 @@ requires an explicit current authorisation naming the specific build.
 
 ## Immediate priorities
 
-1. Enable Push Notifications on the App ID and regenerate both App Store
-   distribution profiles, so a distributable archive can be created at all.
+1. Sign in to Xcode with the Apple Developer account so automatic signing can
+   refresh the managed App Store profiles, which is what currently prevents a
+   distributable archive from being created at all.
 2. Prepare a dedicated review-only Chatwoot environment with invented data.
 2. Run the opt-in live compatibility matrix for history, replies, private notes,
    attachments, availability, and triage.

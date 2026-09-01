@@ -113,8 +113,14 @@ require_push_capable_profile() {
             "Installed distribution profiles for ${BUNDLE_ID}: ${found_names}" \
             "WootDesk declares aps-environment, so signing will fall back to a development" \
             "profile and produce an archive App Store Connect rejects." \
-            "Enable Push Notifications on the App ID, regenerate the App Store distribution" \
-            "profile, download it, then run this script again."
+            "" \
+            "These profiles are Xcode-managed, so they are refreshed by Xcode rather than" \
+            "downloaded from the developer portal. That needs a signed-in Apple Developer" \
+            "account: open Xcode, Settings, Accounts and add the account for this team," \
+            "then run this script again." \
+            "" \
+            "If it still fails, confirm Push Notifications on the App ID at" \
+            "developer.apple.com/account/resources/identifiers."
     fi
 }
 
