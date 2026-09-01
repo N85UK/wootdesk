@@ -40,6 +40,9 @@ jobs:
     steps:
       - name: Check out the repository
         uses: actions/checkout@v4
+        with:
+          # Full history so the commit count used as the build number is correct.
+          fetch-depth: 0
 
       - name: Confirm the delivery secrets are configured
         id: secrets
@@ -120,12 +123,15 @@ jobs:
           PLATFORM: ${{ github.event.inputs.platform || 'ios' }}
         run: |
           set -euo pipefail
-          # The run number is monotonic per workflow, which gives every upload a
-          # unique, increasing build number without editing project.yml.
+          # The commit count is monotonic on main and matches the scheme the
+          # first manual upload used, so CI numbers continue from it rather
+          # than restarting at 1 and being rejected as non-increasing.
+          BUILD_NUMBER="$(git rev-list --count HEAD)"
+          echo "Build number: $BUILD_NUMBER"
           ./script/release_archive.sh \
             --team "${{ secrets.APPLE_TEAM_ID }}" \
             --platform "$PLATFORM" \
-            --build-number "${{ github.run_number }}" \
+            --build-number "$BUILD_NUMBER" \
             --allow-beta-xcode \
             --upload \
             --authorised-build "${{ github.sha }}"
