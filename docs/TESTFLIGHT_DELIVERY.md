@@ -2,7 +2,7 @@
 
 Document ID: `WOOT-TF-001`
 
-Status: Pipeline implemented, secrets not yet configured
+Status: Pipeline implemented, secrets configured and verified
 
 Owner: N85 Dev
 
@@ -59,11 +59,11 @@ the values in place of `REPLACE_ME`:
 | Key | Current |
 |---|---|
 | `APPLE_TEAM_ID` | `Z85CK5CNS3`, set |
-| `ASC_KEY_ID` | to fill |
-| `ASC_ISSUER_ID` | to fill |
-| `ASC_KEY_P8` | to fill |
-| `APPLE_DISTRIBUTION_CERT_P12` | to fill |
-| `APPLE_DISTRIBUTION_CERT_PASSWORD` | to fill |
+| `ASC_KEY_ID` | set |
+| `ASC_ISSUER_ID` | set |
+| `ASC_KEY_P8` | set, PEM verified, authenticates against App Store Connect |
+| `APPLE_DISTRIBUTION_CERT_P12` | set, single identity, verified to import and sign |
+| `APPLE_DISTRIBUTION_CERT_PASSWORD` | set, randomly generated at export time |
 
 ### Running locally against Infisical
 
@@ -97,6 +97,62 @@ Add these under Settings, Secrets and variables, Actions.
 | `ASC_KEY_P8` | The `.p8` file, base64 encoded |
 | `APPLE_DISTRIBUTION_CERT_P12` | The Apple Distribution certificate and private key exported as `.p12`, base64 encoded |
 | `APPLE_DISTRIBUTION_CERT_PASSWORD` | The password set when exporting the `.p12` |
+
+### Producing the distribution `.p12`
+
+`security export` writes **every** identity in the login keychain, which here
+includes unrelated certificates and their private keys. Those must not reach CI,
+so the export is filtered down to the single Apple Distribution identity before
+it is stored.
+
+```bash
+security export -k ~/Library/Keychains/login.keychain-db -t identities -f pkcs12 -P "$PASS" -o all.p12
+```
+
+Then split it, match the Apple Distribution certificate to its private key by
+public key, and re-export only that pair with `openssl pkcs12 -export`. The
+stored value contains one identity and one key, which is what the pipeline
+imports.
+
+Verify a candidate before trusting it:
+
+```bash
+security import candidate.p12 -k /tmp/verify.keychain-db -P "$PASS" -T /usr/bin/codesign
+```
+
+`security find-identity -v -p codesigning /tmp/verify.keychain-db` must list
+exactly `Apple Distribution: Paul McCann (Z85CK5CNS3)`. A `.p12` exported
+without its private key imports without error but signs nothing, so checking the
+identity list rather than the exit code is what catches it.
+
+### `ASC_KEY_P8` must be the PEM, not DER
+
+Apple issues the `.p8` as PEM text beginning `-----BEGIN PRIVATE KEY-----`.
+`xcodebuild` and `altool` reject a DER-encoded key, and the failure appears as
+an authentication error rather than a format error, which is misleading.
+
+Confirm a stored value decodes to PEM:
+
+```bash
+infisical secrets get ASC_KEY_P8 --env=prod --path=/apple --plain | base64 --decode | head -1
+```
+
+That must print `-----BEGIN PRIVATE KEY-----`. If it prints binary, the value
+was encoded from DER and must be converted with
+`openssl pkey -inform DER -outform PEM` before re-encoding.
+
+End-to-end check that the three App Store Connect values work together:
+
+```bash
+API_PRIVATE_KEYS_DIR=<dir containing AuthKey_KEYID.p8> xcrun altool --list-apps --apiKey <KEY_ID> --apiIssuer <ISSUER_ID>
+```
+
+### macOS installer signing
+
+The stored `.p12` carries the Apple Distribution identity only, which covers iOS
+and the macOS app. Signing a macOS **installer package** additionally needs the
+`3rd Party Mac Developer Installer` identity, which is not included. Add it as a
+separate secret when macOS delivery is enabled; iOS TestFlight does not need it.
 
 Encode the two files without newlines:
 
