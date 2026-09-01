@@ -2,21 +2,25 @@
 
 Document ID: `WOOT-TF-001`
 
-Status: Pipeline implemented, secrets configured and verified
+Status: Pipeline implemented and verified; secrets present in Infisical, absent from GitHub Actions, so the job skips
 
 Owner: N85 Dev
 
-Last reviewed: 1 September 2026
+Last reviewed: 1 September 2026, evening
 
 ## Purpose
 
-Every green build on `main` is delivered to TestFlight automatically, so
-end-to-end testing happens against the current source instead of against a
-stale foundation build.
+Once its secrets are configured, every green build on `main` is delivered to
+TestFlight automatically, so end-to-end testing happens against the current
+source instead of against a stale foundation build. The workflow is committed
+and correct; it is not yet armed. See the blocker section below.
 
-This exists because TestFlight currently offers only **build 2**, which predates
-the Milestone 2 source changes and cannot send replies or show message history.
-Testing against it does not tell you anything about the app being built today.
+This exists because TestFlight long offered only **build 2**, which predates the
+Milestone 2 source changes and can neither send replies nor show message
+history. Testing against it said nothing about the app being built that day.
+**Build 24**, uploaded on 1 September 2026, now carries the current source, so
+the immediate problem is solved. The pipeline is what keeps it solved without
+a manual upload each time.
 
 ## Why this can run before the App Store blockers are cleared
 
@@ -31,19 +35,39 @@ Xcode-managed provisioning profiles unattended. That sidesteps the stale
 distribution profiles described in `docs/DELIVERY.md`, because the profile is
 regenerated during the build rather than read from a cache.
 
-## Prerequisite: request App Store Connect API access
+## App Store Connect API access, granted
 
-**This is the current blocker and nothing else can be configured before it.**
+This was previously recorded as the blocking prerequisite. It is no longer.
 
-App Store Connect reports "Permission is required to access the App Store
-Connect API" for this account, so no API key can be created yet.
+Verified on 1 September 2026: a Team Key exists, and a token minted by
+`script/asc_token.py` authenticates against `GET /v1/apps`, returning HTTP 200
+and listing `dev.n85.wootdesk`. The key also refreshes Xcode-managed
+provisioning profiles unattended during a build, which is what cleared the
+signing blocker described in `docs/DELIVERY.md`.
 
-1. Sign in to App Store Connect as the Account Holder.
-2. Go to Users and Access, then Integrations, then App Store Connect API.
-3. Choose **Request Access** and complete the prompt.
-4. Create a **Team Key** with the **App Manager** role.
-5. Download the `.p8` immediately. Apple allows exactly one download.
-6. Note the **Key ID** and the **Issuer ID** from that page.
+## The actual remaining blocker: secrets are not in GitHub Actions
+
+All six values exist in Infisical and are verified. **None of them are set as
+GitHub Actions secrets.** `gh secret list --repo N85UK/wootdesk` returns
+nothing, so the guard step in the workflow finds `TEAM_ID`, `CERT` and
+`KEY_ID` empty and skips the job. Every push to `main` therefore logs
+
+```text
+##[notice]TestFlight delivery secrets are not configured yet. See docs/TESTFLIGHT_DELIVERY.md. Skipping.
+```
+
+and completes in about twelve seconds without building anything. The runs show
+as green, which is easy to misread as a successful delivery.
+
+Build 24 reached TestFlight through an authorised **local** run of
+`script/release_archive.sh`, not through this workflow.
+
+Closing this means copying the six values into GitHub Actions, or wiring the
+Infisical GitHub integration. Note what that changes: once the secrets are
+present, every subsequent green push to `main` archives and uploads a new
+build to TestFlight automatically. That is an outward-facing distribution
+change and needs the release owner's explicit decision, not just the
+credentials.
 
 ## Where the secrets live
 
@@ -53,8 +77,7 @@ environment at path **`/apple`**. The repository is linked to that project
 through `.infisical.json`, which contains only the project identifier and no
 secret material.
 
-The keys are already created with guidance in each secret's comment. Fill in
-the values in place of `REPLACE_ME`:
+All six hold real, verified values. None is a `REPLACE_ME` placeholder:
 
 | Key | Current |
 |---|---|

@@ -6,7 +6,7 @@ Status: In review
 
 Owner: N85 Dev
 
-Last reviewed: 1 September 2026
+Last reviewed: 1 September 2026, evening
 
 ## Current delivery position
 
@@ -41,16 +41,16 @@ when it lies outside the loaded page or is hidden by a search or status filter,
 and it reports an unavailable conversation rather than substituting another.
 None of this has completed invented-data server acceptance.
 
-Build 4 source adds the native notification client, secure device enrolment,
-and the self-hostable authenticated WootDesk Push Gateway. Remote Chatwoot
-new-message delivery is not active because the Apple capability, refreshed
-profiles, gateway deployment, recipient-policy approval, and physical-device
+The source adds the native notification client, secure device enrolment, and
+the self-hostable authenticated WootDesk Push Gateway. Push Notifications is
+confirmed enabled on the App ID and the managed distribution profile now
+carries it. Remote Chatwoot new-message delivery is still not active, because
+gateway deployment, recipient-policy approval, and physical-device delivery
 acceptance remain open.
 
-The source and local build 3 archives are suitable for release review. The iOS
-App Store package exports locally. It is not approved for a public App Store
-release, and neither build 3 candidate has been uploaded. The uploaded build 2
-predates the Milestone 2 source changes.
+iOS build 24 carries this source and is on TestFlight, `IN_BETA_TESTING`, with
+one internal tester having it installed. It is not approved for a public App
+Store release. No macOS build has been uploaded.
 
 ## Delivery documents
 
@@ -84,82 +84,47 @@ predates the Milestone 2 source changes.
 | G2 Secure connection | Profile validation, Keychain token, profile persistence | Implemented and locally verified |
 | G3 Conversation list | Real list, paging, filters, clear states | Implemented and locally verified |
 | G4 Automated quality | macOS and iOS builds, unit tests, UI tests, performance checks | The current source passes macOS and iOS Simulator builds, 192 Swift tests in 19 suites including the performance regression checks, 18 Node gateway tests, and the 4 macOS UI tests including the conversation journey and the cold-launch metric; the three opt-in live compatibility tests are skipped by design. The recorded iPhone and iPad UI journeys have not been re-run on hardware since the conversation actions and the iPad split layout were added |
-| G5 Signed archives | iOS and macOS Organizer validation | Blocked. Both the iOS and macOS App Store distribution profiles for `dev.n85.wootdesk` lack the Push Notifications capability, so neither platform can produce a distributable archive. See "Signing blocker" below |
-| G6 TestFlight | Physical-device and Mac acceptance | Delivery pipeline implemented in `.github/workflows/testflight.yml`, so every green build on main reaches TestFlight. Blocked on App Store Connect API access, which the account does not yet have. TestFlight currently offers only build 2, which predates Milestone 2 |
+| G5 Signed archives | iOS and macOS Organizer validation | Cleared for iOS. An App Store Connect API key now refreshes the managed profiles during the build, so iOS produces a distribution-signed archive. Build 24 was accepted by App Store Connect on 1 September 2026, which is the proof. macOS installer signing still needs the `3rd Party Mac Developer Installer` identity |
+| G6 TestFlight | Physical-device and Mac acceptance | iOS build 24 is on TestFlight, `VALID` and `IN_BETA_TESTING`, uploaded 1 September 2026 from a local authorised run. One internal tester in group `N85` has it `INSTALLED`. The pipeline in `.github/workflows/testflight.yml` is committed but **skips on every push**, because the six delivery secrets exist in Infisical and have never been added to GitHub Actions. Documented acceptance runs are still unrecorded |
 | G7 Product completeness | Message history, replies, private notes, attachments, and conversation triage | Source implementation complete; live acceptance pending |
 | G8 Public release | Explicit product, security, and release approval | No-go |
-| G9 Remote notifications | Push provider, push-capable signing, and profile-safe physical-device delivery | Client and gateway source implemented; capability, deployment, recipient policy, and physical acceptance pending |
+| G9 Remote notifications | Push provider, push-capable signing, and profile-safe physical-device delivery | Client and gateway source implemented. Push Notifications is confirmed enabled on the `dev.n85.wootdesk` App ID, and build 24 signs with it. Gateway deployment, recipient-policy approval, and physical delivery acceptance remain |
 
-## Signing blocker
+## Signing, resolved
 
-WootDesk cannot currently produce a distributable archive on either platform,
-and the failure is silent rather than obvious.
+This section previously recorded a blocker: `xcodebuild archive` reported
+`ARCHIVE SUCCEEDED` while silently producing a development-signed archive
+carrying `get-task-allow` and `aps-environment: development`, because both
+App Store distribution profiles for `dev.n85.wootdesk` were stale and lacked
+the push entitlement.
 
-`xcodebuild archive` **succeeds** and reports `ARCHIVE SUCCEEDED`. The archive it
-produces is signed with the Apple Development certificate and carries
-`get-task-allow` and `aps-environment: development`. App Store Connect rejects
-such a build. Nothing in the build output says the archive is not
-distributable.
+The blocker is cleared, and the fix was not the one first proposed. Signing in
+to Xcode was never required. An App Store Connect API key lets `xcodebuild
+-allowProvisioningUpdates` regenerate the managed distribution profile during
+the build, so the stale cached profile is replaced rather than reused.
 
-The cause is that WootDesk declares the Push Notifications capability, and
-neither App Store distribution profile includes it:
+Verified on 1 September 2026:
 
-| Profile | Kind | `aps-environment` |
-|---|---|---|
-| `iOS Team Store Provisioning Profile: dev.n85.wootdesk` | App Store distribution | absent |
-| `Mac Team Store Provisioning Profile: dev.n85.wootdesk` | App Store distribution | absent |
-| `iOS Team Provisioning Profile: dev.n85.wootdesk` | development | `development` |
-| `Mac Team Provisioning Profile: dev.n85.wootdesk` | development | absent |
+| Check | Result |
+|---|---|
+| App Store Connect API key authenticates | `GET /v1/apps` returns HTTP 200 and lists `dev.n85.wootdesk` |
+| Push Notifications on the App ID | Present. `GET /v1/bundleIds` reports `PUSH_NOTIFICATIONS` and `IN_APP_PURCHASE` |
+| Distribution-signed archive | iOS build 24 was accepted and processed by App Store Connect, which rejects a development-signed upload |
 
-Automatic signing therefore cannot satisfy the entitlements from a distribution
-profile and falls back to the development profile. Forcing distribution signing
-reports the real cause:
+`script/release_archive.sh` still checks the entitlements before building and
+re-checks the exported package afterwards, so a development-signed fallback
+cannot pass unnoticed.
 
-```text
-error: Provisioning profile "iOS Team Store Provisioning Profile: dev.n85.wootdesk"
-doesn't include the aps-environment entitlement.
-```
+Removing the push capability to force a build through remains unacceptable. It
+would ship a build whose notification features silently do nothing, which
+contradicts the delivered behaviour recorded under N85-10 and N85-15.
 
-### Root cause: Xcode has no signed-in Apple Developer account
+### Still outstanding for macOS
 
-All four profiles above are Xcode-managed, not manually created. Two facts
-establish this: their names use Xcode's managed-profile convention
-("Team Provisioning Profile", "Team Store Provisioning Profile"), and the
-Profiles list in the Apple Developer portal for this team is **empty**, which is
-what a team with only Xcode-managed profiles looks like.
-
-Xcode-managed profiles are refreshed by Xcode itself, not downloaded from the
-portal. Refreshing requires a signed-in Apple Developer account, and this build
-machine has none: there is no Xcode account session and no App Store Connect API
-key. `xcodebuild -allowProvisioningUpdates` therefore cannot regenerate the
-managed distribution profile, so it silently reuses the stale cached one and
-falls back to the development profile that does satisfy the entitlements.
-
-Push Notifications is already enabled on the `dev.n85.wootdesk` App ID. The
-managed iOS development profile carries `aps-environment: development`, and
-Apple only writes a capability's entitlement into a profile when the App ID
-holds that capability. The two Store profiles are simply stale: they were issued
-before the capability was added and have never been refreshed.
-
-### To clear the blocker
-
-1. Sign in to Xcode with the Apple Developer account for team `Z85CK5CNS3`,
-   under Xcode, Settings, Accounts. This is the missing piece.
-2. Run `script/release_archive.sh --preflight-only --team Z85CK5CNS3`. Automatic
-   signing regenerates the managed App Store profiles with the push entitlement
-   on the next signed build.
-3. If the preflight still reports the missing capability, confirm Push
-   Notifications on the App ID at
-   `developer.apple.com/account/resources/identifiers`, then retry.
-
-Removing the push capability to force a build through is not an acceptable
-workaround. It would ship a build whose notification features silently do
-nothing, which contradicts the delivered behaviour recorded under N85-10 and
-N85-15.
-
-`script/release_archive.sh` checks all of this before building and reports the
-missing capability directly. It also re-checks the archive afterwards and fails
-if the result is development signed, so the fallback cannot pass unnoticed.
+The stored distribution `.p12` carries the Apple Distribution identity only.
+Signing a macOS **installer package** additionally needs the
+`3rd Party Mac Developer Installer` identity, which is not in the stored
+material. iOS TestFlight delivery does not need it.
 
 ## Toolchain blocker
 
@@ -182,44 +147,56 @@ fine; only submission is restricted.
 
 ## Upload and submission position
 
-No build has been uploaded, and no upload path currently exists.
+App Store Connect API access **is granted** for this team and a Team Key is in
+use. The earlier record of "Permission is required to access the App Store
+Connect API" is superseded.
 
-App Store Connect API access is **not granted for this Apple account**. The
-Keys page under Access, Integrations reports "Permission is required to access
-the App Store Connect API" with a Request Access action, so no API key issuer
-exists for this team and no key-based upload is possible. There is also no
-Xcode account session and no stored upload credential on this machine.
+Current App Store Connect state, read from the API on 1 September 2026:
 
-Clearing this needs the release owner to either request and be granted App Store
-Connect API access and create a key, or sign in to Xcode and upload through the
-Organizer. Neither is something the build tooling should hold or perform.
+| Build | State | Beta state | Uploaded | Tester exposure |
+|---|---|---|---|---|
+| iOS 24 | `VALID` | `IN_BETA_TESTING`, external `READY_FOR_BETA_SUBMISSION` | 1 September 2026 | 1 internal tester in group `N85`, `INSTALLED` |
+| iOS 2 | `VALID` | Superseded | 30 August 2026 | None |
+| iOS 1 | `VALID`, expired | Superseded | 30 August 2026 | None |
 
-Submission to App Review also remains gated on N85-18 AC7, which requires
-recorded product, security, and release-owner approvals, and on AC6, which
-requires an explicit current authorisation naming the specific build.
+Build 24 was uploaded by an authorised local run of
+`script/release_archive.sh`, not by CI. It carries the current source,
+including conversation triage, notification routing, the iPad split layout,
+localisation, and the performance checks.
+
+No macOS build has been uploaded.
+
+Submission to App Review remains gated on N85-18 AC7, which requires recorded
+product, security, and release-owner approvals, on AC6, which requires an
+explicit current authorisation naming the specific build, and on the stable
+Xcode requirement in AC2.
 
 ## Immediate priorities
 
-1. Sign in to Xcode with the Apple Developer account so automatic signing can
-   refresh the managed App Store profiles, which is what currently prevents a
-   distributable archive from being created at all.
-2. Request App Store Connect API access, then add the delivery secrets, so
-   every build reaches TestFlight for end-to-end testing instead of testing
-   against build 2.
-3. Stand up the invented-data Chatwoot environment with `script/compat_env.sh`.
-2. Run the opt-in live compatibility matrix for history, replies, private notes,
-   attachments, availability, and triage.
-3. Review and deploy the implemented Chatwoot-to-APNs gateway with approved
+1. Add the six delivery secrets to GitHub Actions so the committed TestFlight
+   workflow stops skipping. They already exist in Infisical at `prod` `/apple`
+   and are verified. Until this is done, every push to `main` logs a skip
+   notice and no build reaches testers automatically. This is the single
+   cheapest remaining action and it is release-owner authorised work, because
+   it arms automatic distribution on every subsequent green push.
+2. Record the documented acceptance runs against build 24, which is already
+   installed on a physical device. This is the evidence N85-18 AC3 needs and it
+   requires no further Apple setup.
+3. Stand up the invented-data Chatwoot environment with `script/compat_env.sh`,
+   then run the opt-in live compatibility matrix for history, replies, private
+   notes, attachments, availability, and triage. Unblocks N85-17 AC3 to AC5 and
+   the live acceptance on N85-11.
+4. Review and deploy the implemented Chatwoot-to-APNs gateway with approved
    Apple credentials, host secret storage, proxy-log redaction, and a recipient
    policy suitable for the deployment.
-4. Enable Push Notifications on the App ID and regenerate both platform
-   profiles before creating a signed build 4 archive.
 5. Re-run the iPhone and iPad UI journeys on hardware against the current
-   source, which now includes the conversation action interface and the iPad
-   split layout.
-6. Record VoiceOver and keyboard acceptance for the conversation actions on
-   physical hardware.
-7. Complete physical-device, remote-delivery, and Mac acceptance before
+   source, and record VoiceOver and keyboard acceptance for the conversation
+   actions.
+6. Add the `3rd Party Mac Developer Installer` identity before enabling macOS
+   delivery.
+7. Install a stable Xcode before creating any App Store submission build.
+   TestFlight does not require it.
+8. Complete physical-device, remote-delivery, and Mac acceptance before
    considering public submission.
 
 Delivery status changes must cite a command result, App Store Connect record, or
