@@ -199,6 +199,19 @@ mkdir -p "${ARCHIVE_ROOT}"
 # When an App Store Connect API key is available, xcodebuild can create and
 # refresh Xcode-managed profiles without an interactive account session. This is
 # what makes unattended CI signing possible.
+# A secret store hands the key over as base64 text rather than a file, so it is
+# materialised into a private temporary file that is removed on exit.
+if [[ -n "${ASC_KEY_P8:-}" && -z "${ASC_KEY_PATH:-}" && -n "${ASC_KEY_ID:-}" ]]; then
+    ASC_KEY_DIR="$(mktemp -d)"
+    chmod 700 "${ASC_KEY_DIR}"
+    ASC_KEY_PATH="${ASC_KEY_DIR}/AuthKey_${ASC_KEY_ID}.p8"
+    printf '%s' "${ASC_KEY_P8}" | base64 --decode > "${ASC_KEY_PATH}"
+    chmod 600 "${ASC_KEY_PATH}"
+    export ASC_KEY_PATH
+    trap 'rm -rf "${ASC_KEY_DIR}"' EXIT
+    echo "-> Decoded the App Store Connect key from ASC_KEY_P8."
+fi
+
 AUTH_ARGS=()
 if [[ -n "${ASC_KEY_PATH:-}" && -n "${ASC_KEY_ID:-}" && -n "${ASC_ISSUER_ID:-}" ]]; then
     AUTH_ARGS=(
@@ -328,6 +341,9 @@ upload_package() {
     # Credentials come from the environment so no secret is passed on the
     # command line, where it would appear in the process list and shell history.
     if [[ -n "${ASC_KEY_ID:-}" && -n "${ASC_ISSUER_ID:-}" ]]; then
+        if [[ -n "${ASC_KEY_PATH:-}" ]]; then
+            export API_PRIVATE_KEYS_DIR="$(dirname "${ASC_KEY_PATH}")"
+        fi
         xcrun altool --validate-app -f "${package}" -t "${label}" \
             --apiKey "${ASC_KEY_ID}" --apiIssuer "${ASC_ISSUER_ID}"
         echo "-> Uploading the ${label} package..."

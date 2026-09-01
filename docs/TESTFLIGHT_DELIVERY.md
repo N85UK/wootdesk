@@ -45,6 +45,46 @@ Connect API" for this account, so no API key can be created yet.
 5. Download the `.p8` immediately. Apple allows exactly one download.
 6. Note the **Key ID** and the **Issuer ID** from that page.
 
+## Where the secrets live
+
+The values are held in Infisical on the self-hosted instance at
+`https://id.n85.dev`, in the **WootDesk** project under the **prod**
+environment at path **`/apple`**. The repository is linked to that project
+through `.infisical.json`, which contains only the project identifier and no
+secret material.
+
+The keys are already created with guidance in each secret's comment. Fill in
+the values in place of `REPLACE_ME`:
+
+| Key | Current |
+|---|---|
+| `APPLE_TEAM_ID` | `Z85CK5CNS3`, set |
+| `ASC_KEY_ID` | to fill |
+| `ASC_ISSUER_ID` | to fill |
+| `ASC_KEY_P8` | to fill |
+| `APPLE_DISTRIBUTION_CERT_P12` | to fill |
+| `APPLE_DISTRIBUTION_CERT_PASSWORD` | to fill |
+
+### Running locally against Infisical
+
+`script/release_archive.sh` reads all of these from the environment, so
+Infisical can inject them directly. `ASC_KEY_P8` is decoded into a private
+temporary file automatically, which is removed when the script exits.
+
+```bash
+infisical run --env=prod --path=/apple -- ./script/release_archive.sh --team Z85CK5CNS3 --allow-beta-xcode --upload --authorised-build <commit>
+```
+
+### Getting them into GitHub Actions
+
+Two options.
+
+1. **Infisical GitHub integration**, preferred. Point it at this repository and
+   the `/apple` path in `prod`, and it keeps the Actions secrets in sync, so a
+   rotated key never has to be copied twice.
+2. **Copy once by hand** into the repository secrets below. Simpler to start,
+   but the values then exist in two places and can drift.
+
 ## Repository secrets
 
 Add these under Settings, Secrets and variables, Actions.
