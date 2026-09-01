@@ -160,6 +160,25 @@ N85-15.
 missing capability directly. It also re-checks the archive afterwards and fails
 if the result is development signed, so the fallback cannot pass unnoticed.
 
+## Toolchain blocker
+
+Only beta Xcode versions are installed on this machine:
+
+| Path | Version |
+|---|---|
+| `/Applications/Xcode-beta.app` (active) | 27.0 beta |
+| `/Applications/Xcode-27-beta-1.app` | 27.0 beta |
+
+Apple does not accept App Store submissions built with a beta Xcode outside
+specific transition windows, and N85-18 AC2 requires the approved stable Xcode
+version. A stable Xcode must be installed and selected with `xcode-select`
+before a submission build is created. `script/release_archive.sh` checks this
+first, ahead of the signing checks, so the problem surfaces before any build
+time is spent.
+
+This does not affect `script/ci.sh`. Building and testing on a beta toolchain is
+fine; only submission is restricted.
+
 ## Upload and submission position
 
 No build has been uploaded, and no upload path currently exists.

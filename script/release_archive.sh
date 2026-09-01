@@ -124,6 +124,22 @@ require_push_capable_profile() {
     fi
 }
 
+# Apple does not accept App Store submissions built with a beta Xcode outside
+# specific transition windows, so a beta toolchain is caught before a build
+# rather than at upload.
+echo "-> Checking the active Xcode toolchain..."
+XCODE_PATH="$(xcode-select -p 2>/dev/null || true)"
+case "${XCODE_PATH}" in
+    *beta*|*Beta*)
+        fail "The active Xcode is a beta toolchain: ${XCODE_PATH}" \
+            "Apple does not accept App Store submissions built with a beta Xcode." \
+            "Install a stable Xcode and select it with:" \
+            "  sudo xcode-select -s /Applications/Xcode.app" \
+            "then run this script again."
+        ;;
+esac
+echo "   Active toolchain: ${XCODE_PATH}"
+
 echo "-> Checking signing identities..."
 if ! security find-identity -v -p codesigning 2>/dev/null | grep -q "Apple Distribution"; then
     fail "No Apple Distribution signing identity with an accessible private key was found." \
