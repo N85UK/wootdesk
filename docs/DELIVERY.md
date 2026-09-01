@@ -85,7 +85,7 @@ Store release. No macOS build has been uploaded.
 | G3 Conversation list | Real list, paging, filters, clear states | Implemented and locally verified |
 | G4 Automated quality | macOS and iOS builds, unit tests, UI tests, performance checks | The current source passes macOS and iOS Simulator builds, 192 Swift tests in 19 suites including the performance regression checks, 18 Node gateway tests, and the 4 macOS UI tests including the conversation journey and the cold-launch metric; the three opt-in live compatibility tests are skipped by design. The recorded iPhone and iPad UI journeys have not been re-run on hardware since the conversation actions and the iPad split layout were added |
 | G5 Signed archives | iOS and macOS Organizer validation | Cleared for iOS. An App Store Connect API key now refreshes the managed profiles during the build, so iOS produces a distribution-signed archive. Build 24 was accepted by App Store Connect on 1 September 2026, which is the proof. macOS installer signing still needs the `3rd Party Mac Developer Installer` identity |
-| G6 TestFlight | Physical-device and Mac acceptance | iOS build 24 is on TestFlight, `VALID` and `IN_BETA_TESTING`, uploaded 1 September 2026 from a local authorised run. One internal tester in group `N85` has it `INSTALLED`. The pipeline in `.github/workflows/testflight.yml` is committed but **skips on every push**, because the six delivery secrets exist in Infisical and have never been added to GitHub Actions. Documented acceptance runs are still unrecorded |
+| G6 TestFlight | Physical-device and Mac acceptance | Automated delivery works. `.github/workflows/testflight.yml` is armed and run 33544372320 uploaded build 34, now `VALID` and `IN_BETA_TESTING`. Every green push to `main` now delivers. Build 24 remains `INSTALLED` on one internal tester's device. Documented acceptance runs are still unrecorded, and that is now the gating item |
 | G7 Product completeness | Message history, replies, private notes, attachments, and conversation triage | Source implementation complete; live acceptance pending |
 | G8 Public release | Explicit product, security, and release approval | No-go |
 | G9 Remote notifications | Push provider, push-capable signing, and profile-safe physical-device delivery | Client and gateway source implemented. Push Notifications is confirmed enabled on the `dev.n85.wootdesk` App ID, and build 24 signs with it. Gateway deployment, recipient-policy approval, and physical delivery acceptance remain |
@@ -173,30 +173,23 @@ Xcode requirement in AC2.
 
 ## Immediate priorities
 
-1. Add the six delivery secrets to GitHub Actions so the committed TestFlight
-   workflow stops skipping. They already exist in Infisical at `prod` `/apple`
-   and are verified. Until this is done, every push to `main` logs a skip
-   notice and no build reaches testers automatically. This is the single
-   cheapest remaining action and it is release-owner authorised work, because
-   it arms automatic distribution on every subsequent green push.
-2. Record the documented acceptance runs against build 24, which is already
-   installed on a physical device. This is the evidence N85-18 AC3 needs and it
-   requires no further Apple setup.
-3. Stand up the invented-data Chatwoot environment with `script/compat_env.sh`,
-   then run the opt-in live compatibility matrix for history, replies, private
-   notes, attachments, availability, and triage. Unblocks N85-17 AC3 to AC5 and
-   the live acceptance on N85-11.
-4. Review and deploy the implemented Chatwoot-to-APNs gateway with approved
+1. Record the documented acceptance runs against build 34 on physical iPhone
+   and iPad. This is the evidence N85-18 AC3 needs, it requires no further
+   Apple setup, and it is now the largest single gap.
+2. Trust the compatibility CA with `script/compat_env.sh trust`, then run the
+   live matrix. The server is verified and seeded; this is the only remaining
+   step. Unblocks N85-17 AC3 to AC5 and the live acceptance on N85-11.
+3. Review and deploy the implemented Chatwoot-to-APNs gateway with approved
    Apple credentials, host secret storage, proxy-log redaction, and a recipient
    policy suitable for the deployment.
-5. Re-run the iPhone and iPad UI journeys on hardware against the current
+4. Re-run the iPhone and iPad UI journeys on hardware against the current
    source, and record VoiceOver and keyboard acceptance for the conversation
    actions.
-6. Add the `3rd Party Mac Developer Installer` identity before enabling macOS
+5. Add the `3rd Party Mac Developer Installer` identity before enabling macOS
    delivery.
-7. Install a stable Xcode before creating any App Store submission build.
+6. Install a stable Xcode before creating any App Store submission build.
    TestFlight does not require it.
-8. Complete physical-device, remote-delivery, and Mac acceptance before
+7. Complete physical-device, remote-delivery, and Mac acceptance before
    considering public submission.
 
 Delivery status changes must cite a command result, App Store Connect record, or

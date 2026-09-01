@@ -2,7 +2,7 @@
 
 Document ID: `WOOT-TF-001`
 
-Status: Pipeline armed and working end to end; uploads blocked by an unsigned or expired App Store Connect agreement
+Status: Working end to end; every green push to main delivers to TestFlight
 
 Owner: N85 Dev
 
@@ -92,10 +92,10 @@ build to TestFlight automatically. That is an outward-facing distribution
 change and needs the release owner's explicit decision, not just the
 credentials.
 
-## Current blocker: an unsigned or expired App Store Connect agreement
+## Resolved: the blocker was an MRDP compliance declaration
 
-Run 33543635103 built, exported, and verified a distribution-signed package on
-the corrected runner, then failed at the upload:
+Run 33543635103 built, exported, and verified a distribution-signed package,
+then failed at the upload:
 
 ```text
 A required agreement is missing or has expired. (403)
@@ -103,22 +103,26 @@ This request requires an in-effect agreement that has not been signed or has exp
 code: FORBIDDEN.REQUIRED_AGREEMENTS_MISSING_OR_EXPIRED
 ```
 
-Everything the pipeline controls now works. Build number 33 from the commit
-count, Xcode 26.6 with the iOS 26 SDK, `ARCHIVE SUCCEEDED`, `EXPORT SUCCEEDED`,
-and the exported package confirmed distribution signed. The refusal is at the
-account level, not the build.
+The error text points at agreements, and that reading was wrong. Both
+agreements were `Active` throughout: Free Apps from 21 August 2026 and Paid
+Apps from 31 August 2026, each running to 24 July 2027. Nothing had expired.
 
-Worth noting for the timeline: build 24 uploaded successfully at 11:52 on
-1 September 2026 and is still `VALID`. The same credentials were refused at
-19:32 the same day, so the agreement lapsed or a new one was issued between
-those two points rather than this being a long-standing gap. API **reads**
-still return HTTP 200; agreements gate uploads only.
+The actual cause was an outstanding **compliance** item on the same App Store
+Connect page. Model Reporting Rules for Digital Platforms showed
+`Missing Info`, requiring an answer to whether any app on the account provides
+personal services. Apple reports an unanswered compliance declaration through
+the same `REQUIRED_AGREEMENTS_MISSING_OR_EXPIRED` code it uses for a genuinely
+lapsed agreement, so the message does not distinguish the two.
 
-Only the Account Holder can clear this, by signing the outstanding agreement in
-App Store Connect under Business, then Agreements, Tax, and Banking. It is not
-something the build tooling can or should do.
+Worth remembering if this recurs: **check the Compliance section, not just
+Agreements.** An account can show every agreement `Active` and still refuse
+uploads.
 
-## Where the secrets live
+Answering the declaration cleared it immediately, with no change to the
+repository. Run 33544372320 uploaded build 34, which processed to `VALID` and
+is `IN_BETA_TESTING`.
+
+## Where the secrets live## Where the secrets live
 
 The values are held in Infisical on the self-hosted instance at
 `https://id.n85.dev`, in the **WootDesk** project under the **prod**

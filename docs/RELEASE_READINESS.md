@@ -12,7 +12,7 @@ Last reviewed: 1 September 2026
 
 | Field | Detail |
 |---|---|
-| Proposed release | 1.0.0 (25 or later); build 24 is the current TestFlight candidate |
+| Proposed release | 1.0.0 (35 or later); build 34 is the current TestFlight candidate, delivered by CI |
 | Release channel | TestFlight first, then App Store after approval |
 | Platforms | iOS, iPadOS, macOS |
 | Release date | To confirm |
@@ -53,7 +53,8 @@ Read from the App Store Connect API on 1 September 2026.
 | macOS | 1.0.0 (2) | Local archive only | Not uploaded | None |
 | iOS and iPadOS | 1.0.0 (3) | Local archive and App Store export package | Not uploaded | None |
 | macOS | 1.0.0 (3) | Local universal archive and signed App Store installer package | Not uploaded; embedded Mac App Store profile matches the bundle | None |
-| iOS and iPadOS | 1.0.0 (24) | `VALID`, `IN_BETA_TESTING`; external `READY_FOR_BETA_SUBMISSION` | Inherits the build settings declaration | 1 internal tester in group `N85`, state `INSTALLED` |
+| iOS and iPadOS | 1.0.0 (24) | `VALID`, `IN_BETA_TESTING` | Inherits the build settings declaration | 1 internal tester in group `N85`, state `INSTALLED` |
+| iOS and iPadOS | 1.0.0 (34) | `VALID`, `IN_BETA_TESTING`; external `READY_FOR_BETA_SUBMISSION` | Inherits the build settings declaration | Internal group `N85` |
 
 Build 24 carries the current source, including conversation triage,
 notification routing, the iPad split layout, localisation, and the performance
@@ -99,7 +100,7 @@ No platform version has been submitted for App Review.
 | GO-006 | App Store metadata and screenshots are approved | Final platform metadata | Not started |
 | GO-007 | Privacy and export-compliance answers are approved | Builds 2 and 3 declare `ITSAppUsesNonExemptEncryption = false`; App Store privacy answers remain pending | In progress |
 | GO-008 | Dedicated App Review server and account are ready | Private review runbook | Not started |
-| GO-009 | App Store Connect agreements and roles are ready | **Blocking.** Upload refused with `FORBIDDEN.REQUIRED_AGREEMENTS_MISSING_OR_EXPIRED` on 1 September 2026, run 33543635103. Build 24 uploaded successfully at 11:52 the same day, so the agreement lapsed during the day. Needs the Account Holder to sign it under Business, Agreements, Tax, and Banking | Blocked |
+| GO-009 | App Store Connect agreements and roles are ready | Free Apps and Paid Apps agreements are `Active` to 24 July 2027, bank account and tax forms `Active`. The MRDP compliance declaration was answered on 1 September 2026, which cleared the upload refusal. Digital Services Act remains `In Review` on Apple's side and does not block delivery | Pass |
 | GO-010 | Product, security, and release owners record Go | Signed decision table below | Not started |
 | GO-011 | macOS App Store package exports and validates | Xcode export succeeded; the Apple-issued installer signature validates, the embedded profile matches `dev.n85.wootdesk`, and the payload remains universal | Pass locally, upload pending |
 | GO-012 | Remote new-message notifications are private, profile-safe, and reliable | Client and gateway source, deterministic enrolment, rotation, deletion, filtering, and route-isolation tests pass. Push Notifications is confirmed on the App ID and build 24 is signed with it. Gateway deployment, approved recipient policy, and physical delivery remain | In progress; source complete, delivery acceptance blocked |
