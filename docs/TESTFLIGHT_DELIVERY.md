@@ -268,7 +268,15 @@ they would otherwise claim the same build number.
 
 ## Running it
 
-Automatic on every push to `main`. To deliver on demand, or to deliver macOS,
+Automatic on every push to `main` that can change the binary. Pushes touching
+only `docs/**`, markdown or `LICENSE` are skipped, because they cannot alter
+the build and would otherwise spend a build number, six minutes of runner time
+and a slot in every tester's update list. Builds 35 and 36 were spent that way
+before the rule existed. `paths-ignore` is evaluated against the whole push, so
+a commit touching documentation alongside code still delivers.
+
+CI still runs on documentation-only pushes. It is cheap, and keeping the suite
+green on every commit is worth the three minutes. To deliver on demand, or to deliver macOS,
 use the Actions tab, TestFlight, Run workflow, and choose the platform. The
 default is iOS.
 
