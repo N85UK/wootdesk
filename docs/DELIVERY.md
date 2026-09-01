@@ -17,6 +17,14 @@ upload and display boundaries. The maintainer has confirmed a live connection
 to a self-hosted Chatwoot server, but the new message workflow has not yet
 completed dedicated invented-data server or TestFlight acceptance.
 
+User-facing text is now catalogued. British English is the source language,
+`Localizable.xcstrings` holds 266 strings and compiles to an `en-GB.lproj` in
+the app bundle, and every string produced outside a SwiftUI `Text` literal is
+resolved through the localisation system. Only British English ships; a
+partially translated language is deliberately not included. A documented
+performance baseline and its regression checks are recorded in
+`docs/PERFORMANCE_BASELINE.md` and run as part of the normal suite.
+
 iPad now presents the same three adjacent areas as the Mac, through a shared
 workspace sidebar and a `NavigationSplitView` that collapses on its own when the
 window becomes too narrow. iPhone keeps its tab layout. The conversation status
@@ -63,6 +71,7 @@ predates the Milestone 2 source changes.
 | Physical TestFlight acceptance | `docs/TESTFLIGHT_TEST_PLAN.md` |
 | macOS UI-test host setup | `docs/MACOS_UI_TESTING.md` |
 | Push notification design and activation | `docs/PUSH_NOTIFICATIONS.md` |
+| Performance baseline and thresholds | `docs/PERFORMANCE_BASELINE.md` |
 | Push gateway deployment and API contract | `Gateway/README.md` |
 
 ## Delivery gates
@@ -72,7 +81,7 @@ predates the Milestone 2 source changes.
 | G1 Repository foundation | Shared scheme, scripts, CI, documentation | Implemented |
 | G2 Secure connection | Profile validation, Keychain token, profile persistence | Implemented and locally verified |
 | G3 Conversation list | Real list, paging, filters, clear states | Implemented and locally verified |
-| G4 Automated quality | macOS and iOS builds, unit tests, UI tests | The current source passes macOS and iOS Simulator builds, 183 Swift tests in 18 suites, 18 Node gateway tests, and the 3 macOS UI tests including the conversation history and reply journey; the three opt-in live compatibility tests are skipped by design. The recorded iPhone and iPad UI journeys have not been re-run on hardware since the conversation actions and the iPad split layout were added |
+| G4 Automated quality | macOS and iOS builds, unit tests, UI tests, performance checks | The current source passes macOS and iOS Simulator builds, 192 Swift tests in 19 suites including the performance regression checks, 18 Node gateway tests, and the 4 macOS UI tests including the conversation journey and the cold-launch metric; the three opt-in live compatibility tests are skipped by design. The recorded iPhone and iPad UI journeys have not been re-run on hardware since the conversation actions and the iPad split layout were added |
 | G5 Signed archives | iOS and macOS Organizer validation | Build 3 iOS and universal macOS archives pass local checks; iOS package export passes |
 | G6 TestFlight | Physical-device and Mac acceptance | Not started |
 | G7 Product completeness | Message history, replies, private notes, attachments, and conversation triage | Source implementation complete; live acceptance pending |

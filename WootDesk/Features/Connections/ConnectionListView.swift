@@ -48,7 +48,7 @@ public struct ConnectionListView: View {
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
 
-                                Text("Account: \(profile.selectedAccountName) (#\(profile.selectedAccountID))")
+                                Text("Account: \(profile.selectedAccountName) (#\(profile.selectedAccountID.identifierText))")
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
                             }
@@ -64,6 +64,10 @@ public struct ConnectionListView: View {
                                 .buttonStyle(.bordered)
                                 .controlSize(.small)
                                 .disabled(appModel.isSwitchingProfile)
+                                // Announced out of context the bare word
+                                // "Switch" does not say which server it means.
+                                .accessibilityLabel("Switch to \(profile.displayName)")
+                                .accessibilityHint("Makes this the active Chatwoot server")
                             }
 
                             Menu {

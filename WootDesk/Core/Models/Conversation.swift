@@ -8,10 +8,10 @@ public enum ConversationStatus: String, Codable, Hashable, Sendable, CaseIterabl
 
     public var displayName: String {
         switch self {
-        case .open: return "Open"
-        case .resolved: return "Resolved"
-        case .pending: return "Pending"
-        case .snoozed: return "Snoozed"
+        case .open: return String(localized: "Open", comment: "Conversation status")
+        case .resolved: return String(localized: "Resolved", comment: "Conversation status")
+        case .pending: return String(localized: "Pending", comment: "Conversation status")
+        case .snoozed: return String(localized: "Snoozed", comment: "Conversation status")
         }
     }
 
@@ -28,10 +28,10 @@ public enum ConversationPriority: String, Codable, Hashable, Sendable, CaseItera
 
     public var displayName: String {
         switch self {
-        case .urgent: return "Urgent"
-        case .high: return "High"
-        case .medium: return "Medium"
-        case .low: return "Low"
+        case .urgent: return String(localized: "Urgent", comment: "Conversation priority")
+        case .high: return String(localized: "High", comment: "Conversation priority")
+        case .medium: return String(localized: "Medium", comment: "Conversation priority")
+        case .low: return String(localized: "Low", comment: "Conversation priority")
         }
     }
 }

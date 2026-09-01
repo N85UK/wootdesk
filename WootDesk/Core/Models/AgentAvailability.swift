@@ -29,11 +29,11 @@ public enum AgentAvailability: String, CaseIterable, Codable, Hashable, Identifi
     public var displayName: String {
         switch self {
         case .online:
-            return "Online"
+            return String(localized: "Online", comment: "Agent availability")
         case .busy:
-            return "Busy"
+            return String(localized: "Busy", comment: "Agent availability")
         case .offline:
-            return "Offline"
+            return String(localized: "Offline", comment: "Agent availability")
         }
     }
 }

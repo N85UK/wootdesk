@@ -89,6 +89,9 @@ public struct SettingsView: View {
                             .foregroundStyle(.secondary)
                     }
                     .font(.footnote)
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel("Version")
+                    .accessibilityValue(versionText)
                 }
                 .padding(.vertical, 4)
             }

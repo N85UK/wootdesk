@@ -15,18 +15,55 @@ public enum ConversationTriageAction: Hashable, Sendable {
     public var actionDescription: String {
         switch self {
         case .status(let status):
-            return "set the status to \(status.displayName)"
+            return String(
+                localized: "set the status to \(status.displayName)",
+                comment: "Names a triage action inside a failure message"
+            )
         case .priority(let priority):
-            return priority.map { "set the priority to \($0.displayName)" } ?? "clear the priority"
+            guard let priority else {
+                return String(
+                    localized: "clear the priority",
+                    comment: "Names a triage action inside a failure message"
+                )
+            }
+            return String(
+                localized: "set the priority to \(priority.displayName)",
+                comment: "Names a triage action inside a failure message"
+            )
         case .assignment(let target):
             switch target {
-            case .agent: return "change the assigned agent"
-            case .team: return "change the assigned team"
-            case .unassignAgent: return "remove the assigned agent"
-            case .unassignTeam: return "remove the assigned team"
+            case .agent:
+                return String(
+                    localized: "change the assigned agent",
+                    comment: "Names a triage action inside a failure message"
+                )
+            case .team:
+                return String(
+                    localized: "change the assigned team",
+                    comment: "Names a triage action inside a failure message"
+                )
+            case .unassignAgent:
+                return String(
+                    localized: "remove the assigned agent",
+                    comment: "Names a triage action inside a failure message"
+                )
+            case .unassignTeam:
+                return String(
+                    localized: "remove the assigned team",
+                    comment: "Names a triage action inside a failure message"
+                )
             }
         case .label(let title, let isAdding):
-            return isAdding ? "add the label \(title)" : "remove the label \(title)"
+            if isAdding {
+                return String(
+                    localized: "add the label \(title)",
+                    comment: "Names a triage action inside a failure message"
+                )
+            }
+            return String(
+                localized: "remove the label \(title)",
+                comment: "Names a triage action inside a failure message"
+            )
         }
     }
 }
@@ -266,7 +303,10 @@ public final class ConversationTriageState {
     ) async {
         let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedTitle.isEmpty else {
-            errorMessage = "Choose a label before applying it."
+            errorMessage = String(
+                localized: "Choose a label before applying it.",
+                comment: "Shown when a label change is attempted with no label chosen"
+            )
             return
         }
 
@@ -331,7 +371,10 @@ public final class ConversationTriageState {
             let confirmed = try await perform(current)
             guard loadedContext == context, !Task.isCancelled else { return }
             guard confirmed.id == current.id else {
-                errorMessage = "The Chatwoot server confirmed a different conversation, so no change was applied."
+                errorMessage = String(
+                    localized: "The Chatwoot server confirmed a different conversation, so no change was applied.",
+                    comment: "Shown when a triage confirmation names an unexpected conversation"
+                )
                 return
             }
             conversation = confirmed
@@ -361,7 +404,10 @@ public final class ConversationTriageState {
         action: ConversationTriageAction
     ) -> String {
         let reason = message(for: error)
-        return "WootDesk could not \(action.actionDescription). \(reason)"
+        return String(
+            localized: "WootDesk could not \(action.actionDescription). \(reason)",
+            comment: "Combines a triage action name with the reason the server rejected it"
+        )
     }
 
     private static func message(for error: Error) -> String {

@@ -14,9 +14,12 @@ public enum ConversationSnoozeOption: String, CaseIterable, Identifiable, Sendab
 
     public var displayName: String {
         switch self {
-        case .anHour: return "For an Hour"
-        case .tomorrowMorning: return "Until Tomorrow Morning"
-        case .nextWeek: return "Until Next Week"
+        case .anHour:
+            return String(localized: "For an Hour", comment: "Snooze duration")
+        case .tomorrowMorning:
+            return String(localized: "Until Tomorrow Morning", comment: "Snooze duration")
+        case .nextWeek:
+            return String(localized: "Until Next Week", comment: "Snooze duration")
         }
     }
 

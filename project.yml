@@ -1,6 +1,9 @@
 name: WootDesk
 options:
   bundleIdPrefix: dev.n85
+  # British English is the source language. Every catalogued string falls back to
+  # it when a translation is unavailable.
+  developmentLanguage: en-GB
   deploymentTarget:
     macOS: "15.0"
     iOS: "18.0"
@@ -9,6 +12,9 @@ settings:
   base:
     SWIFT_VERSION: "6.0"
     SWIFT_STRICT_CONCURRENCY: complete
+    # Extracts localisable strings from source into the String Catalog on build.
+    SWIFT_EMIT_LOC_STRINGS: YES
+    DEVELOPMENT_LANGUAGE: en-GB
     ENABLE_USER_SCRIPT_SANDBOXING: YES
     CURRENT_PROJECT_VERSION: 4
     MARKETING_VERSION: 1.0.0

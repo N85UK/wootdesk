@@ -67,7 +67,7 @@ public final class AppModel {
             let token = try environment.credentialStore.loadToken(for: profile.id)
             guard let token, !token.isEmpty else {
                 AppLogger.auth.error("A saved server profile has no corresponding Keychain credential.")
-                lastError = "The saved credential for \"\(profile.displayName)\" could not be found in the Keychain. Remove the profile and add it again."
+                lastError = Self.missingCredentialMessage(for: profile)
                 return
             }
 
@@ -222,7 +222,7 @@ public final class AppModel {
         do {
             guard let token = try environment.credentialStore.loadToken(for: profile.id),
                   !token.isEmpty else {
-                lastError = "The saved credential for \"\(profile.displayName)\" could not be found in the Keychain. Remove the profile and add it again."
+                lastError = Self.missingCredentialMessage(for: profile)
                 return nil
             }
             return token
@@ -238,7 +238,10 @@ public final class AppModel {
         guard let profile = profiles.first(where: { $0.id == route.profileID }),
               profile.selectedAccountID == route.accountID else {
             AppLogger.app.error("A remote notification did not match a saved WootDesk profile and account.")
-            lastError = "The notification belongs to a server profile that is no longer available."
+            lastError = String(
+                localized: "The notification belongs to a server profile that is no longer available.",
+                comment: "Shown when a notification names a profile the app no longer holds"
+            )
             return false
         }
 
@@ -369,6 +372,13 @@ public final class AppModel {
         }
     }
 
+    private static func missingCredentialMessage(for profile: ServerProfile) -> String {
+        String(
+            localized: "The saved credential for \"\(profile.displayName)\" could not be found in the Keychain. Remove the profile and add it again.",
+            comment: "Shown when a saved profile has no Keychain credential"
+        )
+    }
+
     private static func displayName(from rawName: String, baseURL: URL, fallback: String) -> String {
         let trimmed = rawName.trimmingCharacters(in: .whitespacesAndNewlines)
         if !trimmed.isEmpty {
@@ -381,7 +391,10 @@ public final class AppModel {
         if let localised = error as? LocalizedError, let description = localised.errorDescription {
             return description
         }
-        return "WootDesk could not complete the profile operation. Please try again."
+        return String(
+            localized: "WootDesk could not complete the profile operation. Please try again.",
+            comment: "Generic fallback shown when a profile operation fails"
+        )
     }
 }
 
@@ -395,15 +408,30 @@ public enum AppModelError: LocalizedError, Sendable, Equatable {
     public var errorDescription: String? {
         switch self {
         case .profileNotFound:
-            return "The saved server profile could not be found."
+            return String(
+                localized: "The saved server profile could not be found.",
+                comment: "Shown when a server profile referenced by the app is missing"
+            )
         case .credentialMissing:
-            return "The saved Chatwoot credential could not be found in Apple Keychain."
+            return String(
+                localized: "The saved Chatwoot credential could not be found in Apple Keychain.",
+                comment: "Shown when a profile has no stored Keychain token"
+            )
         case .invalidCredential:
-            return "Please enter a valid Chatwoot personal access token."
+            return String(
+                localized: "Please enter a valid Chatwoot personal access token.",
+                comment: "Shown when the entered access token is empty or invalid"
+            )
         case .persistenceFailed:
-            return "WootDesk could not save the server profile. The previous saved state was restored."
+            return String(
+                localized: "WootDesk could not save the server profile. The previous saved state was restored.",
+                comment: "Shown when saving profile metadata failed and was rolled back"
+            )
         case .recoveryRequired:
-            return "WootDesk could not restore the previous saved state. Keep the app open and review the local profile and Keychain data before trying again."
+            return String(
+                localized: "WootDesk could not restore the previous saved state. Keep the app open and review the local profile and Keychain data before trying again.",
+                comment: "Shown when both a profile write and its rollback failed"
+            )
         }
     }
 }

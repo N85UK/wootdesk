@@ -44,10 +44,16 @@ public struct ConversationAttachment: Identifiable, Hashable, Sendable {
 
         if let fileExtension,
            let sanitisedExtension = Self.sanitisedFileName(fileExtension) {
-            return "\(fileType.displayName) attachment.\(sanitisedExtension)"
+            return String(
+                localized: "\(fileType.displayName) attachment.\(sanitisedExtension)",
+                comment: "Fallback attachment name built from its type and file extension"
+            )
         }
 
-        return "\(fileType.displayName) attachment"
+        return String(
+            localized: "\(fileType.displayName) attachment",
+            comment: "Fallback attachment name built from its type"
+        )
     }
 
     /// Accepts only HTTPS URLs, with a narrow debug-only localhost exception.
@@ -116,14 +122,14 @@ public enum ConversationAttachmentType: Hashable, Sendable {
 
     public var displayName: String {
         switch self {
-        case .image: "Image"
-        case .audio: "Audio"
-        case .video: "Video"
-        case .file: "File"
-        case .location: "Location"
-        case .contact: "Contact"
-        case .fallback: "Attachment"
-        case .unknown: "Attachment"
+        case .image: String(localized: "Image", comment: "Attachment type")
+        case .audio: String(localized: "Audio", comment: "Attachment type")
+        case .video: String(localized: "Video", comment: "Attachment type")
+        case .file: String(localized: "File", comment: "Attachment type")
+        case .location: String(localized: "Location", comment: "Attachment type")
+        case .contact: String(localized: "Contact", comment: "Attachment type")
+        case .fallback: String(localized: "Attachment", comment: "Attachment type")
+        case .unknown: String(localized: "Attachment", comment: "Attachment type")
         }
     }
 }
@@ -229,15 +235,30 @@ public enum AttachmentSelectionError: LocalizedError, Equatable, Sendable {
     public var errorDescription: String? {
         switch self {
         case .invalidFile:
-            "The selected item is not a readable file."
+            String(
+                localized: "The selected item is not a readable file.",
+                comment: "Shown when a chosen attachment cannot be read"
+            )
         case .emptyFile:
-            "The selected file is empty."
+            String(
+                localized: "The selected file is empty.",
+                comment: "Shown when a chosen attachment contains no data"
+            )
         case .tooLarge:
-            "The selected file is larger than WootDesk's 25 MB upload limit."
+            String(
+                localized: "The selected file is larger than WootDesk's 25 MB upload limit.",
+                comment: "Shown when one chosen attachment exceeds the size limit"
+            )
         case .tooManyFiles:
-            "A message can contain up to 15 attachments."
+            String(
+                localized: "A message can contain up to 15 attachments.",
+                comment: "Shown when too many attachments are chosen for one message"
+            )
         case .totalSizeExceeded:
-            "The selected attachments exceed WootDesk's 25 MB per-message limit."
+            String(
+                localized: "The selected attachments exceed WootDesk's 25 MB per-message limit.",
+                comment: "Shown when the chosen attachments exceed the per-message size limit"
+            )
         }
     }
 }

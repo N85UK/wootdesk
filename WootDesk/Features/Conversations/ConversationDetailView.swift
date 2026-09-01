@@ -34,7 +34,7 @@ public struct ConversationDetailView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .navigationTitle(conversation.map { $0.contact?.name ?? "Conversation #\($0.id)" } ?? "Conversation")
+        .navigationTitle(conversation.map { $0.contact?.name ?? Self.untitledConversationName(for: $0) } ?? String(localized: "Conversation", comment: "Navigation title when no conversation is selected"))
         .toolbar {
             if let conversation {
                 ToolbarItem(placement: .primaryAction) {
@@ -82,11 +82,11 @@ public struct ConversationDetailView: View {
     private func conversationHeader(_ conversation: Conversation) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
             VStack(alignment: .leading, spacing: 3) {
-                Text(conversation.contact?.name ?? "Conversation #\(conversation.id)")
+                Text(conversation.contact?.name ?? Self.untitledConversationName(for: conversation))
                     .font(.headline)
 
                 HStack(spacing: 8) {
-                    Text("#\(conversation.id)")
+                    Text("#\(conversation.id.identifierText)")
                     Text((triageState.conversation ?? conversation).status.displayName)
                     if let inboxName = conversation.inboxName {
                         Text(inboxName)
@@ -252,6 +252,14 @@ public struct ConversationDetailView: View {
                 .frame(maxWidth: 360)
         }
         .padding(32)
+    }
+
+    /// The name shown for a conversation whose contact Chatwoot did not supply.
+    static func untitledConversationName(for conversation: Conversation) -> String {
+        String(
+            localized: "Conversation #\(conversation.id.identifierText)",
+            comment: "Title for a conversation with no contact name"
+        )
     }
 
     private func loadMessages(for conversation: Conversation) async {

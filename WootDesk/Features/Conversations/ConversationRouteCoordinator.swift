@@ -53,8 +53,10 @@ public final class ConversationRouteCoordinator {
         guard await appModel.activateNotificationRoute(route),
               let profile = appModel.activeProfile,
               let token = appModel.activeToken else {
-            errorMessage = appModel.lastError
-                ?? "The notification belongs to a server profile that is no longer available."
+            errorMessage = appModel.lastError ?? String(
+                localized: "The notification belongs to a server profile that is no longer available.",
+                comment: "Shown when a notification names a profile the app no longer holds"
+            )
             return false
         }
 
@@ -80,7 +82,10 @@ public final class ConversationRouteCoordinator {
             guard conversation.id == route.conversationID else {
                 errorMessage = Self.unavailableMessage(
                     conversationID: route.conversationID,
-                    reason: "The server returned a different conversation."
+                    reason: String(
+                        localized: "The server returned a different conversation.",
+                        comment: "Reason shown when a routed conversation read returns the wrong conversation"
+                    )
                 )
                 return false
             }
@@ -100,14 +105,20 @@ public final class ConversationRouteCoordinator {
     }
 
     private static func unavailableMessage(conversationID: Int, reason: String) -> String {
-        "WootDesk could not open conversation #\(conversationID) from that notification. \(reason)"
+        String(
+            localized: "WootDesk could not open conversation #\(conversationID.identifierText) from that notification. \(reason)",
+            comment: "Combines a conversation number with the reason a notification could not be opened"
+        )
     }
 
     private static func message(for error: Error) -> String {
         if let apiError = error as? APIError {
             switch apiError {
             case .notFound:
-                return "It may have been deleted, or your access to it may have been removed."
+                return String(
+                    localized: "It may have been deleted, or your access to it may have been removed.",
+                    comment: "Reason shown when a routed conversation no longer exists"
+                )
             default:
                 return apiError.errorDescription ?? apiError.localizedDescription
             }

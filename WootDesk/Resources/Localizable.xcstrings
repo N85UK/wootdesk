@@ -1,0 +1,3004 @@
+{
+  "sourceLanguage": "en-GB",
+  "strings": {
+    "#%@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "#%@"
+          }
+        }
+      }
+    },
+    "#%lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "#%lld"
+          }
+        }
+      }
+    },
+    "%@ attachment": {
+      "comment": "Fallback attachment name built from its type",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ attachment"
+          }
+        }
+      }
+    },
+    "%@ attachment.%@": {
+      "comment": "Fallback attachment name built from its type and file extension",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ attachment.%2$@"
+          }
+        }
+      }
+    },
+    "%lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld"
+          }
+        }
+      }
+    },
+    "%lld unread messages": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld unread messages"
+          }
+        }
+      }
+    },
+    "A message can contain up to 15 attachments.": {
+      "comment": "Shown when too many attachments are chosen for one message",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A message can contain up to 15 attachments."
+          }
+        }
+      }
+    },
+    "A native client for the Chatwoot servers you control.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A native client for the Chatwoot servers you control."
+          }
+        }
+      }
+    },
+    "A secure connection to the Chatwoot server could not be established. Check the server certificate and system trust settings.": {
+      "comment": "Shown when the TLS handshake with Chatwoot fails",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A secure connection to the Chatwoot server could not be established. Check the server certificate and system trust settings."
+          }
+        }
+      }
+    },
+    "AI Research & Intelligence": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AI Research & Intelligence"
+          }
+        }
+      }
+    },
+    "About WootDesk": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "About WootDesk"
+          }
+        }
+      }
+    },
+    "Access denied. Your user profile does not have permission to access this resource or account.": {
+      "comment": "Shown when the agent lacks permission for a Chatwoot resource",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Access denied. Your user profile does not have permission to access this resource or account."
+          }
+        }
+      }
+    },
+    "Account": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Account"
+          }
+        }
+      }
+    },
+    "Account %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Account %@"
+          }
+        }
+      }
+    },
+    "Account: %@ (#%@)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Account: %1$@ (#%2$@)"
+          }
+        }
+      }
+    },
+    "Account: %@ (#%lld)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Account: %1$@ (#%2$lld)"
+          }
+        }
+      }
+    },
+    "Actions for %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actions for %@"
+          }
+        }
+      }
+    },
+    "Active": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active"
+          }
+        }
+      }
+    },
+    "Active Server": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active Server"
+          }
+        }
+      }
+    },
+    "Active profile, account %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active profile, account %@"
+          }
+        }
+      }
+    },
+    "Add Chatwoot Server": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Chatwoot Server"
+          }
+        }
+      }
+    },
+    "Add Server": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Server"
+          }
+        }
+      }
+    },
+    "Add Server Connection...": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add Server Connection..."
+          }
+        }
+      }
+    },
+    "Add a Chatwoot server connection": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a Chatwoot server connection"
+          }
+        }
+      }
+    },
+    "Add attachments": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add attachments"
+          }
+        }
+      }
+    },
+    "Add files to this message": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add files to this message"
+          }
+        }
+      }
+    },
+    "Add or remove a conversation label": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add or remove a conversation label"
+          }
+        }
+      }
+    },
+    "Advanced AI features (conversation summarisation, smart draft replies, and deep cited research) are designed to route through an authenticated, privacy-preserving server gateway. No raw OpenAI keys or Chatwoot tokens are exposed.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Advanced AI features (conversation summarisation, smart draft replies, and deep cited research) are designed to route through an authenticated, privacy-preserving server gateway. No raw OpenAI keys or Chatwoot tokens are exposed."
+          }
+        }
+      }
+    },
+    "Agent": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agent"
+          }
+        }
+      }
+    },
+    "Agent Availability": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agent Availability"
+          }
+        }
+      }
+    },
+    "Agents": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Agents"
+          }
+        }
+      }
+    },
+    "All": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All"
+          }
+        }
+      }
+    },
+    "All network communication mandates TLS/HTTPS encryption with system-trusted certificates. Plain HTTP is only permitted on localhost during debug sessions.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All network communication mandates TLS/HTTPS encryption with system-trusted certificates. Plain HTTP is only permitted on localhost during debug sessions."
+          }
+        }
+      }
+    },
+    "Apple Keychain Storage": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Keychain Storage"
+          }
+        }
+      }
+    },
+    "Apple Registration": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple Registration"
+          }
+        }
+      }
+    },
+    "Applied": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Applied"
+          }
+        }
+      }
+    },
+    "Applied labels: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Applied labels: %@"
+          }
+        }
+      }
+    },
+    "Are you sure you want to remove %@? Its remote notification registration will be removed first, then its saved credentials will be deleted from your Keychain.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Are you sure you want to remove %@? Its remote notification registration will be removed first, then its saved credentials will be deleted from your Keychain."
+          }
+        }
+      }
+    },
+    "Assign this conversation to an agent or team": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Assign this conversation to an agent or team"
+          }
+        }
+      }
+    },
+    "Assignee": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Assignee"
+          }
+        }
+      }
+    },
+    "Assignment options and labels are unavailable. %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Assignment options and labels are unavailable. %@"
+          }
+        }
+      }
+    },
+    "Attachment": {
+      "comment": "Attachment type",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attachment"
+          }
+        }
+      }
+    },
+    "Attachment unavailable": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Attachment unavailable"
+          }
+        }
+      }
+    },
+    "Audio": {
+      "comment": "Attachment type",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Audio"
+          }
+        }
+      }
+    },
+    "Authentication failed. Please verify that your Chatwoot personal access token is active and valid.": {
+      "comment": "Shown when the Chatwoot server rejects the access token",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Authentication failed. Please verify that your Chatwoot personal access token is active and valid."
+          }
+        }
+      }
+    },
+    "Availability": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Availability"
+          }
+        }
+      }
+    },
+    "Availability error: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Availability error: %@"
+          }
+        }
+      }
+    },
+    "Availability, %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Availability, %@"
+          }
+        }
+      }
+    },
+    "Available": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Available"
+          }
+        }
+      }
+    },
+    "Busy": {
+      "comment": "Agent availability",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Busy"
+          }
+        }
+      }
+    },
+    "Cancel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        }
+      }
+    },
+    "Chatwoot Server URL": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chatwoot Server URL"
+          }
+        }
+      }
+    },
+    "Chatwoot access tokens are stored in Apple Keychain and are never written to the server-profile file. Distributed builds use a device-only protection class. A token is sent only to its selected Chatwoot server for authenticated requests.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chatwoot access tokens are stored in Apple Keychain and are never written to the server-profile file. Distributed builds use a device-only protection class. A token is sent only to its selected Chatwoot server for authenticated requests."
+          }
+        }
+      }
+    },
+    "Chatwoot did not provide a safe HTTPS attachment address": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Chatwoot did not provide a safe HTTPS attachment address"
+          }
+        }
+      }
+    },
+    "Check Again": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check Again"
+          }
+        }
+      }
+    },
+    "Choose Online, Busy, or Offline for the active Chatwoot account": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose Online, Busy, or Offline for the active Chatwoot account"
+          }
+        }
+      }
+    },
+    "Choose Time...": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose Time..."
+          }
+        }
+      }
+    },
+    "Choose a label before applying it.": {
+      "comment": "Shown when a label change is attempted with no label chosen",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a label before applying it."
+          }
+        }
+      }
+    },
+    "Choose a snooze time in the future.": {
+      "comment": "Shown when the agent chooses a snooze time that has already passed",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a snooze time in the future."
+          }
+        }
+      }
+    },
+    "Choose public reply or private note": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose public reply or private note"
+          }
+        }
+      }
+    },
+    "Connect": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect"
+          }
+        }
+      }
+    },
+    "Connect to Chatwoot": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect to Chatwoot"
+          }
+        }
+      }
+    },
+    "Connect to a Chatwoot server to manage your availability.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connect to a Chatwoot server to manage your availability."
+          }
+        }
+      }
+    },
+    "Connected Since": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connected Since"
+          }
+        }
+      }
+    },
+    "Connection Status": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connection Status"
+          }
+        }
+      }
+    },
+    "Connection error: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Connection error: %@"
+          }
+        }
+      }
+    },
+    "Contact": {
+      "comment": "Attachment type",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Contact"
+          }
+        }
+      }
+    },
+    "Conversation": {
+      "comment": "Navigation title when no conversation is selected",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conversation"
+          }
+        }
+      }
+    },
+    "Conversation #%@": {
+      "comment": "Title for a conversation with no contact name",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conversation #%@"
+          }
+        }
+      }
+    },
+    "Conversation action failed. %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conversation action failed. %@"
+          }
+        }
+      }
+    },
+    "Conversation actions": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conversation actions"
+          }
+        }
+      }
+    },
+    "Conversations": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Conversations"
+          }
+        }
+      }
+    },
+    "Delete Server": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete Server"
+          }
+        }
+      }
+    },
+    "Device API Token": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Device API Token"
+          }
+        }
+      }
+    },
+    "Disable Remote Notifications": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disable Remote Notifications"
+          }
+        }
+      }
+    },
+    "Disable Remote Notifications?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Disable Remote Notifications?"
+          }
+        }
+      }
+    },
+    "Dismiss": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dismiss"
+          }
+        }
+      }
+    },
+    "Display Name": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Display Name"
+          }
+        }
+      }
+    },
+    "Display Name (Optional)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Display Name (Optional)"
+          }
+        }
+      }
+    },
+    "Drafts and selected attachments stay in memory only and are discarded when you switch conversations or server profiles.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drafts and selected attachments stay in memory only and are discarded when you switch conversations or server profiles."
+          }
+        }
+      }
+    },
+    "Edit Chatwoot Server": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit Chatwoot Server"
+          }
+        }
+      }
+    },
+    "Edit and Revalidate": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Edit and Revalidate"
+          }
+        }
+      }
+    },
+    "Enable Notifications": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enable Notifications"
+          }
+        }
+      }
+    },
+    "Enforced Transport Security": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enforced Transport Security"
+          }
+        }
+      }
+    },
+    "Enrol This Device": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enrol This Device"
+          }
+        }
+      }
+    },
+    "Enter a reply or private note before sending.": {
+      "comment": "Shown when the agent tries to send an empty message",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter a reply or private note before sending."
+          }
+        }
+      }
+    },
+    "Enter the address of your Chatwoot instance and your personal API access token to connect WootDesk.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter the address of your Chatwoot instance and your personal API access token to connect WootDesk."
+          }
+        }
+      }
+    },
+    "Failed to process the response from the Chatwoot server: %@": {
+      "comment": "Shown when a Chatwoot response cannot be decoded",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Failed to process the response from the Chatwoot server: %@"
+          }
+        }
+      }
+    },
+    "File": {
+      "comment": "Attachment type",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "File"
+          }
+        }
+      }
+    },
+    "Filter conversations by status": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filter conversations by status"
+          }
+        }
+      }
+    },
+    "For an Hour": {
+      "comment": "Snooze duration",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For an Hour"
+          }
+        }
+      }
+    },
+    "HTTPS is required for secure connections to Chatwoot servers. Plain HTTP is only permitted on localhost in debug builds.": {
+      "comment": "Shown when a server address does not use HTTPS",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "HTTPS is required for secure connections to Chatwoot servers. Plain HTTP is only permitted on localhost in debug builds."
+          }
+        }
+      }
+    },
+    "High": {
+      "comment": "Conversation priority",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "High"
+          }
+        }
+      }
+    },
+    "How to find your personal access token": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How to find your personal access token"
+          }
+        }
+      }
+    },
+    "Image": {
+      "comment": "Attachment type",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Image"
+          }
+        }
+      }
+    },
+    "It may have been deleted, or your access to it may have been removed.": {
+      "comment": "Reason shown when a routed conversation no longer exists",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "It may have been deleted, or your access to it may have been removed."
+          }
+        }
+      }
+    },
+    "Labels": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Labels"
+          }
+        }
+      }
+    },
+    "Last Used": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last Used"
+          }
+        }
+      }
+    },
+    "Load Earlier Messages": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Load Earlier Messages"
+          }
+        }
+      }
+    },
+    "Loading WootDesk...": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading WootDesk..."
+          }
+        }
+      }
+    },
+    "Loading assignment options...": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading assignment options..."
+          }
+        }
+      }
+    },
+    "Loading availability": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading availability"
+          }
+        }
+      }
+    },
+    "Loading conversations...": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading conversations..."
+          }
+        }
+      }
+    },
+    "Loading earlier messages...": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading earlier messages..."
+          }
+        }
+      }
+    },
+    "Loading labels...": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading labels..."
+          }
+        }
+      }
+    },
+    "Loading message history...": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading message history..."
+          }
+        }
+      }
+    },
+    "Loading more conversations...": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading more conversations..."
+          }
+        }
+      }
+    },
+    "Location": {
+      "comment": "Attachment type",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Location"
+          }
+        }
+      }
+    },
+    "Low": {
+      "comment": "Conversation priority",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Low"
+          }
+        }
+      }
+    },
+    "Makes this the active Chatwoot server": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Makes this the active Chatwoot server"
+          }
+        }
+      }
+    },
+    "Manage Servers": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Manage Servers"
+          }
+        }
+      }
+    },
+    "Medium": {
+      "comment": "Conversation priority",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medium"
+          }
+        }
+      }
+    },
+    "Message type": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Message type"
+          }
+        }
+      }
+    },
+    "Network connection error: %@": {
+      "comment": "Shown when a network request fails for another reason",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Network connection error: %@"
+          }
+        }
+      }
+    },
+    "New Message Alerts": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New Message Alerts"
+          }
+        }
+      }
+    },
+    "No Chatwoot servers configured.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Chatwoot servers configured."
+          }
+        }
+      }
+    },
+    "No Conversation Selected": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Conversation Selected"
+          }
+        }
+      }
+    },
+    "No Conversations Found": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Conversations Found"
+          }
+        }
+      }
+    },
+    "No Messages Yet": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Messages Yet"
+          }
+        }
+      }
+    },
+    "No Priority": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No Priority"
+          }
+        }
+      }
+    },
+    "No messages yet": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No messages yet"
+          }
+        }
+      }
+    },
+    "No server currently connected.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No server currently connected."
+          }
+        }
+      }
+    },
+    "Notification could not be opened. %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notification could not be opened. %@"
+          }
+        }
+      }
+    },
+    "Notification error: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notification error: %@"
+          }
+        }
+      }
+    },
+    "Notifications": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifications"
+          }
+        }
+      }
+    },
+    "Notifications are disabled in System Settings. Allow notifications for WootDesk, then check again.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifications are disabled in System Settings. Allow notifications for WootDesk, then check again."
+          }
+        }
+      }
+    },
+    "Offline": {
+      "comment": "Agent availability",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Offline"
+          }
+        }
+      }
+    },
+    "Online": {
+      "comment": "Agent availability",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Online"
+          }
+        }
+      }
+    },
+    "Open": {
+      "comment": "Conversation status",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open"
+          }
+        }
+      }
+    },
+    "Open %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open %@"
+          }
+        }
+      }
+    },
+    "Open attachment?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open attachment?"
+          }
+        }
+      }
+    },
+    "Open this attachment using the system handler": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open this attachment using the system handler"
+          }
+        }
+      }
+    },
+    "Opens Chatwoot's token help in your browser": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens Chatwoot's token help in your browser"
+          }
+        }
+      }
+    },
+    "Optional Display Name": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Optional Display Name"
+          }
+        }
+      }
+    },
+    "Paste your API access token": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paste your API access token"
+          }
+        }
+      }
+    },
+    "Pending": {
+      "comment": "Conversation status",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pending"
+          }
+        }
+      }
+    },
+    "Permission": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Permission"
+          }
+        }
+      }
+    },
+    "Personal Access Token": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Personal Access Token"
+          }
+        }
+      }
+    },
+    "Please enter a valid Chatwoot personal access token.": {
+      "comment": "Shown when the entered access token is empty or invalid",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Please enter a valid Chatwoot personal access token."
+          }
+        }
+      }
+    },
+    "Preferences": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preferences"
+          }
+        }
+      }
+    },
+    "Priority": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Priority"
+          }
+        }
+      }
+    },
+    "Private note": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Private note"
+          }
+        }
+      }
+    },
+    "Private note text": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Private note text"
+          }
+        }
+      }
+    },
+    "Push Gateway Address": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Push Gateway Address"
+          }
+        }
+      }
+    },
+    "Push gateway error: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Push gateway error: %@"
+          }
+        }
+      }
+    },
+    "Rate limit reached. Please wait %lld seconds before trying again.": {
+      "comment": "Shown when Chatwoot rate limits a request and states a wait time in seconds",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rate limit reached. Please wait %lld seconds before trying again."
+          }
+        }
+      }
+    },
+    "Rate limit reached. Please wait a moment before trying again.": {
+      "comment": "Shown when Chatwoot rate limits a request without stating a wait time",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rate limit reached. Please wait a moment before trying again."
+          }
+        }
+      }
+    },
+    "Refresh": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refresh"
+          }
+        }
+      }
+    },
+    "Refresh Availability": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refresh Availability"
+          }
+        }
+      }
+    },
+    "Refresh Messages": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refresh Messages"
+          }
+        }
+      }
+    },
+    "Refreshing messages": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Refreshing messages"
+          }
+        }
+      }
+    },
+    "Reload conversations from the Chatwoot server": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reload conversations from the Chatwoot server"
+          }
+        }
+      }
+    },
+    "Reload this conversation's messages": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reload this conversation's messages"
+          }
+        }
+      }
+    },
+    "Remote Delivery": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remote Delivery"
+          }
+        }
+      }
+    },
+    "Remove %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove %@"
+          }
+        }
+      }
+    },
+    "Remove Server": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove Server"
+          }
+        }
+      }
+    },
+    "Remove Server Profile?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove Server Profile?"
+          }
+        }
+      }
+    },
+    "Reply text": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reply text"
+          }
+        }
+      }
+    },
+    "Requests permission to show alerts, update the badge and play sounds": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Requests permission to show alerts, update the badge and play sounds"
+          }
+        }
+      }
+    },
+    "Resolved": {
+      "comment": "Conversation status",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resolved"
+          }
+        }
+      }
+    },
+    "Retry": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retry"
+          }
+        }
+      }
+    },
+    "Return time": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Return time"
+          }
+        }
+      }
+    },
+    "Revalidate Chatwoot Connection": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Revalidate Chatwoot Connection"
+          }
+        }
+      }
+    },
+    "Role: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Role: %@"
+          }
+        }
+      }
+    },
+    "Saved Servers": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saved Servers"
+          }
+        }
+      }
+    },
+    "Saving server profile": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Saving server profile"
+          }
+        }
+      }
+    },
+    "Schedules an invented local notification without using Chatwoot data": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schedules an invented local notification without using Chatwoot data"
+          }
+        }
+      }
+    },
+    "Search conversations or contacts": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search conversations or contacts"
+          }
+        }
+      }
+    },
+    "Security & Privacy": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Security & Privacy"
+          }
+        }
+      }
+    },
+    "Select Chatwoot Account": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select Chatwoot Account"
+          }
+        }
+      }
+    },
+    "Select a conversation to load its message history and reply.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Select a conversation to load its message history and reply."
+          }
+        }
+      }
+    },
+    "Selected": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selected"
+          }
+        }
+      }
+    },
+    "Selected attachments": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Selected attachments"
+          }
+        }
+      }
+    },
+    "Send Local Test Notification": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send Local Test Notification"
+          }
+        }
+      }
+    },
+    "Send error: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send error: %@"
+          }
+        }
+      }
+    },
+    "Send with Command and Return": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send with Command and Return"
+          }
+        }
+      }
+    },
+    "Sends the current draft to Chatwoot": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sends the current draft to Chatwoot"
+          }
+        }
+      }
+    },
+    "Sends this app's APNs device token and opaque profile routing identifiers to the configured push gateway": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sends this app's APNs device token and opaque profile routing identifiers to the configured push gateway"
+          }
+        }
+      }
+    },
+    "Server Actions": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server Actions"
+          }
+        }
+      }
+    },
+    "Server Address": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server Address"
+          }
+        }
+      }
+    },
+    "Server Profiles": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server Profiles"
+          }
+        }
+      }
+    },
+    "Servers": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Servers"
+          }
+        }
+      }
+    },
+    "Set availability to %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set availability to %@"
+          }
+        }
+      }
+    },
+    "Set or clear the conversation priority": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set or clear the conversation priority"
+          }
+        }
+      }
+    },
+    "Set the conversation status, or snooze it until a chosen time": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Set the conversation status, or snooze it until a chosen time"
+          }
+        }
+      }
+    },
+    "Settings": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settings"
+          }
+        }
+      }
+    },
+    "Snooze": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Snooze"
+          }
+        }
+      }
+    },
+    "Snooze Until": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Snooze Until"
+          }
+        }
+      }
+    },
+    "Snoozed": {
+      "comment": "Conversation status",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Snoozed"
+          }
+        }
+      }
+    },
+    "Start the conversation with a reply, or add a private note for other agents.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start the conversation with a reply, or add a private note for other agents."
+          }
+        }
+      }
+    },
+    "Status": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Status"
+          }
+        }
+      }
+    },
+    "Status Filter": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Status Filter"
+          }
+        }
+      }
+    },
+    "Switch": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Switch"
+          }
+        }
+      }
+    },
+    "Switch to %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Switch to %@"
+          }
+        }
+      }
+    },
+    "Switch to this Chatwoot server profile": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Switch to this Chatwoot server profile"
+          }
+        }
+      }
+    },
+    "Teams": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Teams"
+          }
+        }
+      }
+    },
+    "The Chatwoot server confirmed a different conversation, so no change was applied.": {
+      "comment": "Shown when a triage confirmation names an unexpected conversation",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Chatwoot server confirmed a different conversation, so no change was applied."
+          }
+        }
+      }
+    },
+    "The Chatwoot server reported an error (HTTP %lld): %@": {
+      "comment": "Shown when Chatwoot returns an error status and a message",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Chatwoot server reported an error (HTTP %1$lld): %2$@"
+          }
+        }
+      }
+    },
+    "The Chatwoot server returned an error (HTTP %lld).": {
+      "comment": "Shown when Chatwoot returns an error status without a message",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Chatwoot server returned an error (HTTP %lld)."
+          }
+        }
+      }
+    },
+    "The Chatwoot server took too long to respond. Check the server address and try again.": {
+      "comment": "Shown when a request to Chatwoot times out",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The Chatwoot server took too long to respond. Check the server address and try again."
+          }
+        }
+      }
+    },
+    "The network request was cancelled.": {
+      "comment": "Shown when a request is cancelled before it completes",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The network request was cancelled."
+          }
+        }
+      }
+    },
+    "The notification belongs to a server profile that is no longer available.": {
+      "comment": "Shown when a notification names a profile the app no longer holds",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The notification belongs to a server profile that is no longer available."
+          }
+        }
+      }
+    },
+    "The requested resource was not found on the Chatwoot server. Please check the account ID and server configuration.": {
+      "comment": "Shown when a Chatwoot resource does not exist",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The requested resource was not found on the Chatwoot server. Please check the account ID and server configuration."
+          }
+        }
+      }
+    },
+    "The saved Chatwoot credential could not be found in Apple Keychain.": {
+      "comment": "Shown when a profile has no stored Keychain token",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The saved Chatwoot credential could not be found in Apple Keychain."
+          }
+        }
+      }
+    },
+    "The saved credential for \"%@\" could not be found in the Keychain. Remove the profile and add it again.": {
+      "comment": "Shown when a saved profile has no Keychain credential",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The saved credential for \"%@\" could not be found in the Keychain. Remove the profile and add it again."
+          }
+        }
+      }
+    },
+    "The saved server profile could not be found.": {
+      "comment": "Shown when a server profile referenced by the app is missing",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The saved server profile could not be found."
+          }
+        }
+      }
+    },
+    "The selected attachments exceed WootDesk's 25 MB per-message limit.": {
+      "comment": "Shown when the chosen attachments exceed the per-message size limit",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The selected attachments exceed WootDesk's 25 MB per-message limit."
+          }
+        }
+      }
+    },
+    "The selected file is empty.": {
+      "comment": "Shown when a chosen attachment contains no data",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The selected file is empty."
+          }
+        }
+      }
+    },
+    "The selected file is larger than WootDesk's 25 MB upload limit.": {
+      "comment": "Shown when one chosen attachment exceeds the size limit",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The selected file is larger than WootDesk's 25 MB upload limit."
+          }
+        }
+      }
+    },
+    "The selected item is not a readable file.": {
+      "comment": "Shown when a chosen attachment cannot be read",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The selected item is not a readable file."
+          }
+        }
+      }
+    },
+    "The server URL provided is invalid. Please check the hostname and path.": {
+      "comment": "Shown when a Chatwoot server address cannot be parsed",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The server URL provided is invalid. Please check the hostname and path."
+          }
+        }
+      }
+    },
+    "The server returned a different conversation.": {
+      "comment": "Reason shown when a routed conversation read returns the wrong conversation",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The server returned a different conversation."
+          }
+        }
+      }
+    },
+    "The validated user profile is not associated with any active Chatwoot accounts.": {
+      "comment": "Shown when a validated Chatwoot profile has no accounts",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The validated user profile is not associated with any active Chatwoot accounts."
+          }
+        }
+      }
+    },
+    "This account defines no labels.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This account defines no labels."
+          }
+        }
+      }
+    },
+    "This account offers no agents or teams for assignment.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This account offers no agents or teams for assignment."
+          }
+        }
+      }
+    },
+    "Try Again": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try Again"
+          }
+        }
+      }
+    },
+    "Unable to Load Conversations": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unable to Load Conversations"
+          }
+        }
+      }
+    },
+    "Unable to Load Messages": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unable to Load Messages"
+          }
+        }
+      }
+    },
+    "Unassign Agent": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unassign Agent"
+          }
+        }
+      }
+    },
+    "Unassign Team": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unassign Team"
+          }
+        }
+      }
+    },
+    "Until Next Week": {
+      "comment": "Snooze duration",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Until Next Week"
+          }
+        }
+      }
+    },
+    "Until Tomorrow Morning": {
+      "comment": "Snooze duration",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Until Tomorrow Morning"
+          }
+        }
+      }
+    },
+    "Update Enrolment": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update Enrolment"
+          }
+        }
+      }
+    },
+    "Updating availability": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Updating availability"
+          }
+        }
+      }
+    },
+    "Updating push gateway enrolment": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Updating push gateway enrolment"
+          }
+        }
+      }
+    },
+    "Urgent": {
+      "comment": "Conversation priority",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urgent"
+          }
+        }
+      }
+    },
+    "Use the HTTPS address and device API token issued by your gateway administrator. Do not enter a Chatwoot personal access token here. The token is saved only in Apple Keychain for this server profile.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use the HTTPS address and device API token issued by your gateway administrator. Do not enter a Chatwoot personal access token here. The token is saved only in Apple Keychain for this server profile."
+          }
+        }
+      }
+    },
+    "Validate and Save": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Validate and Save"
+          }
+        }
+      }
+    },
+    "Validating connection to Chatwoot...": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Validating connection to Chatwoot..."
+          }
+        }
+      }
+    },
+    "Version": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Version"
+          }
+        }
+      }
+    },
+    "Video": {
+      "comment": "Attachment type",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Video"
+          }
+        }
+      }
+    },
+    "Visible only to Chatwoot agents": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visible only to Chatwoot agents"
+          }
+        }
+      }
+    },
+    "Visible to the contact": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Visible to the contact"
+          }
+        }
+      }
+    },
+    "Waiting for Apple Push Notification service to register this signed app. A development or distribution build with the Push Notifications capability is required.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waiting for Apple Push Notification service to register this signed app. A development or distribution build with the Push Notifications capability is required."
+          }
+        }
+      }
+    },
+    "Welcome to WootDesk": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Welcome to WootDesk"
+          }
+        }
+      }
+    },
+    "WootDesk": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WootDesk"
+          }
+        }
+      }
+    },
+    "WootDesk AI Gateway": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WootDesk AI Gateway"
+          }
+        }
+      }
+    },
+    "WootDesk Push Gateway address": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WootDesk Push Gateway address"
+          }
+        }
+      }
+    },
+    "WootDesk Push Gateway device API token": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WootDesk Push Gateway device API token"
+          }
+        }
+      }
+    },
+    "WootDesk appears to be offline. Check your network connection and try again.": {
+      "comment": "Shown when the device has no network connection",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WootDesk appears to be offline. Check your network connection and try again."
+          }
+        }
+      }
+    },
+    "WootDesk could not %@. %@": {
+      "comment": "Combines a triage action name with the reason the server rejected it",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WootDesk could not %1$@. %2$@"
+          }
+        }
+      }
+    },
+    "WootDesk could not complete the profile operation. Please try again.": {
+      "comment": "Generic fallback shown when a profile operation fails",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WootDesk could not complete the profile operation. Please try again."
+          }
+        }
+      }
+    },
+    "WootDesk could not open conversation #%@ from that notification. %@": {
+      "comment": "Combines a conversation number with the reason a notification could not be opened",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WootDesk could not open conversation #%1$@ from that notification. %2$@"
+          }
+        }
+      }
+    },
+    "WootDesk could not open conversation #%lld from that notification. %@": {
+      "comment": "Combines a conversation number with the reason a notification could not be opened",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WootDesk could not open conversation #%1$lld from that notification. %2$@"
+          }
+        }
+      }
+    },
+    "WootDesk could not restore the previous saved state. Keep the app open and review the local profile and Keychain data before trying again.": {
+      "comment": "Shown when both a profile write and its rollback failed",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WootDesk could not restore the previous saved state. Keep the app open and review the local profile and Keychain data before trying again."
+          }
+        }
+      }
+    },
+    "WootDesk could not save the server profile. The previous saved state was restored.": {
+      "comment": "Shown when saving profile metadata failed and was rolled back",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WootDesk could not save the server profile. The previous saved state was restored."
+          }
+        }
+      }
+    },
+    "WootDesk is an independent native client for Chatwoot. It is not affiliated with, maintained by, or endorsed by Chatwoot. The Chatwoot name and marks belong to their respective owners.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WootDesk is an independent native client for Chatwoot. It is not affiliated with, maintained by, or endorsed by Chatwoot. The Chatwoot name and marks belong to their respective owners."
+          }
+        }
+      }
+    },
+    "WootDesk registers with Apple and can enrol this saved server profile with an authenticated WootDesk Push Gateway. The gateway receives no Chatwoot personal access token.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WootDesk registers with Apple and can enrol this saved server profile with an authenticated WootDesk Push Gateway. The gateway receives no Chatwoot personal access token."
+          }
+        }
+      }
+    },
+    "WootDesk will ask the push gateway to remove this device registration, then delete the gateway credential for the active profile from Apple Keychain.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WootDesk will ask the push gateway to remove this device registration, then delete the gateway credential for the active profile from Apple Keychain."
+          }
+        }
+      }
+    },
+    "Workspace": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Workspace"
+          }
+        }
+      }
+    },
+    "Write a private note...": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Write a private note..."
+          }
+        }
+      }
+    },
+    "Write a reply...": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Write a reply..."
+          }
+        }
+      }
+    },
+    "Your profile has access to multiple accounts on this server. Choose which account you would like WootDesk to manage.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your profile has access to multiple accounts on this server. Choose which account you would like WootDesk to manage."
+          }
+        }
+      }
+    },
+    "Your status applies to %@ on the active Chatwoot server.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your status applies to %@ on the active Chatwoot server."
+          }
+        }
+      }
+    },
+    "add the label %@": {
+      "comment": "Names a triage action inside a failure message",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "add the label %@"
+          }
+        }
+      }
+    },
+    "change the assigned agent": {
+      "comment": "Names a triage action inside a failure message",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "change the assigned agent"
+          }
+        }
+      }
+    },
+    "change the assigned team": {
+      "comment": "Names a triage action inside a failure message",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "change the assigned team"
+          }
+        }
+      }
+    },
+    "clear the priority": {
+      "comment": "Names a triage action inside a failure message",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "clear the priority"
+          }
+        }
+      }
+    },
+    "e.g. Acme Support": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "e.g. Acme Support"
+          }
+        }
+      }
+    },
+    "https://chatwoot.example.com": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "https://chatwoot.example.com"
+          }
+        }
+      }
+    },
+    "https://push.example.com": {
+      "extractionState": "manual",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "https://push.example.com"
+          }
+        }
+      }
+    },
+    "remove the assigned agent": {
+      "comment": "Names a triage action inside a failure message",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "remove the assigned agent"
+          }
+        }
+      }
+    },
+    "remove the assigned team": {
+      "comment": "Names a triage action inside a failure message",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "remove the assigned team"
+          }
+        }
+      }
+    },
+    "remove the label %@": {
+      "comment": "Names a triage action inside a failure message",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "remove the label %@"
+          }
+        }
+      }
+    },
+    "set the priority to %@": {
+      "comment": "Names a triage action inside a failure message",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "set the priority to %@"
+          }
+        }
+      }
+    },
+    "set the status to %@": {
+      "comment": "Names a triage action inside a failure message",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en-GB": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "set the status to %@"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

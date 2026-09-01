@@ -70,6 +70,21 @@ final class WootDeskLaunchUITests: XCTestCase {
         XCTAssertTrue(tokenField.exists, "The token must be entered in a secure field.")
     }
 
+    /// Records cold-launch time against the invented first-run state.
+    ///
+    /// The launch reaches the setup screen with no saved profile, no Keychain
+    /// access and no network call, so the measurement covers WootDesk's own
+    /// start-up rather than a server round trip.
+    @MainActor
+    func testLaunchPerformance() throws {
+        measure(metrics: [XCTApplicationLaunchMetric()]) {
+            let app = XCUIApplication()
+            app.launchArguments = ["--uitesting"]
+            app.launch()
+            app.terminate()
+        }
+    }
+
     @MainActor
     func testConversationHistoryAndReplyWithoutNetwork() throws {
         let app = launchWithInventedConversations()

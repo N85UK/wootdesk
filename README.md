@@ -29,6 +29,8 @@ on the Apple App Store, or intended for general rollout.
 - **Replies and Private Notes:** Send plain-text agent replies or private notes through the Chatwoot Application API. Drafts remain in memory only and are cleared only after the server confirms creation.
 - **Safe Message Presentation:** Convert processed HTML to readable text, apply inline Markdown formatting without activating embedded links, and tolerate unknown message fields.
 - **Attachment Handling:** Upload selected files as documented `multipart/form-data`, retain selections in memory after recoverable failures, and show received attachment metadata without fetching remote content automatically. Opening a remote attachment requires an explicit confirmation.
+- **British English Throughout:** User-facing text is catalogued with British English as the source language, so translations can be added without code changes. Only British English ships today; a partially translated language is deliberately not included. Chatwoot identifiers are shown without locale grouping separators, so a conversation number matches what Chatwoot displays.
+- **Performance Regression Checks:** The normal test suite measures timeline loading, list filtering, and message presentation against documented thresholds using invented data, and fails when a threshold is exceeded. See [the performance baseline](docs/PERFORMANCE_BASELINE.md).
 - **Adaptive Navigation:** Mac and iPad present workspace navigation, the conversation list, and the selected conversation as three adjacent columns, collapsing to a single column without losing the selected workspace or conversation. iPhone uses a tab layout. The status filter becomes a menu at accessibility text sizes so no option is clipped.
 - **Conversation Triage:** Set a conversation to open, pending or resolved, snooze it until a chosen future time, set or clear its priority, assign it to an agent or team, and add or remove labels. Every change is confirmed by reading the conversation back from Chatwoot, so a value is shown only once the server reports it. Label changes read the current server set immediately before writing, so a label another agent added is never discarded.
 - **Notification Routing:** Opening a notification activates the saved profile it belongs to, clears the previous profile's data, removes any search or status filter that would hide the conversation, and fetches the conversation directly when it is outside the loaded page. A conversation that cannot be opened is explained rather than replaced with another one.
@@ -133,6 +135,7 @@ Detailed architectural and design documentation is available in [`docs/`](docs/)
 - [App Store Submission Guide](docs/APP_STORE_SUBMISSION.md)
 - [Draft App Store Metadata](docs/APP_STORE_METADATA.md)
 - [Release Readiness](docs/RELEASE_READINESS.md)
+- [Performance Baseline and Thresholds](docs/PERFORMANCE_BASELINE.md)
 - [Chatwoot Compatibility Runbook](docs/CHATWOOT_COMPATIBILITY.md)
 - [TestFlight Acceptance Plan](docs/TESTFLIGHT_TEST_PLAN.md)
 - [macOS UI Test Host Preparation](docs/MACOS_UI_TESTING.md)

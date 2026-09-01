@@ -16,7 +16,7 @@ public struct ConversationRowView: View {
                     .fill(Color.accentColor.opacity(0.15))
                     .frame(width: 40, height: 40)
 
-                Text(conversation.contact?.initials ?? "#\(conversation.id)")
+                Text(conversation.contact?.initials ?? "#\(conversation.id.identifierText)")
                     .font(.system(size: 14, weight: .bold))
                     .foregroundStyle(Color.accentColor)
             }
@@ -25,7 +25,7 @@ public struct ConversationRowView: View {
             // Conversation details
             VStack(alignment: .leading, spacing: 4) {
                 HStack(alignment: .firstTextBaseline) {
-                    Text(conversation.contact?.name ?? "Conversation #\(conversation.id)")
+                    Text(conversation.contact?.name ?? ConversationDetailView.untitledConversationName(for: conversation))
                         .font(.headline)
                         .lineLimit(1)
 

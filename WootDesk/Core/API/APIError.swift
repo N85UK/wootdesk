@@ -4,6 +4,9 @@ import Foundation
 ///
 /// Under no circumstances should authentication tokens or confidential data
 /// be embedded in error messages or descriptions.
+///
+/// Every message is catalogued. The literal at each call site is the British
+/// English wording, so an untranslated language falls back to it.
 public enum APIError: LocalizedError, Sendable, Equatable {
     case invalidURL
     case insecureScheme
@@ -25,43 +28,97 @@ public enum APIError: LocalizedError, Sendable, Equatable {
     public var errorDescription: String? {
         switch self {
         case .invalidURL:
-            return "The server URL provided is invalid. Please check the hostname and path."
+            return String(
+                localized: "The server URL provided is invalid. Please check the hostname and path.",
+                comment: "Shown when a Chatwoot server address cannot be parsed"
+            )
         case .insecureScheme:
-            return "HTTPS is required for secure connections to Chatwoot servers. Plain HTTP is only permitted on localhost in debug builds."
+            return String(
+                localized: "HTTPS is required for secure connections to Chatwoot servers. Plain HTTP is only permitted on localhost in debug builds.",
+                comment: "Shown when a server address does not use HTTPS"
+            )
         case .unauthorized:
-            return "Authentication failed. Please verify that your Chatwoot personal access token is active and valid."
+            return String(
+                localized: "Authentication failed. Please verify that your Chatwoot personal access token is active and valid.",
+                comment: "Shown when the Chatwoot server rejects the access token"
+            )
         case .forbidden:
-            return "Access denied. Your user profile does not have permission to access this resource or account."
+            return String(
+                localized: "Access denied. Your user profile does not have permission to access this resource or account.",
+                comment: "Shown when the agent lacks permission for a Chatwoot resource"
+            )
         case .notFound:
-            return "The requested resource was not found on the Chatwoot server. Please check the account ID and server configuration."
+            return String(
+                localized: "The requested resource was not found on the Chatwoot server. Please check the account ID and server configuration.",
+                comment: "Shown when a Chatwoot resource does not exist"
+            )
         case .rateLimited(let retryAfter):
             if let retryAfter {
-                return "Rate limit reached. Please wait \(Int(retryAfter)) seconds before trying again."
+                return String(
+                    localized: "Rate limit reached. Please wait \(Int(retryAfter)) seconds before trying again.",
+                    comment: "Shown when Chatwoot rate limits a request and states a wait time in seconds"
+                )
             }
-            return "Rate limit reached. Please wait a moment before trying again."
+            return String(
+                localized: "Rate limit reached. Please wait a moment before trying again.",
+                comment: "Shown when Chatwoot rate limits a request without stating a wait time"
+            )
         case .serverError(let statusCode, let message):
             if let message, !message.isEmpty {
-                return "The Chatwoot server reported an error (HTTP \(statusCode)): \(message)"
+                return String(
+                    localized: "The Chatwoot server reported an error (HTTP \(statusCode)): \(message)",
+                    comment: "Shown when Chatwoot returns an error status and a message"
+                )
             }
-            return "The Chatwoot server returned an error (HTTP \(statusCode))."
+            return String(
+                localized: "The Chatwoot server returned an error (HTTP \(statusCode)).",
+                comment: "Shown when Chatwoot returns an error status without a message"
+            )
         case .offline:
-            return "WootDesk appears to be offline. Check your network connection and try again."
+            return String(
+                localized: "WootDesk appears to be offline. Check your network connection and try again.",
+                comment: "Shown when the device has no network connection"
+            )
         case .timedOut:
-            return "The Chatwoot server took too long to respond. Check the server address and try again."
+            return String(
+                localized: "The Chatwoot server took too long to respond. Check the server address and try again.",
+                comment: "Shown when a request to Chatwoot times out"
+            )
         case .tlsFailure:
-            return "A secure connection to the Chatwoot server could not be established. Check the server certificate and system trust settings."
+            return String(
+                localized: "A secure connection to the Chatwoot server could not be established. Check the server certificate and system trust settings.",
+                comment: "Shown when the TLS handshake with Chatwoot fails"
+            )
         case .networkError(let details):
-            return "Network connection error: \(details)"
+            return String(
+                localized: "Network connection error: \(details)",
+                comment: "Shown when a network request fails for another reason"
+            )
         case .decodingError(let details):
-            return "Failed to process the response from the Chatwoot server: \(details)"
+            return String(
+                localized: "Failed to process the response from the Chatwoot server: \(details)",
+                comment: "Shown when a Chatwoot response cannot be decoded"
+            )
         case .invalidMessageContent:
-            return "Enter a reply or private note before sending."
+            return String(
+                localized: "Enter a reply or private note before sending.",
+                comment: "Shown when the agent tries to send an empty message"
+            )
         case .invalidSnoozeTime:
-            return "Choose a snooze time in the future."
+            return String(
+                localized: "Choose a snooze time in the future.",
+                comment: "Shown when the agent chooses a snooze time that has already passed"
+            )
         case .noAccountsAvailable:
-            return "The validated user profile is not associated with any active Chatwoot accounts."
+            return String(
+                localized: "The validated user profile is not associated with any active Chatwoot accounts.",
+                comment: "Shown when a validated Chatwoot profile has no accounts"
+            )
         case .cancelled:
-            return "The network request was cancelled."
+            return String(
+                localized: "The network request was cancelled.",
+                comment: "Shown when a request is cancelled before it completes"
+            )
         }
     }
 }
