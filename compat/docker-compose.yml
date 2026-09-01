@@ -40,6 +40,28 @@ services:
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
 
+  # The Chatwoot entrypoint waits for Postgres but never creates the schema, so
+  # rails and sidekiq crash-loop on a fresh volume with
+  # `relation "installation_configs" does not exist`. This one-shot service
+  # prepares the database and exits, and the app services wait for it to finish.
+  # db:chatwoot_prepare is idempotent, so it is safe on every start.
+  db-prepare:
+    image: chatwoot/chatwoot:${CHATWOOT_VERSION:?set CHATWOOT_VERSION in compat/.env}
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file: [.env]
+    environment:
+      NODE_ENV: production
+      RAILS_ENV: production
+      INSTALLATION_ENV: docker
+    entrypoint: ["bundle", "exec", "rails", "db:chatwoot_prepare"]
+    volumes:
+      - storage:/app/storage
+
   rails:
     image: chatwoot/chatwoot:${CHATWOOT_VERSION:?set CHATWOOT_VERSION in compat/.env}
     restart: unless-stopped
@@ -48,6 +70,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      db-prepare:
+        condition: service_completed_successfully
     env_file: [.env]
     environment:
       NODE_ENV: production
@@ -66,6 +90,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      db-prepare:
+        condition: service_completed_successfully
     env_file: [.env]
     environment:
       NODE_ENV: production

@@ -22,7 +22,10 @@ if agent.nil?
     name: AGENT_NAME,
     display_name: AGENT_NAME,
     email: AGENT_EMAIL,
-    password: SecureRandom.hex(24)
+    # Chatwoot requires an uppercase letter and a special character, which
+    # SecureRandom.hex cannot produce on its own. The password is never needed:
+    # WootDesk authenticates with the access token written below.
+    password: "Aa1!#{SecureRandom.hex(24)}"
   )
   agent.skip_confirmation!
   agent.save!
