@@ -38,6 +38,42 @@ Suggested invented records include an account named `WootDesk Compatibility`, a
 contact named `Avery Example`, and a conversation about a fictional sample
 export. Do not copy records from a real server.
 
+## Standing the server up
+
+A reproducible stack is provided so the dedicated server does not have to be
+built by hand. It runs a pinned Chatwoot release, Postgres with pgvector, Redis,
+and Caddy for trusted HTTPS, and it is isolated from every production system.
+
+```bash
+script/compat_env.sh up
+```
+
+First boot runs migrations and takes several minutes. Then load the invented
+records, which prints the account and conversation identifiers the checks need:
+
+```bash
+script/compat_env.sh seed
+```
+
+WootDesk requires system-trusted certificates, so trust Caddy's local
+certificate authority once:
+
+```bash
+script/compat_env.sh trust
+```
+
+Destroy everything, including volumes, after a mutating run:
+
+```bash
+script/compat_env.sh reset
+```
+
+Pin the exact release in `compat/.env` through `CHATWOOT_VERSION`. Record that
+tag in the supported-version matrix below. The seeded records are invented:
+account `WootDesk Compatibility`, contact `Avery Example`, and a conversation
+about a fictional sample export, with a public reply, a private note, and
+labels the triage checks add to and remove from.
+
 ## Running read-only checks
 
 Run the script interactively so the token is entered without being echoed:

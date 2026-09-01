@@ -1,0 +1,16 @@
+# Terminates HTTPS for the invented-data Chatwoot compatibility server.
+#
+# `tls internal` issues a certificate from Caddy's own local certificate
+# authority. Trusting that CA once on the host makes the certificate
+# system-trusted, which is what the dedicated-server requirements ask for and
+# what WootDesk's transport rules require.
+
+{
+	admin off
+	local_certs
+}
+
+wootdesk-compat.localhost {
+	tls internal
+	reverse_proxy rails:3000
+}

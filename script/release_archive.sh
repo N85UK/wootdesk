@@ -10,6 +10,7 @@
 #   script/release_archive.sh --team <TEAM_ID> [--platform ios|macos|all]
 #   script/release_archive.sh --preflight-only --team <TEAM_ID>
 #   script/release_archive.sh --team <TEAM_ID> --upload --authorised-build <ref>
+#   script/release_archive.sh --team <TEAM_ID> --build-number <n> --upload ...
 #
 # Uploading is opt-in and requires --authorised-build to name the build the
 # release owner has authorised, so a build is never uploaded merely because it
@@ -31,6 +32,8 @@ PLATFORM="all"
 PREFLIGHT_ONLY=0
 DO_UPLOAD=0
 AUTHORISED_BUILD=""
+BUILD_NUMBER=""
+ALLOW_BETA_XCODE=0
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -39,6 +42,9 @@ while [[ $# -gt 0 ]]; do
         --preflight-only) PREFLIGHT_ONLY=1; shift ;;
         --upload) DO_UPLOAD=1; shift ;;
         --authorised-build) AUTHORISED_BUILD="$2"; shift 2 ;;
+        --build-number) BUILD_NUMBER="$2"; shift 2 ;;
+        # TestFlight accepts beta-built binaries; only App Store review does not.
+        --allow-beta-xcode) ALLOW_BETA_XCODE=1; shift ;;
         -h|--help) sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
         *) echo "Unknown option: $1" >&2; exit 2 ;;
     esac
@@ -146,11 +152,17 @@ echo "-> Checking the active Xcode toolchain..."
 XCODE_PATH="$(xcode-select -p 2>/dev/null || true)"
 case "${XCODE_PATH}" in
     *beta*|*Beta*)
-        fail "The active Xcode is a beta toolchain: ${XCODE_PATH}" \
-            "Apple does not accept App Store submissions built with a beta Xcode." \
-            "Install a stable Xcode and select it with:" \
-            "  sudo xcode-select -s /Applications/Xcode.app" \
-            "then run this script again."
+        if [[ "${ALLOW_BETA_XCODE}" -eq 1 ]]; then
+            echo "   WARNING: beta toolchain ${XCODE_PATH}, allowed for TestFlight only."
+            echo "   An App Store review submission still requires a stable Xcode."
+        else
+            fail "The active Xcode is a beta toolchain: ${XCODE_PATH}" \
+                "Apple does not accept App Store submissions built with a beta Xcode." \
+                "TestFlight does accept them: re-run with --allow-beta-xcode to build" \
+                "for TestFlight only." \
+                "For an App Store submission, install a stable Xcode and select it:" \
+                "  sudo xcode-select -s /Applications/Xcode.app"
+        fi
         ;;
 esac
 echo "   Active toolchain: ${XCODE_PATH}"
@@ -162,13 +174,19 @@ if ! security find-identity -v -p codesigning 2>/dev/null | grep -q "Apple Distr
 fi
 echo "   Apple Distribution identity present."
 
-case "${PLATFORM}" in
-    ios|all) echo "-> Checking the iOS distribution profile..."; require_push_capable_profile "iOS" ;;
-esac
-case "${PLATFORM}" in
-    macos|all) echo "-> Checking the macOS distribution profile..."; require_push_capable_profile "macOS" ;;
-esac
-echo "   Distribution profiles satisfy the declared capabilities."
+if [[ -n "${ASC_KEY_PATH:-}" && -n "${ASC_KEY_ID:-}" && -n "${ASC_ISSUER_ID:-}" ]]; then
+    # An API key lets xcodebuild create or refresh the managed profile during the
+    # build, so a stale or missing local profile is not a blocker.
+    echo "-> Skipping the local profile check: an API key can refresh profiles during the build."
+else
+    case "${PLATFORM}" in
+        ios|all) echo "-> Checking the iOS distribution profile..."; require_push_capable_profile "iOS" ;;
+    esac
+    case "${PLATFORM}" in
+        macos|all) echo "-> Checking the macOS distribution profile..."; require_push_capable_profile "macOS" ;;
+    esac
+    echo "   Distribution profiles satisfy the declared capabilities."
+fi
 
 if [[ "${PREFLIGHT_ONLY}" -eq 1 ]]; then
     echo ""
@@ -177,6 +195,19 @@ if [[ "${PREFLIGHT_ONLY}" -eq 1 ]]; then
 fi
 
 mkdir -p "${ARCHIVE_ROOT}"
+
+# When an App Store Connect API key is available, xcodebuild can create and
+# refresh Xcode-managed profiles without an interactive account session. This is
+# what makes unattended CI signing possible.
+AUTH_ARGS=()
+if [[ -n "${ASC_KEY_PATH:-}" && -n "${ASC_KEY_ID:-}" && -n "${ASC_ISSUER_ID:-}" ]]; then
+    AUTH_ARGS=(
+        -authenticationKeyPath "${ASC_KEY_PATH}"
+        -authenticationKeyID "${ASC_KEY_ID}"
+        -authenticationKeyIssuerID "${ASC_ISSUER_ID}"
+    )
+    echo "-> Using an App Store Connect API key for provisioning updates."
+fi
 
 export_options() {
     local destination_plist="$1"
@@ -210,6 +241,11 @@ archive_platform() {
     echo ""
     echo "-> Archiving ${label}..."
     rm -rf "${archive_path}" "${export_path}"
+    local build_setting_overrides=(DEVELOPMENT_TEAM="${TEAM_ID}")
+    if [[ -n "${BUILD_NUMBER}" ]]; then
+        build_setting_overrides+=(CURRENT_PROJECT_VERSION="${BUILD_NUMBER}")
+    fi
+
     xcodebuild archive \
         -project "${PROJECT}" \
         -scheme "${SCHEME}" \
@@ -217,7 +253,8 @@ archive_platform() {
         -configuration Release \
         -archivePath "${archive_path}" \
         -allowProvisioningUpdates \
-        DEVELOPMENT_TEAM="${TEAM_ID}"
+        "${AUTH_ARGS[@]}" \
+        "${build_setting_overrides[@]}"
 
     echo "-> Verifying the ${label} archive was signed for distribution..."
     local app
@@ -243,7 +280,8 @@ archive_platform() {
         -archivePath "${archive_path}" \
         -exportOptionsPlist "${options_plist}" \
         -exportPath "${export_path}" \
-        -allowProvisioningUpdates
+        -allowProvisioningUpdates \
+        "${AUTH_ARGS[@]}"
     echo "   Exported to ${export_path}"
 }
 

@@ -73,6 +73,7 @@ predates the Milestone 2 source changes.
 | Push notification design and activation | `docs/PUSH_NOTIFICATIONS.md` |
 | Performance baseline and thresholds | `docs/PERFORMANCE_BASELINE.md` |
 | App Store screenshots | `docs/screenshots/README.md` |
+| TestFlight delivery pipeline | `docs/TESTFLIGHT_DELIVERY.md` |
 | Push gateway deployment and API contract | `Gateway/README.md` |
 
 ## Delivery gates
@@ -84,7 +85,7 @@ predates the Milestone 2 source changes.
 | G3 Conversation list | Real list, paging, filters, clear states | Implemented and locally verified |
 | G4 Automated quality | macOS and iOS builds, unit tests, UI tests, performance checks | The current source passes macOS and iOS Simulator builds, 192 Swift tests in 19 suites including the performance regression checks, 18 Node gateway tests, and the 4 macOS UI tests including the conversation journey and the cold-launch metric; the three opt-in live compatibility tests are skipped by design. The recorded iPhone and iPad UI journeys have not been re-run on hardware since the conversation actions and the iPad split layout were added |
 | G5 Signed archives | iOS and macOS Organizer validation | Blocked. Both the iOS and macOS App Store distribution profiles for `dev.n85.wootdesk` lack the Push Notifications capability, so neither platform can produce a distributable archive. See "Signing blocker" below |
-| G6 TestFlight | Physical-device and Mac acceptance | Not started |
+| G6 TestFlight | Physical-device and Mac acceptance | Delivery pipeline implemented in `.github/workflows/testflight.yml`, so every green build on main reaches TestFlight. Blocked on App Store Connect API access, which the account does not yet have. TestFlight currently offers only build 2, which predates Milestone 2 |
 | G7 Product completeness | Message history, replies, private notes, attachments, and conversation triage | Source implementation complete; live acceptance pending |
 | G8 Public release | Explicit product, security, and release approval | No-go |
 | G9 Remote notifications | Push provider, push-capable signing, and profile-safe physical-device delivery | Client and gateway source implemented; capability, deployment, recipient policy, and physical acceptance pending |
@@ -202,7 +203,10 @@ requires an explicit current authorisation naming the specific build.
 1. Sign in to Xcode with the Apple Developer account so automatic signing can
    refresh the managed App Store profiles, which is what currently prevents a
    distributable archive from being created at all.
-2. Prepare a dedicated review-only Chatwoot environment with invented data.
+2. Request App Store Connect API access, then add the delivery secrets, so
+   every build reaches TestFlight for end-to-end testing instead of testing
+   against build 2.
+3. Stand up the invented-data Chatwoot environment with `script/compat_env.sh`.
 2. Run the opt-in live compatibility matrix for history, replies, private notes,
    attachments, availability, and triage.
 3. Review and deploy the implemented Chatwoot-to-APNs gateway with approved

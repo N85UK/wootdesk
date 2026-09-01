@@ -46,3 +46,7 @@ fastlane/test_output/
 *.mobileprovision
 *.provisionprofile
 Gateway/data/
+
+# Local compatibility server secrets and tokens. Never commit these.
+compat/.env
+compat/.token
