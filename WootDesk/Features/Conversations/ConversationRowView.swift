@@ -1,7 +1,23 @@
 import SwiftUI
 
+/// How a conversation row arranges its status, priority and inbox badges.
+///
+/// The badges cannot share one line at an accessibility text size. Left in an
+/// `HStack` they are compressed to their minimum intrinsic width, which wraps
+/// every label to a single character per line, so "Urgent" renders as a
+/// vertical column of letters. Stacking them keeps each badge readable instead.
+public enum ConversationRowMetadataLayout: Sendable {
+    case row
+    case stacked
+
+    public static func preferred(for size: DynamicTypeSize) -> Self {
+        size.isAccessibilitySize ? .stacked : .row
+    }
+}
+
 /// Renders a single conversation row with contact information, status, and message preview.
 public struct ConversationRowView: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     public let conversation: Conversation
 
     public init(conversation: Conversation) {
@@ -48,42 +64,69 @@ public struct ConversationRowView: View {
                         .italic()
                 }
 
-                HStack(spacing: 6) {
-                    statusBadge(conversation.status)
-
-                    if let priority = conversation.priority {
-                        priorityBadge(priority)
-                    }
-
-                    if let inbox = conversation.inboxName {
-                        Text(inbox)
-                            .font(.caption2)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.secondary.opacity(0.1))
-                            .foregroundStyle(.secondary)
-                            .clipShape(Capsule())
-                    }
-
-                    Spacer()
-
-                    if conversation.unreadCount > 0 {
-                        Text("\(conversation.unreadCount)")
-                            .font(.caption2.bold())
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.accentColor)
-                            .foregroundStyle(.white)
-                            .clipShape(Capsule())
-                            .accessibilityLabel("\(conversation.unreadCount) unread messages")
-                    }
-                }
-                .padding(.top, 2)
+                metadata
+                    .padding(.top, 2)
             }
         }
         .padding(.vertical, 4)
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("conversation-row-\(conversation.id)")
+    }
+
+    /// The badge row, laid out horizontally or stacked depending on text size.
+    @ViewBuilder
+    private var metadata: some View {
+        switch ConversationRowMetadataLayout.preferred(for: dynamicTypeSize) {
+        case .row:
+            HStack(spacing: 6) {
+                badges
+                Spacer()
+                unreadBadge
+            }
+        case .stacked:
+            VStack(alignment: .leading, spacing: 4) {
+                badges
+                unreadBadge
+            }
+        }
+    }
+
+    /// Every badge keeps its intrinsic width so a label never wraps mid-word.
+    @ViewBuilder
+    private var badges: some View {
+        statusBadge(conversation.status)
+
+        if let priority = conversation.priority {
+            priorityBadge(priority)
+        }
+
+        if let inbox = conversation.inboxName {
+            Text(inbox)
+                .font(.caption2)
+                .lineLimit(1)
+                .fixedSize(horizontal: true, vertical: false)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 2)
+                .background(Color.secondary.opacity(0.1))
+                .foregroundStyle(.secondary)
+                .clipShape(Capsule())
+        }
+    }
+
+    @ViewBuilder
+    private var unreadBadge: some View {
+        if conversation.unreadCount > 0 {
+            Text("\(conversation.unreadCount)")
+                .font(.caption2.bold())
+                .lineLimit(1)
+                .fixedSize(horizontal: true, vertical: false)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 2)
+                .background(Color.accentColor)
+                .foregroundStyle(.white)
+                .clipShape(Capsule())
+                .accessibilityLabel("\(conversation.unreadCount) unread messages")
+        }
     }
 
     private func statusBadge(_ status: ConversationStatus) -> some View {
@@ -98,6 +141,8 @@ public struct ConversationRowView: View {
 
         return Text(status.displayName)
             .font(.caption2.weight(.medium))
+            .lineLimit(1)
+            .fixedSize(horizontal: true, vertical: false)
             .padding(.horizontal, 6)
             .padding(.vertical, 2)
             .background(bg)
@@ -117,6 +162,8 @@ public struct ConversationRowView: View {
 
         return Label(priority.displayName, systemImage: "flag.fill")
             .font(.caption2)
+            .lineLimit(1)
+            .fixedSize(horizontal: true, vertical: false)
             .foregroundStyle(fg)
             .labelStyle(.titleAndIcon)
     }

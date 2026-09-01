@@ -128,4 +128,38 @@ struct AdaptiveNavigationTests {
         // sizes without clipping, so the control changes rather than the text.
         #expect(ConversationFilterPickerLayout.preferred(for: size) == .menu)
     }
+
+    @Test(
+        "Conversation row metadata stays on one line at standard text sizes",
+        arguments: [
+            DynamicTypeSize.xSmall,
+            .small,
+            .medium,
+            .large,
+            .xLarge,
+            .xxLarge,
+            .xxxLarge
+        ]
+    )
+    func testRowMetadataStaysInARowAtStandardSizes(size: DynamicTypeSize) {
+        #expect(ConversationRowMetadataLayout.preferred(for: size) == .row)
+    }
+
+    @Test(
+        "Conversation row metadata stacks at accessibility text sizes",
+        arguments: [
+            DynamicTypeSize.accessibility1,
+            .accessibility2,
+            .accessibility3,
+            .accessibility4,
+            .accessibility5
+        ]
+    )
+    func testRowMetadataStacksAtAccessibilitySizes(size: DynamicTypeSize) {
+        // Status, priority and inbox badges cannot share one line at these
+        // sizes. Left in an HStack they are squeezed to their minimum width,
+        // which wraps each label to one character per line, so "Urgent" renders
+        // as a vertical column of letters. Stacking keeps every badge readable.
+        #expect(ConversationRowMetadataLayout.preferred(for: size) == .stacked)
+    }
 }
