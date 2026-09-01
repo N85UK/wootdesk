@@ -1,8 +1,8 @@
 # Chatwoot Live Compatibility Testing
 
-Status: Harness available, dedicated-server execution pending
+Status: Server verified and seeded; checks reach it and stop at the CA trust step
 
-Last reviewed: 31 August 2026
+Last reviewed: 1 September 2026
 
 ## Purpose
 
@@ -113,13 +113,54 @@ is the isolated invented-data server:
 Both flags are mandatory. A coding agent must still receive explicit action-time
 approval before it runs this command because it changes remote data.
 
+## Environment verification, 1 September 2026
+
+The stack was built from scratch, destroyed, and rebuilt to confirm it comes up
+unattended. Two defects had to be fixed first, both of which failed silently:
+
+| Defect | Effect | Fix |
+|---|---|---|
+| The compose stack never created the database schema | `rails` and `sidekiq` crash-looped on a fresh volume with `relation "installation_configs" does not exist`, while `compat_env.sh up` still exited 0 | One-shot `db-prepare` service running `db:chatwoot_prepare`, with both app services waiting on `service_completed_successfully` |
+| The seed password used `SecureRandom.hex`, which has no uppercase or special character | Chatwoot 4.9 rejected the agent record, so the seed aborted | Password prefixed to satisfy the policy. It is never used; WootDesk authenticates with the access token |
+| `live_compatibility.sh` exported `WOOTDESK_LIVE_*` into its own environment only | `xcodebuild` forwards only `TEST_RUNNER_`-prefixed variables, so all three cases skipped themselves and the script exited 0, which looked like a passing run that never contacted the server | The script now exports each setting under a `TEST_RUNNER_` prefix as well |
+
+Verified against `chatwoot/chatwoot:v4.9.0` over the proxied HTTPS endpoint:
+
+| Check | Result |
+|---|---|
+| `GET /api/v1/profile` | User 1, `Compatibility Agent`, account 1 `WootDesk Compatibility`, role `administrator` |
+| `GET /api/v1/accounts/1/conversations?status=open` | One conversation, `open`, label `billing`, assigned to the agent |
+| `GET /api/v1/accounts/1/conversations/1/messages` | 4 messages, of which 1 is a private note |
+| `GET /api/v1/accounts/1/labels` | `billing`, `engineering`, `export` |
+
+### Proxy header behaviour worth keeping
+
+Through the Caddy proxy, a request carrying only `api_access_token` is rejected
+with HTTP 401, while the same request carrying `api-access-token` succeeds.
+Directly against Rails both spellings work, so the underscore form is lost in
+proxying. WootDesk already sends both spellings from
+`WootDesk/Core/API/APIRequest.swift`, which is why it is unaffected. This is
+worth keeping in the record: it reproduces a real self-hosted deployment
+hazard, and it independently confirms that defence is load-bearing rather than
+decorative.
+
+### Remaining step
+
+The three compatibility cases now execute and reach the network. They fail with
+`tlsFailure` until Caddy's local CA is trusted, which needs `sudo` against the
+System keychain:
+
+```bash
+script/compat_env.sh trust
+```
+
 ## Supported-version matrix
 
 Record evidence without credentials or message bodies:
 
 | Chatwoot release | Deployment | Read-only | Public reply | Private note | Attachment | Availability | Triage | Date | Reviewer |
 |---|---|---|---|---|---|---|---|---|---|
-| Current supported release | Dedicated container | Pending | Pending | Pending | Pending | Pending | Pending | | |
+| `chatwoot/chatwoot:v4.9.0` | Dedicated container | Blocked on CA trust | Blocked on CA trust | Blocked on CA trust | Blocked on CA trust | Blocked on CA trust | Blocked on CA trust | 1 Sep 2026 | Environment verified over the API; Swift suite pending CA trust |
 | Previous supported release | Dedicated container | Pending | Pending | Pending | Pending | Pending | Pending | | |
 
 Pin exact Chatwoot image versions for each run. Do not use a floating `latest`
