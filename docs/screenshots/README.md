@@ -21,8 +21,14 @@ pixel dimensions exactly, captured at native simulator resolution.
 
 | Directory | Device | Pixels | App Store display class |
 |---|---|---|---|
+| `iphone-6.5/` | iPhone 13 Pro Max | 1284 x 2778 | iPhone 6.5 inch, **the slot App Store Connect actually shows** |
 | `iphone-6.9/` | iPhone 17 Pro Max | 1320 x 2868 | iPhone 6.9 inch |
 | `ipad-13/` | iPad Pro 13-inch (M5) | 2064 x 2752 | iPad 13 inch |
+
+The listing for this app presents a **6.5 inch** iPhone slot, which accepts
+1242 x 2688, 2688 x 1242, 1284 x 2778 or 2778 x 1284. The 6.9 inch captures do
+not fit it. App Store Connect states it will use the 6.5 inch screenshots for
+all iPhone display sizes, so that set is the one to complete first.
 
 ## Current set
 
@@ -33,11 +39,19 @@ pixel dimensions exactly, captured at native simulator resolution.
 | `iphone-6.9/03-status-actions-menu.png` | The status menu, with the current value marked by a symbol rather than by colour alone |
 | `ipad-13/01-three-column-workspace.png` | The three adjacent areas: workspace sidebar, conversation list, and conversation detail |
 
+## Uploaded to App Store Connect
+
+`iphone-6.5/01-conversation-list.png` is uploaded against iOS version 1.0 and
+build 24. The listing shows "1 of 10 Screenshots".
+
 ## Known gaps
 
-* The iPad set shows the empty detail column. A capture with a conversation
-  selected needs a tap on the iPad simulator, which requires simulator device
-  access to be granted, or a manual tap before capturing.
+* Only one 6.5 inch screenshot is uploaded. The conversation detail and the
+  triage menu still need capturing at 1284 x 2778. Driving taps on the
+  simulator needs simulator device access to be granted from the panel; the
+  request went unanswered, so only the launch screen could be captured
+  unattended.
+* The iPad set shows the empty detail column, for the same reason.
 * No macOS screenshots are captured yet. macOS App Store listings need their own
   set at 2880 x 1800 or another accepted Mac size.
 * The set has not been reviewed or ordered for the store listing. Ordering,
