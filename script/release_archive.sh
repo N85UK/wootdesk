@@ -174,7 +174,7 @@ if ! security find-identity -v -p codesigning 2>/dev/null | grep -q "Apple Distr
 fi
 echo "   Apple Distribution identity present."
 
-if [[ -n "${ASC_KEY_PATH:-}" && -n "${ASC_KEY_ID:-}" && -n "${ASC_ISSUER_ID:-}" ]]; then
+if [[ ( -n "${ASC_KEY_PATH:-}" || -n "${ASC_KEY_P8:-}" ) && -n "${ASC_KEY_ID:-}" && -n "${ASC_ISSUER_ID:-}" ]]; then
     # An API key lets xcodebuild create or refresh the managed profile during the
     # build, so a stale or missing local profile is not a blocker.
     echo "-> Skipping the local profile check: an API key can refresh profiles during the build."
@@ -269,23 +269,9 @@ archive_platform() {
         "${AUTH_ARGS[@]}" \
         "${build_setting_overrides[@]}"
 
-    echo "-> Verifying the ${label} archive was signed for distribution..."
     local app
     app="$(find "${archive_path}/Products" -maxdepth 3 -name "WootDesk.app" | head -1)"
     [[ -n "${app}" ]] || fail "The ${label} archive contains no WootDesk.app."
-
-    local entitlements
-    entitlements="$(codesign -d --entitlements :- "${app}" 2>/dev/null | plutil -p - 2>/dev/null || true)"
-    if echo "${entitlements}" | grep -q '"get-task-allow" => 1'; then
-        fail "The ${label} archive is signed for development, not distribution." \
-            "get-task-allow is present, so App Store Connect will reject it." \
-            "This usually means automatic signing fell back to a development profile."
-    fi
-    if echo "${entitlements}" | grep -qi '"aps-environment" => "development"'; then
-        fail "The ${label} archive carries the development push environment." \
-            "A distributed build must use the production aps-environment."
-    fi
-    echo "   ${label} archive is distribution signed."
 
     echo "-> Exporting the ${label} App Store package..."
     export_options "${options_plist}"
@@ -296,6 +282,48 @@ archive_platform() {
         -allowProvisioningUpdates \
         "${AUTH_ARGS[@]}"
     echo "   Exported to ${export_path}"
+
+    verify_exported_signing "${label}" "${export_path}"
+}
+
+# Confirms the uploadable package is genuinely signed for distribution.
+# App Store Connect rejects a development-signed payload, and the archive step
+# alone cannot tell you, because re-signing happens during export.
+verify_exported_signing() {
+    local label="$1" export_path="$2"
+    echo "-> Verifying the exported ${label} package is distribution signed..."
+
+    local payload_app inspect_dir
+    inspect_dir="$(mktemp -d)"
+    local ipa
+    ipa="$(find "${export_path}" -maxdepth 1 -name "*.ipa" | head -1)"
+    if [[ -n "${ipa}" ]]; then
+        (cd "${inspect_dir}" && unzip -qq "${ipa}")
+        payload_app="$(find "${inspect_dir}/Payload" -maxdepth 1 -name "*.app" | head -1)"
+    else
+        # macOS exports a .pkg, whose payload is not inspected the same way.
+        echo "   No .ipa to inspect for ${label}; relying on the export method."
+        rm -rf "${inspect_dir}"
+        return 0
+    fi
+
+    [[ -n "${payload_app}" ]] || { rm -rf "${inspect_dir}"; fail "The exported ${label} package contains no app."; }
+
+    local entitlements
+    entitlements="$(codesign -d --entitlements :- "${payload_app}" 2>/dev/null | plutil -p - 2>/dev/null || true)"
+    local problem=""
+    if echo "${entitlements}" | grep -q '"get-task-allow" => 1'; then
+        problem="get-task-allow is present, so the payload is development signed"
+    elif echo "${entitlements}" | grep -qi '"aps-environment" => "development"'; then
+        problem="the payload carries the development push environment"
+    fi
+    rm -rf "${inspect_dir}"
+
+    if [[ -n "${problem}" ]]; then
+        fail "The exported ${label} package is not distribution signed: ${problem}." \
+            "App Store Connect would reject this upload."
+    fi
+    echo "   Exported ${label} package is distribution signed."
 }
 
 case "${PLATFORM}" in
