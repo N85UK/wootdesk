@@ -1,0 +1,19 @@
+{
+  "id": 1041,
+  "account_id": 1,
+  "inbox_id": 3,
+  "status": "snoozed",
+  "priority": "urgent",
+  "snoozed_until": 1767225600,
+  "unread_count": 0,
+  "last_activity_at": 1735737000,
+  "created_at": 1735730000,
+  "labels": ["billing", "export"],
+  "inbox_name": "Website Live Chat",
+  "meta": {
+    "sender": { "id": 501, "name": "Ada Sample", "email": "ada@example.invalid" },
+    "assignee": { "id": 7001, "name": "Sample Agent", "available_name": "Sample Agent", "availability_status": "online" },
+    "team": { "id": 6001, "name": "Sample Escalations" },
+    "channel": "Channel::WebWidget"
+  }
+}

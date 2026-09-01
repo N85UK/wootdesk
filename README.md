@@ -29,6 +29,9 @@ on the Apple App Store, or intended for general rollout.
 - **Replies and Private Notes:** Send plain-text agent replies or private notes through the Chatwoot Application API. Drafts remain in memory only and are cleared only after the server confirms creation.
 - **Safe Message Presentation:** Convert processed HTML to readable text, apply inline Markdown formatting without activating embedded links, and tolerate unknown message fields.
 - **Attachment Handling:** Upload selected files as documented `multipart/form-data`, retain selections in memory after recoverable failures, and show received attachment metadata without fetching remote content automatically. Opening a remote attachment requires an explicit confirmation.
+- **Adaptive Navigation:** Mac and iPad present workspace navigation, the conversation list, and the selected conversation as three adjacent columns, collapsing to a single column without losing the selected workspace or conversation. iPhone uses a tab layout. The status filter becomes a menu at accessibility text sizes so no option is clipped.
+- **Conversation Triage:** Set a conversation to open, pending or resolved, snooze it until a chosen future time, set or clear its priority, assign it to an agent or team, and add or remove labels. Every change is confirmed by reading the conversation back from Chatwoot, so a value is shown only once the server reports it. Label changes read the current server set immediately before writing, so a label another agent added is never discarded.
+- **Notification Routing:** Opening a notification activates the saved profile it belongs to, clears the previous profile's data, removes any search or status filter that would hide the conversation, and fetches the conversation directly when it is outside the loaded page. A conversation that cannot be opened is explained rather than replaced with another one.
 - **Server Isolation:** Conversation and message state is cleared whenever the active server profile or selected conversation changes.
 - **Sandboxed on macOS:** The Mac app runs in the App Sandbox with outbound network access and read-only access to files the user explicitly selects for upload.
 - **Original App Identity:** Includes distinct iOS, iPadOS, and macOS app icon treatments based on a generic inbox and conversation symbol, without Chatwoot branding.
@@ -37,7 +40,7 @@ on the Apple App Store, or intended for general rollout.
 - **Strict Concurrency:** Built entirely in Swift 6 language mode with complete strict concurrency checking.
 
 ### Planned Functionality (Upcoming Milestones)
-- **Milestone 2 Completion:** Dedicated live-server acceptance and conversation workflow actions such as status, assignment, and labels.
+- **Milestone 2 Completion:** Dedicated live-server acceptance for the message and triage workflows.
 - **Milestone 3:** Deploy and accept the authenticated push gateway, add a reviewed per-agent recipient policy, complete signed physical-device notification testing, and add WebSocket invalidation via ActionCable (`RoomChannel`).
 - **Milestone 4:** Privacy-preserving WootDesk AI Gateway integration for conversation summarisation, smart draft replies, and cited deep research.
 - **Milestone 5:** Offline-first caching, outgoing mutation queue, and multi-tenant enterprise features.

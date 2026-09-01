@@ -43,7 +43,9 @@ public enum PreviewData {
             unreadCount: 3,
             lastMessagePreview: "The export still times out when I select the full date range.",
             channel: "Channel::WebWidget",
-            createdAt: Date().addingTimeInterval(-60 * 60 * 6)
+            createdAt: Date().addingTimeInterval(-60 * 60 * 6),
+            assignee: ConversationAssignee(id: 7_001, name: "Sample Agent"),
+            labels: ["billing", "export"]
         ),
         Conversation(
             id: 1038,
@@ -71,7 +73,9 @@ public enum PreviewData {
             unreadCount: 0,
             lastMessagePreview: "Waiting on the engineering team to confirm the fix window.",
             channel: "Channel::Email",
-            createdAt: Date().addingTimeInterval(-60 * 60 * 72)
+            createdAt: Date().addingTimeInterval(-60 * 60 * 72),
+            team: AssignableTeam(id: 6_001, name: "Sample Escalations"),
+            labels: ["engineering"]
         ),
         Conversation(
             id: 1011,
@@ -144,5 +148,24 @@ public enum PreviewData {
                 )
             ]
         )
+    ]
+
+    public static let assignmentOptions = ConversationAssignmentOptions(
+        agents: [
+            AssignableAgent(id: 7_001, name: "Sample Agent", availability: .online),
+            AssignableAgent(id: 7_002, name: "Elif Placeholder", availability: .busy),
+            AssignableAgent(id: 7_003, name: "Farid Invented", availability: .offline)
+        ],
+        teams: [
+            AssignableTeam(id: 6_001, name: "Sample Escalations"),
+            AssignableTeam(id: 6_002, name: "Sample Billing")
+        ]
+    )
+
+    public static let accountLabels: [AccountLabel] = [
+        AccountLabel(id: 5_001, title: "billing", colour: "#1F93FF"),
+        AccountLabel(id: 5_002, title: "export", colour: "#7B61FF"),
+        AccountLabel(id: 5_003, title: "engineering", colour: "#2DA44E"),
+        AccountLabel(id: 5_004, title: "vip", colour: "#D4380D")
     ]
 }

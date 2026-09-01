@@ -73,13 +73,12 @@ final class WootDeskLaunchUITests: XCTestCase {
     @MainActor
     func testConversationHistoryAndReplyWithoutNetwork() throws {
         let app = launchWithInventedConversations()
-        #if os(macOS)
+        // The row is a navigation link on iPhone and a selectable split-view row
+        // on Mac and iPad, so it is matched by identifier rather than by element
+        // type.
         let conversationRow = app.descendants(matching: .any)
             .matching(identifier: "conversation-row-1041")
             .firstMatch
-        #else
-        let conversationRow = app.buttons["conversation-row-1041"]
-        #endif
         XCTAssertTrue(
             conversationRow.waitForExistence(timeout: 15),
             "The invented conversation should load through the in-memory API stub."

@@ -91,6 +91,155 @@ final class ChatwootLiveCompatibilityTests: XCTestCase {
         )
     }
 
+    /// Exercises availability and every triage behaviour against the approved
+    /// invented-data server, restoring the conversation to the state it started
+    /// in so the compatibility target is left unchanged.
+    func testAvailabilityAndTriageCompatibility() async throws {
+        let configuration = try liveConfiguration(requiresWrites: true)
+        let client = ChatwootAPIClient(isDebug: false)
+
+        // Availability round trip. The current value is written back, so the
+        // agent's presence is confirmed as writable without changing it.
+        let profile = try await client.fetchProfile(
+            baseURL: configuration.baseURL,
+            token: configuration.token
+        )
+        let account = try XCTUnwrap(
+            profile.accounts.first { $0.id == configuration.accountID },
+            "The configured invented-data account must be available to the test agent."
+        )
+        try await client.updateAvailability(
+            baseURL: configuration.baseURL,
+            token: configuration.token,
+            accountID: configuration.accountID,
+            availability: account.effectiveAvailability ?? .online
+        )
+
+        let original = try await client.fetchConversation(
+            baseURL: configuration.baseURL,
+            token: configuration.token,
+            accountID: configuration.accountID,
+            conversationID: configuration.conversationID
+        )
+        XCTAssertEqual(original.id, configuration.conversationID)
+
+        // Assignment targets. An account may legitimately expose none, so an
+        // empty set is recorded rather than treated as a failure.
+        let options = try await client.fetchAssignmentOptions(
+            baseURL: configuration.baseURL,
+            token: configuration.token,
+            accountID: configuration.accountID
+        )
+        let accountLabels = try await client.fetchAccountLabels(
+            baseURL: configuration.baseURL,
+            token: configuration.token,
+            accountID: configuration.accountID
+        )
+        print("Compatibility: \(options.agents.count) agents, \(options.teams.count) teams, \(accountLabels.count) account labels.")
+
+        do {
+            // Status. The conversation is moved to a different status and then
+            // restored.
+            let target: ConversationStatus = original.status == .pending ? .open : .pending
+            let afterStatus = try await client.updateConversationStatus(
+                baseURL: configuration.baseURL,
+                token: configuration.token,
+                accountID: configuration.accountID,
+                conversationID: configuration.conversationID,
+                status: target,
+                snoozedUntil: nil
+            )
+            XCTAssertEqual(
+                afterStatus.status,
+                target,
+                "The server must confirm the requested status on a supported Chatwoot version."
+            )
+
+            // Priority, including clearing it.
+            let afterPriority = try await client.updateConversationPriority(
+                baseURL: configuration.baseURL,
+                token: configuration.token,
+                accountID: configuration.accountID,
+                conversationID: configuration.conversationID,
+                priority: .low
+            )
+            XCTAssertEqual(afterPriority.priority, .low)
+
+            // Labels. The complete set is preserved across an add and a remove.
+            let compatibilityLabel = "wootdesk-invented-compatibility"
+            let labelsBefore = try await client.fetchConversationLabels(
+                baseURL: configuration.baseURL,
+                token: configuration.token,
+                accountID: configuration.accountID,
+                conversationID: configuration.conversationID
+            )
+            let intended = ConversationTriageState.merged(
+                latest: labelsBefore,
+                title: compatibilityLabel,
+                isAdding: true
+            )
+            let afterAdd = try await client.updateConversationLabels(
+                baseURL: configuration.baseURL,
+                token: configuration.token,
+                accountID: configuration.accountID,
+                conversationID: configuration.conversationID,
+                labels: intended
+            )
+            XCTAssertTrue(
+                afterAdd.contains(compatibilityLabel),
+                "The confirmed label set must contain the label that was added."
+            )
+            for existing in labelsBefore {
+                XCTAssertTrue(
+                    afterAdd.contains(existing),
+                    "Adding a label must not discard the label \(existing) the server already held."
+                )
+            }
+
+            let afterRemove = try await client.updateConversationLabels(
+                baseURL: configuration.baseURL,
+                token: configuration.token,
+                accountID: configuration.accountID,
+                conversationID: configuration.conversationID,
+                labels: ConversationTriageState.merged(
+                    latest: afterAdd,
+                    title: compatibilityLabel,
+                    isAdding: false
+                )
+            )
+            XCTAssertFalse(afterRemove.contains(compatibilityLabel))
+        } catch {
+            try await restore(original, configuration: configuration, client: client)
+            throw error
+        }
+
+        try await restore(original, configuration: configuration, client: client)
+    }
+
+    /// Returns the compatibility conversation to the status and priority it held
+    /// before the mutating checks ran.
+    private func restore(
+        _ original: Conversation,
+        configuration: LiveConfiguration,
+        client: ChatwootAPIClient
+    ) async throws {
+        _ = try await client.updateConversationStatus(
+            baseURL: configuration.baseURL,
+            token: configuration.token,
+            accountID: configuration.accountID,
+            conversationID: configuration.conversationID,
+            status: original.status,
+            snoozedUntil: original.status == .snoozed ? original.snoozedUntil : nil
+        )
+        _ = try await client.updateConversationPriority(
+            baseURL: configuration.baseURL,
+            token: configuration.token,
+            accountID: configuration.accountID,
+            conversationID: configuration.conversationID,
+            priority: original.priority
+        )
+    }
+
     private func liveConfiguration(requiresWrites: Bool = false) throws -> LiveConfiguration {
         let environment = ProcessInfo.processInfo.environment
         guard environment["WOOTDESK_LIVE_TESTS"] == "1" else {

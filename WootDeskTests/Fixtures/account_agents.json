@@ -1,0 +1,5 @@
+[
+  { "id": 7001, "name": "Sample Agent", "available_name": "Sample Agent", "availability_status": "online" },
+  { "id": 7002, "name": "Elif Placeholder", "availability_status": "busy" },
+  { "id": 7003 }
+]

@@ -211,9 +211,13 @@ public actor ChatwootAPIClient: ChatwootAPIProtocol {
         }
     }
 
-    // MARK: - Private Request Execution
+    // MARK: - Shared Request Execution
 
-    private func perform(request: URLRequest) async throws -> Data {
+    /// Executes a request and maps transport and HTTP failures onto `APIError`.
+    ///
+    /// Internal rather than private so that the triage extension in
+    /// `ChatwootAPIClient+Triage.swift` shares one error-mapping path.
+    func perform(request: URLRequest) async throws -> Data {
         do {
             let (data, response) = try await session.data(for: request)
 
@@ -272,7 +276,7 @@ public actor ChatwootAPIClient: ChatwootAPIProtocol {
         }
     }
 
-    private func parseErrorMessage(from data: Data) -> String? {
+    func parseErrorMessage(from data: Data) -> String? {
         if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
             if let message = json["message"] as? String {
                 return sanitisedServerMessage(message)

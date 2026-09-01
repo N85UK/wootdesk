@@ -77,15 +77,26 @@ public struct ChatwootConversationListResponseDTO: Decodable, Sendable {
 public struct ChatwootConversationMetaDTO: Codable, Sendable {
     public let sender: ChatwootContactDTO?
     public let channel: String?
+    public let assignee: ChatwootAssignedUserDTO?
+    public let team: ChatwootTeamDTO?
 
     enum CodingKeys: String, CodingKey {
         case sender
         case channel
+        case assignee
+        case team
     }
 
-    public init(sender: ChatwootContactDTO? = nil, channel: String? = nil) {
+    public init(
+        sender: ChatwootContactDTO? = nil,
+        channel: String? = nil,
+        assignee: ChatwootAssignedUserDTO? = nil,
+        team: ChatwootTeamDTO? = nil
+    ) {
         self.sender = sender
         self.channel = channel
+        self.assignee = assignee
+        self.team = team
     }
 }
 
@@ -104,6 +115,8 @@ public struct ChatwootConversationDTO: Codable, Sendable {
     public let messages: [ChatwootMessageDTO]?
     public let lastNonActivityMessage: ChatwootMessageDTO?
     public let inboxName: String?
+    public let labels: [String]?
+    public let snoozedUntil: Double?
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -119,6 +132,8 @@ public struct ChatwootConversationDTO: Codable, Sendable {
         case messages
         case lastNonActivityMessage = "last_non_activity_message"
         case inboxName = "inbox_name"
+        case labels
+        case snoozedUntil = "snoozed_until"
     }
 
     public init(
@@ -134,7 +149,9 @@ public struct ChatwootConversationDTO: Codable, Sendable {
         meta: ChatwootConversationMetaDTO? = nil,
         messages: [ChatwootMessageDTO]? = nil,
         lastNonActivityMessage: ChatwootMessageDTO? = nil,
-        inboxName: String? = nil
+        inboxName: String? = nil,
+        labels: [String]? = nil,
+        snoozedUntil: Double? = nil
     ) {
         self.id = id
         self.accountId = accountId
@@ -149,6 +166,8 @@ public struct ChatwootConversationDTO: Codable, Sendable {
         self.messages = messages
         self.lastNonActivityMessage = lastNonActivityMessage
         self.inboxName = inboxName
+        self.labels = labels
+        self.snoozedUntil = snoozedUntil
     }
 
     public func toDomain(defaultAccountID: Int) -> Conversation {
@@ -193,7 +212,11 @@ public struct ChatwootConversationDTO: Codable, Sendable {
             unreadCount: unreadCount ?? 0,
             lastMessagePreview: latestMsg,
             channel: meta?.channel,
-            createdAt: createdDate
+            createdAt: createdDate,
+            assignee: meta?.assignee?.toAssignee(),
+            team: meta?.team?.toDomain(),
+            labels: labels ?? [],
+            snoozedUntil: DateParser.parse(snoozedUntil)
         )
     }
 }

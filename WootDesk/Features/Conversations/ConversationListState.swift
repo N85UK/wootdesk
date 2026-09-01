@@ -174,6 +174,37 @@ public final class ConversationListState {
         }
     }
 
+    /// Replaces a listed conversation with the state a triage change confirmed.
+    ///
+    /// The conversation stays in the list even when the confirmed status no
+    /// longer matches the active filter, so that the agent sees the result of
+    /// their own action rather than the row silently disappearing.
+    public func applyConfirmedConversation(_ conversation: Conversation) {
+        guard let index = conversations.firstIndex(where: { $0.id == conversation.id }) else { return }
+        conversations[index] = conversation
+    }
+
+    /// Adds a conversation that a notification identified but that the loaded
+    /// page did not contain, then selects it.
+    ///
+    /// The conversation is placed at the top of the list so that the agent can
+    /// see the item the notification referred to. Nothing else is removed.
+    public func adoptRoutedConversation(_ conversation: Conversation) {
+        if let index = conversations.firstIndex(where: { $0.id == conversation.id }) {
+            conversations[index] = conversation
+        } else {
+            conversations.insert(conversation, at: 0)
+        }
+        selectedConversationID = conversation.id
+    }
+
+    /// Removes any search or status filter that would hide a conversation the
+    /// agent has been sent to.
+    public func clearFiltersForRouting() {
+        searchQuery = ""
+        statusFilter = nil
+    }
+
     /// Clears all conversation data. Used when switching server profiles so that
     /// data loaded from one server is never shown under another.
     public func clear() {

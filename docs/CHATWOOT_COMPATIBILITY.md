@@ -62,8 +62,13 @@ environment.
 ## Running mutating checks
 
 Mutating tests create one public reply, one private note, and one small text
-attachment. They do not delete or alter existing messages. Run them only after
-confirming the target is the isolated invented-data server:
+attachment. They also write the agent's current availability back unchanged, and
+they exercise every triage behaviour on the configured invented-data
+conversation: a status change, a priority change, and one label added and then
+removed. The triage checks record the conversation's status and priority before
+they run and restore both afterwards, including when an assertion fails. They do
+not delete or alter existing messages. Run them only after confirming the target
+is the isolated invented-data server:
 
 ```bash
 ./script/live_compatibility.sh --allow-writes --confirm-invented-data
@@ -76,10 +81,10 @@ approval before it runs this command because it changes remote data.
 
 Record evidence without credentials or message bodies:
 
-| Chatwoot release | Deployment | Read-only | Public reply | Private note | Attachment | Date | Reviewer |
-|---|---|---|---|---|---|---|---|
-| Current supported release | Dedicated container | Pending | Pending | Pending | Pending | | |
-| Previous supported release | Dedicated container | Pending | Pending | Pending | Pending | | |
+| Chatwoot release | Deployment | Read-only | Public reply | Private note | Attachment | Availability | Triage | Date | Reviewer |
+|---|---|---|---|---|---|---|---|---|---|
+| Current supported release | Dedicated container | Pending | Pending | Pending | Pending | Pending | Pending | | |
+| Previous supported release | Dedicated container | Pending | Pending | Pending | Pending | Pending | Pending | | |
 
 Pin exact Chatwoot image versions for each run. Do not use a floating `latest`
 tag as compatibility evidence. Re-run the matrix before changing the documented
@@ -106,3 +111,23 @@ The official message-create endpoint accepts JSON for text-only messages and
 `multipart/form-data` with `attachments[]` for file messages. WootDesk uses each
 format only for its corresponding request and never retries a mutating request
 automatically.
+
+Chatwoot's triage endpoints differ in what they return. `toggle_priority` and
+some `toggle_status` and `assignments` responses confirm with an empty body or
+with only a fragment of the conversation. WootDesk therefore treats no triage
+response body as authoritative: after every triage mutation it reads
+`GET /api/v1/accounts/{account_id}/conversations/{conversation_id}` and displays
+that result. A conversation payload that omits `labels`, `snoozed_until`,
+`meta.assignee`, or `meta.team` is read as "not set" rather than as a fabricated
+value.
+
+`POST .../conversations/{id}/labels` replaces the whole label set rather than
+merging it. WootDesk therefore reads the current set immediately before every
+label change and sends the complete intended set, so a label another agent added
+after the conversation was displayed is preserved.
+
+Conversation label responses are accepted both as a payload of title strings and
+as a payload of label objects, because supported versions differ. An agent-role
+token is refused access to `GET /api/v1/accounts/{account_id}/teams` on supported
+versions; WootDesk records that as "no teams available to this agent" and still
+offers agent assignment, while any other team-list failure is reported.

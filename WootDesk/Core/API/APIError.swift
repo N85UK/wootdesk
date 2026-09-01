@@ -18,6 +18,7 @@ public enum APIError: LocalizedError, Sendable, Equatable {
     case networkError(String)
     case decodingError(String)
     case invalidMessageContent
+    case invalidSnoozeTime
     case noAccountsAvailable
     case cancelled
 
@@ -55,6 +56,8 @@ public enum APIError: LocalizedError, Sendable, Equatable {
             return "Failed to process the response from the Chatwoot server: \(details)"
         case .invalidMessageContent:
             return "Enter a reply or private note before sending."
+        case .invalidSnoozeTime:
+            return "Choose a snooze time in the future."
         case .noAccountsAvailable:
             return "The validated user profile is not associated with any active Chatwoot accounts."
         case .cancelled:

@@ -34,6 +34,13 @@ public struct StubChatwootAPI: ChatwootAPIProtocol {
     public var messagesOutcome: Outcome<ConversationMessagePage>
     public var createdMessageOutcome: Outcome<ConversationMessage>?
     public var availabilityUpdateOutcome: Outcome<Void>
+    /// Overrides the conversation returned after a triage change. When unset,
+    /// the stub applies the requested change to its seeded conversation so that
+    /// callers exercise a real confirmed-state transition.
+    public var triageOutcome: Outcome<Conversation>?
+    public var conversationLabelsOutcome: Outcome<[String]>?
+    public var assignmentOptionsOutcome: Outcome<ConversationAssignmentOptions>
+    public var accountLabelsOutcome: Outcome<[AccountLabel]>
 
     public init(
         profileOutcome: Outcome<ProfileResult> = .success(
@@ -44,13 +51,23 @@ public struct StubChatwootAPI: ChatwootAPIProtocol {
             ConversationMessagePage(messages: PreviewData.messages, hasOlderMessages: false)
         ),
         createdMessageOutcome: Outcome<ConversationMessage>? = nil,
-        availabilityUpdateOutcome: Outcome<Void> = .success(())
+        availabilityUpdateOutcome: Outcome<Void> = .success(()),
+        triageOutcome: Outcome<Conversation>? = nil,
+        conversationLabelsOutcome: Outcome<[String]>? = nil,
+        assignmentOptionsOutcome: Outcome<ConversationAssignmentOptions> = .success(
+            PreviewData.assignmentOptions
+        ),
+        accountLabelsOutcome: Outcome<[AccountLabel]> = .success(PreviewData.accountLabels)
     ) {
         self.profileOutcome = profileOutcome
         self.conversationsOutcome = conversationsOutcome
         self.messagesOutcome = messagesOutcome
         self.createdMessageOutcome = createdMessageOutcome
         self.availabilityUpdateOutcome = availabilityUpdateOutcome
+        self.triageOutcome = triageOutcome
+        self.conversationLabelsOutcome = conversationLabelsOutcome
+        self.assignmentOptionsOutcome = assignmentOptionsOutcome
+        self.accountLabelsOutcome = accountLabelsOutcome
     }
 
     public func updateAvailability(
@@ -131,6 +148,138 @@ public struct StubChatwootAPI: ChatwootAPIProtocol {
                 )
             }
         )
+    }
+
+    // MARK: - Conversation Triage
+
+    public func fetchConversation(
+        baseURL: URL,
+        token: String,
+        accountID: Int,
+        conversationID: Int
+    ) async throws -> Conversation {
+        if let triageOutcome {
+            return try await resolve(triageOutcome)
+        }
+        return try await seededConversation(id: conversationID)
+    }
+
+    public func updateConversationStatus(
+        baseURL: URL,
+        token: String,
+        accountID: Int,
+        conversationID: Int,
+        status: ConversationStatus,
+        snoozedUntil: Date?
+    ) async throws -> Conversation {
+        if status == .snoozed, snoozedUntil.map({ $0.timeIntervalSinceNow <= 0 }) ?? true {
+            throw APIError.invalidSnoozeTime
+        }
+        if let triageOutcome {
+            return try await resolve(triageOutcome)
+        }
+        return try await seededConversation(id: conversationID)
+            .applying(status: status, snoozedUntil: .some(status == .snoozed ? snoozedUntil : nil))
+    }
+
+    public func updateConversationPriority(
+        baseURL: URL,
+        token: String,
+        accountID: Int,
+        conversationID: Int,
+        priority: ConversationPriority?
+    ) async throws -> Conversation {
+        if let triageOutcome {
+            return try await resolve(triageOutcome)
+        }
+        return try await seededConversation(id: conversationID).applying(priority: .some(priority))
+    }
+
+    public func assignConversation(
+        baseURL: URL,
+        token: String,
+        accountID: Int,
+        conversationID: Int,
+        target: ConversationAssignmentTarget
+    ) async throws -> Conversation {
+        if let triageOutcome {
+            return try await resolve(triageOutcome)
+        }
+
+        let options = try await resolve(assignmentOptionsOutcome)
+        let conversation = try await seededConversation(id: conversationID)
+
+        switch target {
+        case .agent(let id):
+            guard let agent = options.agents.first(where: { $0.id == id }) else {
+                throw APIError.notFound
+            }
+            return conversation.applying(
+                assignee: .some(ConversationAssignee(id: agent.id, name: agent.name))
+            )
+        case .team(let id):
+            guard let team = options.teams.first(where: { $0.id == id }) else {
+                throw APIError.notFound
+            }
+            return conversation.applying(team: .some(team))
+        case .unassignAgent:
+            return conversation.applying(assignee: .some(nil))
+        case .unassignTeam:
+            return conversation.applying(team: .some(nil))
+        }
+    }
+
+    public func fetchConversationLabels(
+        baseURL: URL,
+        token: String,
+        accountID: Int,
+        conversationID: Int
+    ) async throws -> [String] {
+        if let conversationLabelsOutcome {
+            return try await resolve(conversationLabelsOutcome)
+        }
+        return try await seededConversation(id: conversationID).labels
+    }
+
+    public func updateConversationLabels(
+        baseURL: URL,
+        token: String,
+        accountID: Int,
+        conversationID: Int,
+        labels: [String]
+    ) async throws -> [String] {
+        if let conversationLabelsOutcome, case .failure = conversationLabelsOutcome {
+            return try await resolve(conversationLabelsOutcome)
+        }
+        return labels
+    }
+
+    public func fetchAssignmentOptions(
+        baseURL: URL,
+        token: String,
+        accountID: Int
+    ) async throws -> ConversationAssignmentOptions {
+        try await resolve(assignmentOptionsOutcome)
+    }
+
+    public func fetchAccountLabels(
+        baseURL: URL,
+        token: String,
+        accountID: Int
+    ) async throws -> [AccountLabel] {
+        try await resolve(accountLabelsOutcome)
+    }
+
+    /// Finds the seeded conversation a triage call refers to.
+    ///
+    /// An unknown identifier is reported as not found rather than substituted
+    /// with another conversation.
+    private func seededConversation(id: Int) async throws -> Conversation {
+        let seeded = try await resolve(conversationsOutcome)
+        guard let conversation = seeded.first(where: { $0.id == id }) else {
+            throw APIError.notFound
+        }
+        return conversation
     }
 
     private func resolve<Value: Sendable>(_ outcome: Outcome<Value>) async throws -> Value {

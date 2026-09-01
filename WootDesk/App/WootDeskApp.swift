@@ -1,4 +1,7 @@
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
 
 @main
 struct WootDeskApp: App {
@@ -106,6 +109,8 @@ struct MainAppView: View {
     /// the same selection on macOS.
     @State private var conversationState = ConversationListState()
     @State private var conversationDetailState = ConversationDetailState()
+    @State private var conversationTriageState = ConversationTriageState()
+    @State private var routeCoordinator = ConversationRouteCoordinator()
 
     var body: some View {
         Group {
@@ -123,6 +128,11 @@ struct MainAppView: View {
                 #endif
             }
         }
+        .safeAreaInset(edge: .top, spacing: 0) {
+            if let message = routeCoordinator.errorMessage {
+                notificationRouteBanner(message)
+            }
+        }
         .sheet(isPresented: $appModel.showAddConnectionSheet) {
             AddConnectionView(
                 onSaveSuccess: { displayName, url, token, account in
@@ -137,8 +147,13 @@ struct MainAppView: View {
             .environment(\.appEnvironment, environment)
         }
         .onChange(of: ActiveProfileDataContext(profile: appModel.activeProfile)) { _, _ in
-            conversationState.clear()
-            conversationDetailState.clear()
+            if !routeCoordinator.isOpening {
+                ConversationWorkspaceReset.clearProfileData(
+                    list: conversationState,
+                    detail: conversationDetailState,
+                    triage: conversationTriageState
+                )
+            }
             availabilityState.clear()
             Task {
                 await notificationState.updateProfileContext(
@@ -151,12 +166,37 @@ struct MainAppView: View {
                 )
             }
         }
+        .onChange(of: conversationTriageState.conversation) { _, confirmed in
+            guard let confirmed else { return }
+            conversationState.applyConfirmedConversation(confirmed)
+        }
         .onChange(of: notificationState.pendingRoute) { _, route in
             guard let route else { return }
             Task {
                 await openNotificationRoute(route)
             }
         }
+    }
+
+    private func notificationRouteBanner(_ message: String) -> some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "bell.badge.slash")
+                .foregroundStyle(.orange)
+                .accessibilityHidden(true)
+            Text(message)
+                .font(.footnote)
+                .fixedSize(horizontal: false, vertical: true)
+            Spacer(minLength: 0)
+            Button("Dismiss") { routeCoordinator.dismissError() }
+                .buttonStyle(.borderless)
+                .font(.footnote)
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.regularMaterial)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Notification could not be opened. \(message)")
     }
 
     private var profileRecoveryState: some View {
@@ -180,24 +220,14 @@ struct MainAppView: View {
 
     private func openNotificationRoute(_ route: PushNotificationRoute) async {
         defer { notificationState.clearPendingRoute() }
-        guard await appModel.activateNotificationRoute(route),
-              let profile = appModel.activeProfile,
-              let token = appModel.activeToken else {
-            return
-        }
-
-        conversationDetailState.clear()
-        conversationState.statusFilter = nil
-        await conversationState.loadConversations(
-            profile: profile,
-            token: token,
+        await routeCoordinator.open(
+            route: route,
+            appModel: appModel,
+            listState: conversationState,
+            detailState: conversationDetailState,
+            triageState: conversationTriageState,
             using: environment.apiClient
         )
-        if conversationState.conversations.contains(where: { $0.id == route.conversationID }) {
-            conversationState.selectedConversationID = route.conversationID
-        } else if conversationState.errorMessage == nil {
-            conversationState.errorMessage = "The notified conversation was not present in the first loaded page. Refresh or search for conversation #\(route.conversationID)."
-        }
     }
 
     private var launchingView: some View {
@@ -258,120 +288,106 @@ struct MainAppView: View {
     #if os(macOS)
     private var macOSLayout: some View {
         NavigationSplitView {
-            macOSSidebar
+            WorkspaceSidebarView(appModel: appModel, availabilityState: availabilityState)
         } content: {
-            switch appModel.selectedNavigationItem {
-            case .connections:
-                ConnectionListView(appModel: appModel)
-            case .settings:
-                SettingsView(
-                    appModel: appModel,
-                    notificationState: notificationState,
-                    availabilityState: availabilityState
-                )
-            case .conversations, .none:
-                ConversationListView(appModel: appModel, state: conversationState)
-            }
+            workspaceContent
         } detail: {
-            switch appModel.selectedNavigationItem {
-            case .conversations, .none:
-                ConversationDetailView(
-                    appModel: appModel,
-                    state: conversationDetailState,
-                    conversation: conversationState.selectedConversation
-                )
-            default:
-                ConversationDetailView(
-                    appModel: appModel,
-                    state: conversationDetailState,
-                    conversation: nil
-                )
-            }
+            workspaceDetail
         }
         .navigationSplitViewStyle(.balanced)
     }
+    #endif
 
-    private var macOSSidebar: some View {
-        List(selection: $appModel.selectedNavigationItem) {
-            Section("Workspace") {
-                Label("Conversations", systemImage: "bubble.left.and.bubble.right")
-                    .tag(AppModel.NavigationItem.conversations(status: .open))
-            }
+    // MARK: - Shared Split-View Columns
 
-            Section("Server Profiles") {
-                ForEach(appModel.profiles) { profile in
-                    Button {
-                        Task { await appModel.selectProfile(profile) }
-                    } label: {
-                        HStack(spacing: 8) {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(profile.displayName)
-                                    .font(.body)
-                                    .foregroundStyle(.primary)
-                                Text(profile.selectedAccountName)
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                            if profile.id == appModel.activeProfile?.id {
-                                Image(systemName: "checkmark")
-                                    .foregroundStyle(Color.accentColor)
-                                    .accessibilityLabel("Active profile")
-                            }
-                        }
-                        .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(appModel.isSwitchingProfile)
-                    .accessibilityHint("Switch to this Chatwoot server profile")
-                }
-
-                Label("Manage Servers", systemImage: "server.rack")
-                    .tag(AppModel.NavigationItem.connections)
-            }
-
-            Section("Preferences") {
-                Label("Settings", systemImage: "gearshape")
-                    .tag(AppModel.NavigationItem.settings)
-            }
-
-            Section("Agent") {
-                AgentAvailabilityMenu(
-                    state: availabilityState,
-                    profile: appModel.activeProfile,
-                    token: appModel.activeToken
-                )
-            }
-        }
-        .listStyle(.sidebar)
-        .navigationSplitViewColumnWidth(min: 200, ideal: 240, max: 320)
-        .toolbar {
-            ToolbarItem {
-                Button {
-                    appModel.showAddConnectionSheet = true
-                } label: {
-                    Label("Add Server", systemImage: "plus")
-                }
-                .help("Add a Chatwoot server connection")
-            }
+    /// The middle column of the Mac and iPad split layouts.
+    @ViewBuilder
+    private var workspaceContent: some View {
+        switch appModel.selectedNavigationItem {
+        case .connections:
+            ConnectionListView(appModel: appModel)
+        case .settings:
+            SettingsView(
+                appModel: appModel,
+                notificationState: notificationState,
+                availabilityState: availabilityState
+            )
+        case .conversations, .none:
+            ConversationListView(
+                appModel: appModel,
+                state: conversationState,
+                presentation: .splitViewSelection
+            )
         }
     }
-    #endif
+
+    /// The trailing column of the Mac and iPad split layouts.
+    @ViewBuilder
+    private var workspaceDetail: some View {
+        switch appModel.selectedNavigationItem {
+        case .conversations, .none:
+            ConversationDetailView(
+                appModel: appModel,
+                state: conversationDetailState,
+                triageState: conversationTriageState,
+                conversation: conversationState.selectedConversation
+            )
+        default:
+            ConversationDetailView(
+                appModel: appModel,
+                state: conversationDetailState,
+                triageState: conversationTriageState,
+                conversation: nil
+            )
+        }
+    }
 
     // MARK: - iOS and iPadOS Layout
 
     #if os(iOS)
+    /// iPad presents the same three adjacent areas as the Mac. iPhone keeps the
+    /// tab layout, because a split view has no second column to show there.
+    ///
+    /// The choice follows the device idiom rather than the size class, so that
+    /// resizing an iPad window does not swap one navigation structure for
+    /// another. `NavigationSplitView` collapses itself when the window becomes
+    /// too narrow, preserving the selected workspace and conversation.
+    @ViewBuilder
     private var iOSLayout: some View {
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            iPadLayout
+        } else {
+            iPhoneLayout
+        }
+    }
+
+    private var iPadLayout: some View {
+        NavigationSplitView {
+            WorkspaceSidebarView(appModel: appModel, availabilityState: availabilityState)
+        } content: {
+            workspaceContent
+        } detail: {
+            workspaceDetail
+        }
+        .navigationSplitViewStyle(.balanced)
+    }
+
+    private var iPhoneLayout: some View {
         TabView {
             NavigationStack {
-                ConversationListView(appModel: appModel, state: conversationState)
-                    .navigationDestination(item: $conversationState.selectedConversationID) { id in
-                        ConversationDetailView(
-                            appModel: appModel,
-                            state: conversationDetailState,
-                            conversation: conversationState.conversations.first { $0.id == id }
-                        )
-                    }
+                ConversationListView(
+                    appModel: appModel,
+                    state: conversationState,
+                    presentation: .navigationStack
+                )
+                .navigationDestination(item: $conversationState.selectedConversationID) { id in
+                    ConversationDetailView(
+                        appModel: appModel,
+                        state: conversationDetailState,
+                        triageState: conversationTriageState,
+                        conversation: conversationState.conversations.first { $0.id == id }
+                    )
+                }
             }
             .tabItem {
                 Label("Conversations", systemImage: "bubble.left.and.bubble.right")

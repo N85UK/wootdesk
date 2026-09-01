@@ -1,0 +1,6 @@
+{
+  "payload": [
+    { "id": 5001, "title": "billing", "color": "#1F93FF" },
+    { "id": 5002, "title": "export" }
+  ]
+}

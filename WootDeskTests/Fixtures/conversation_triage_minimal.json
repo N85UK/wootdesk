@@ -1,0 +1,10 @@
+{
+  "payload": {
+    "id": 1042,
+    "account_id": 1,
+    "inbox_id": 3,
+    "status": "open",
+    "last_activity_at": 1735737000,
+    "created_at": 1735730000
+  }
+}

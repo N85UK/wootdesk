@@ -5,15 +5,18 @@ public struct ConversationDetailView: View {
     @Environment(\.appEnvironment) private var environment
     @Bindable var appModel: AppModel
     @Bindable var state: ConversationDetailState
+    @Bindable var triageState: ConversationTriageState
     public let conversation: Conversation?
 
     public init(
         appModel: AppModel,
         state: ConversationDetailState,
+        triageState: ConversationTriageState,
         conversation: Conversation?
     ) {
         self.appModel = appModel
         self.state = state
+        self.triageState = triageState
         self.conversation = conversation
     }
 
@@ -53,6 +56,7 @@ public struct ConversationDetailView: View {
                 conversationID: conversation?.id
             )
         ) {
+            triageState.adopt(conversation, profile: appModel.activeProfile)
             guard let conversation else {
                 state.clear()
                 return
@@ -64,6 +68,12 @@ public struct ConversationDetailView: View {
     private func selectedConversation(_ conversation: Conversation) -> some View {
         VStack(spacing: 0) {
             conversationHeader(conversation)
+            ConversationActionsView(
+                state: triageState,
+                profile: appModel.activeProfile,
+                token: appModel.activeToken
+            )
+            .padding(.bottom, 8)
             Divider()
             messageContent(conversation)
         }
@@ -77,7 +87,7 @@ public struct ConversationDetailView: View {
 
                 HStack(spacing: 8) {
                     Text("#\(conversation.id)")
-                    Text(conversation.status.displayName)
+                    Text((triageState.conversation ?? conversation).status.displayName)
                     if let inboxName = conversation.inboxName {
                         Text(inboxName)
                     }
@@ -303,9 +313,13 @@ private func previewDetail(
     let appModel = AppModel(environment: environment)
     appModel.applyPreviewState(profiles: [profile], activeProfile: profile, token: "test")
 
+    let triageState = ConversationTriageState()
+    triageState.adopt(conversation, profile: profile)
+
     return ConversationDetailView(
         appModel: appModel,
         state: ConversationDetailState(),
+        triageState: triageState,
         conversation: conversation
     )
     .environment(\.appEnvironment, environment)

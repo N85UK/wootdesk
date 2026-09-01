@@ -1,18 +1,48 @@
 import SwiftUI
 
+/// How the surrounding navigation structure expects a conversation to be opened.
+public enum ConversationListPresentation: Sendable {
+    /// The list drives an adjacent detail column through its selection, used by
+    /// the Mac and iPad split layouts.
+    case splitViewSelection
+    /// The list pushes the conversation onto a navigation stack, used on iPhone.
+    case navigationStack
+}
+
+/// Which control the status filter uses at the current text size.
+///
+/// A segmented control cannot lay out five readable labels at an accessibility
+/// text size without clipping, so the filter becomes a menu instead of shrinking
+/// or truncating its options.
+public enum ConversationFilterPickerLayout: Sendable {
+    case segmented
+    case menu
+
+    public static func preferred(for size: DynamicTypeSize) -> Self {
+        size.isAccessibilitySize ? .menu : .segmented
+    }
+}
+
 /// The conversation list for the active Chatwoot server profile.
 ///
 /// This view renders list content only. The surrounding navigation structure is
-/// supplied by the platform shell: a three-column split view on macOS, and a
-/// navigation stack on iOS and iPadOS.
+/// supplied by the platform shell: a three-column split view on macOS and iPad,
+/// and a navigation stack on iPhone.
 public struct ConversationListView: View {
     @Environment(\.appEnvironment) private var environment
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Bindable var appModel: AppModel
     @Bindable var state: ConversationListState
+    let presentation: ConversationListPresentation
 
-    public init(appModel: AppModel, state: ConversationListState) {
+    public init(
+        appModel: AppModel,
+        state: ConversationListState,
+        presentation: ConversationListPresentation = .splitViewSelection
+    ) {
         self.appModel = appModel
         self.state = state
+        self.presentation = presentation
     }
 
     public var body: some View {
@@ -67,7 +97,20 @@ public struct ConversationListView: View {
         }
     }
 
+    @ViewBuilder
     private var filterPicker: some View {
+        switch ConversationFilterPickerLayout.preferred(for: dynamicTypeSize) {
+        case .segmented:
+            statusPicker
+                .pickerStyle(.segmented)
+        case .menu:
+            statusPicker
+                .pickerStyle(.menu)
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    private var statusPicker: some View {
         Picker("Status Filter", selection: $state.statusFilter) {
             Text("Open").tag(ConversationStatus?.some(.open))
             Text("Pending").tag(ConversationStatus?.some(.pending))
@@ -75,13 +118,21 @@ public struct ConversationListView: View {
             Text("Snoozed").tag(ConversationStatus?.some(.snoozed))
             Text("All").tag(ConversationStatus?.none)
         }
-        .pickerStyle(.segmented)
         .accessibilityLabel("Filter conversations by status")
     }
 
+    @ViewBuilder
     private var conversationList: some View {
-        #if os(macOS)
-        // The selection drives the detail column of the surrounding split view.
+        switch presentation {
+        case .splitViewSelection:
+            selectionList
+        case .navigationStack:
+            stackList
+        }
+    }
+
+    /// The selection drives the detail column of the surrounding split view.
+    private var selectionList: some View {
         List(selection: $state.selectedConversationID) {
             ForEach(state.filteredConversations) { conversation in
                 ConversationRowView(conversation: conversation)
@@ -90,8 +141,18 @@ public struct ConversationListView: View {
             }
             paginationFooter
         }
+        #if os(macOS)
         .listStyle(.inset)
         #else
+        .listStyle(.plain)
+        .refreshable {
+            await refreshConversations()
+        }
+        #endif
+    }
+
+    /// Each row pushes the conversation onto the surrounding navigation stack.
+    private var stackList: some View {
         List(selection: $state.selectedConversationID) {
             ForEach(state.filteredConversations) { conversation in
                 NavigationLink(value: conversation.id) {
@@ -102,6 +163,7 @@ public struct ConversationListView: View {
             paginationFooter
         }
         .listStyle(.plain)
+        #if os(iOS)
         .refreshable {
             await refreshConversations()
         }
