@@ -100,6 +100,23 @@ export WOOTDESK_LIVE_TESTS=1
 export WOOTDESK_LIVE_ALLOW_WRITES="${ALLOW_WRITES}"
 export WOOTDESK_LIVE_CONFIRM_INVENTED_DATA="${CONFIRM_INVENTED_DATA}"
 
+# xcodebuild does not hand its own environment to the test process. Only
+# variables prefixed with TEST_RUNNER_ are forwarded, with the prefix stripped.
+# Exporting the bare names alone leaves WOOTDESK_LIVE_TESTS unset inside the
+# tests, so all three skip themselves and this script still exits 0, which
+# reads as a passing compatibility run that never contacted the server.
+for live_variable in \
+    WOOTDESK_LIVE_TESTS \
+    WOOTDESK_LIVE_BASE_URL \
+    WOOTDESK_LIVE_TOKEN_FILE \
+    WOOTDESK_LIVE_ACCOUNT_ID \
+    WOOTDESK_LIVE_CONVERSATION_ID \
+    WOOTDESK_LIVE_ALLOW_WRITES \
+    WOOTDESK_LIVE_CONFIRM_INVENTED_DATA
+do
+    export "TEST_RUNNER_${live_variable}=${!live_variable}"
+done
+
 if command -v xcodegen > /dev/null 2>&1; then
     xcodegen generate --spec project.yml
 fi

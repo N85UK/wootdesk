@@ -60,15 +60,16 @@ case "${1:-}" in
         "${COMPOSE[@]}" exec -T rails cat /app/storage/wootdesk-compat-token > "${TOKEN_FILE}"
         chmod 600 "${TOKEN_FILE}"
         echo ""
-        echo "Run the compatibility checks with:"
-        echo "  WOOTDESK_LIVE_TESTS=1 \\"
+        echo "Trust the Caddy CA first, or every check fails with tlsFailure:"
+        echo "  script/compat_env.sh trust"
+        echo ""
+        echo "Then run the compatibility checks through the script, which"
+        echo "forwards the settings to the test process correctly:"
         echo "  WOOTDESK_LIVE_BASE_URL=https://wootdesk-compat.localhost:8443 \\"
         echo "  WOOTDESK_LIVE_TOKEN_FILE=$(pwd)/${TOKEN_FILE} \\"
         echo "  WOOTDESK_LIVE_ACCOUNT_ID=<ACCOUNT_ID from above> \\"
         echo "  WOOTDESK_LIVE_CONVERSATION_ID=<CONVERSATION_ID from above> \\"
-        echo "  WOOTDESK_LIVE_ALLOW_WRITES=1 WOOTDESK_LIVE_CONFIRM_INVENTED_DATA=1 \\"
-        echo "  xcodebuild test -project WootDesk.xcodeproj -scheme WootDesk \\"
-        echo "    -destination 'platform=macOS' -only-testing:WootDeskTests/ChatwootLiveCompatibilityTests"
+        echo "  script/live_compatibility.sh --allow-writes --confirm-invented-data"
         ;;
     status)
         "${COMPOSE[@]}" ps
