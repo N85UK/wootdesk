@@ -88,7 +88,7 @@ Store release. No macOS build has been uploaded.
 | G6 TestFlight | Physical-device and Mac acceptance | Automated delivery works. `.github/workflows/testflight.yml` is armed and run 33544372320 uploaded build 34, now `VALID` and `IN_BETA_TESTING`. Every green push to `main` now delivers. Build 24 remains `INSTALLED` on one internal tester's device. Documented acceptance runs are still unrecorded, and that is now the gating item |
 | G7 Product completeness | Message history, replies, private notes, attachments, and conversation triage | Source implementation complete; live acceptance pending |
 | G8 Public release | Explicit product, security, and release approval | No-go |
-| G9 Remote notifications | Push provider, push-capable signing, and profile-safe physical-device delivery | Client and gateway source implemented. Push Notifications is confirmed enabled on the `dev.n85.wootdesk` App ID, and build 24 signs with it. Gateway deployment, recipient-policy approval, and physical delivery acceptance remain |
+| G9 Remote notifications | Push provider, push-capable signing, and profile-safe physical-device delivery | Push Notifications is confirmed on the App ID and the build signs with it. **Not source complete**: recipients are selected by Chatwoot account, so N85-15 AC2, per-agent isolation, is unimplemented rather than merely unapproved. See `DEC-008`. Gateway deployment and physical delivery acceptance also remain |
 
 ## Signing, resolved
 

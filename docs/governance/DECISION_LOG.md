@@ -2,7 +2,7 @@
 
 Document ID: `WOOT-DEC-INDEX-001`
 
-Last reviewed: 31 August 2026
+Last reviewed: 2 September 2026
 
 | ID | Decision | Status | Evidence |
 |---|---|---|---|
@@ -13,6 +13,7 @@ Last reviewed: 31 August 2026
 | DEC-005 | Use automatic signing without a committed development-team identifier | Accepted | `project.yml` and App Store submission guide |
 | DEC-006 | TestFlight precedes public distribution, and public release remains blocked until Milestone 2 | Accepted | `docs/RELEASE_READINESS.md` |
 | DEC-007 | Use native APNs registration and a separate authenticated push provider instead of sending APNs tokens to Chatwoot's FCM endpoint | Client and provider source accepted, deployment pending | `docs/decisions/0004-native-apns-and-push-provider-boundary.md` |
+| DEC-008 | Defer per-agent push recipient routing until the policy is chosen, and record N85-15 AC2 as unmet in source rather than blocked on deployment | Deferred | `docs/decisions/0005-push-recipient-routing-deferred.md` |
 
 Account-level actions such as agreement acceptance, upload, TestFlight release,
 and App Review submission require a separate explicit owner decision. This log
