@@ -103,7 +103,8 @@ public final class AppModel {
         displayName: String,
         baseURL: URL,
         token: String,
-        account: ChatwootAccount
+        account: ChatwootAccount,
+        agentID: Int? = nil
     ) async throws {
         let allowedBaseURL = try APIRequest.normaliseBaseURL(
             baseURL.absoluteString,
@@ -124,6 +125,7 @@ public final class AppModel {
             baseURL: allowedBaseURL,
             selectedAccountID: account.id,
             selectedAccountName: account.name,
+            agentID: agentID,
             createdAt: Date(),
             lastUsedAt: Date()
         )
@@ -166,7 +168,8 @@ public final class AppModel {
         displayName: String,
         baseURL: URL,
         token: String,
-        account: ChatwootAccount
+        account: ChatwootAccount,
+        agentID: Int? = nil
     ) async throws {
         guard let index = profiles.firstIndex(where: { $0.id == profileID }) else {
             throw AppModelError.profileNotFound
@@ -189,6 +192,12 @@ public final class AppModel {
         updatedProfile.baseURL = allowedBaseURL
         updatedProfile.selectedAccountID = account.id
         updatedProfile.selectedAccountName = account.name
+        // Re-validation may have authenticated a different Chatwoot user, and
+        // a stale agent identity would route this device's notifications to
+        // the wrong person. Only overwrite when validation supplied one.
+        if let agentID {
+            updatedProfile.agentID = agentID
+        }
         updatedProfile.lastUsedAt = Date()
 
         var updatedProfiles = profiles

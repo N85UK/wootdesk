@@ -107,6 +107,23 @@ export class AtomicRegistrationStore {
     })
   }
 
+  /// Recipients for one event.
+  ///
+  /// An assigned conversation goes only to devices enrolled by that agent. An
+  /// unassigned one goes to every device on the account, which matches how
+  /// Chatwoot itself treats an unassigned conversation. Registrations that
+  /// carry no agent identity can never match an assignee; the caller reports
+  /// them so the condition is visible rather than silent.
+  async registrationsForEvent(accountID, assigneeID, ttlDays) {
+    const all = await this.registrationsForAccount(accountID, ttlDays)
+    if (assigneeID === undefined) {
+      return { recipients: all, unroutable: 0 }
+    }
+    const recipients = all.filter((item) => item.agentId === assigneeID)
+    const unroutable = all.filter((item) => item.agentId === undefined).length
+    return { recipients, unroutable }
+  }
+
   async registrationsForAccount(accountID, ttlDays) {
     return this.#exclusive(async () => {
       this.#requireReady()
@@ -286,6 +303,7 @@ export class AtomicRegistrationStore {
       deviceId: registration.deviceId,
       profileId: registration.profileId,
       accountId: registration.accountId,
+      agentId: registration.agentId,
       environment: registration.environment,
       topic: registration.topic,
       createdAt: registration.createdAt,
@@ -376,6 +394,7 @@ function registrationResponse(registration) {
       deviceId: registration.deviceId,
       profileId: registration.profileId,
       accountId: registration.accountId,
+      agentId: registration.agentId,
       environment: registration.environment,
       topic: registration.topic,
       updatedAt: registration.updatedAt,

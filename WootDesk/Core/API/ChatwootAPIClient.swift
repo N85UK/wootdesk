@@ -15,7 +15,7 @@ public actor ChatwootAPIClient: ChatwootAPIProtocol {
     public func fetchProfile(
         baseURL: URL,
         token: String
-    ) async throws -> (profileName: String, accounts: [ChatwootAccount]) {
+    ) async throws -> (profileName: String, agentID: Int?, accounts: [ChatwootAccount]) {
         let endpoint = try APIRequest.endpointURL(baseURL: baseURL, path: "api/v1/profile")
         let request = APIRequest.makeRequest(url: endpoint, method: "GET", token: token)
 
@@ -33,7 +33,7 @@ public actor ChatwootAPIClient: ChatwootAPIProtocol {
             }
 
             let profileName = profileDTO.name ?? profileDTO.email ?? baseURL.host ?? "Chatwoot User"
-            return (profileName: profileName, accounts: domainAccounts)
+            return (profileName: profileName, agentID: profileDTO.id, accounts: domainAccounts)
         } catch let apiError as APIError {
             throw apiError
         } catch {

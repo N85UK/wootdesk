@@ -116,11 +116,21 @@ meets the following source-level boundaries:
 12. Rate limit registration and delivery, and reject payloads outside a small
     documented schema.
 
-The current source-level policy notifies every enrolled device registered for
-the event's Chatwoot account. It does not yet prove which Chatwoot agent should
-receive an event. Do not deploy it for an organisation that requires per-agent
-recipient routing until that policy and its identity source are implemented and
-reviewed.
+The recipient policy is recorded in `DEC-008`. An assigned conversation
+notifies only the assignee's devices. An unassigned one notifies every agent on
+the account, matching how Chatwoot itself treats an unassigned conversation,
+because assignee-only with no fallback would mean an unassigned message reaches
+nobody.
+
+The agent identity comes from `GET /api/v1/profile` and is stored on the server
+profile, then sent at enrolment. A registration without one still enrols, but
+can never match an assigned conversation, so it is excluded and reported as
+`unroutable_registrations` rather than being notified about a colleague's
+conversation.
+
+This is proven by unit tests on both sides only. It has not been exercised
+against a real APNs delivery, so physical-device acceptance is still required
+before the routing can be trusted in production.
 
 The Chatwoot webhook route secret and gateway device API token are secrets.
 They belong in server secret storage and Apple Keychain respectively, never in

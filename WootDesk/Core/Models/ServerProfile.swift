@@ -10,6 +10,13 @@ public struct ServerProfile: Identifiable, Codable, Hashable, Sendable {
     public var baseURL: URL
     public var selectedAccountID: Int
     public var selectedAccountName: String
+    /// The Chatwoot user this profile authenticates as.
+    ///
+    /// Optional because profiles saved before per-agent push routing existed
+    /// have no value for it, and a missing key must decode rather than fail.
+    /// The push gateway uses it to send an assigned conversation only to the
+    /// agent it belongs to.
+    public var agentID: Int?
     public var createdAt: Date
     public var lastUsedAt: Date
 
@@ -19,6 +26,7 @@ public struct ServerProfile: Identifiable, Codable, Hashable, Sendable {
         baseURL: URL,
         selectedAccountID: Int,
         selectedAccountName: String,
+        agentID: Int? = nil,
         createdAt: Date = Date(),
         lastUsedAt: Date = Date()
     ) {
@@ -27,6 +35,7 @@ public struct ServerProfile: Identifiable, Codable, Hashable, Sendable {
         self.baseURL = baseURL
         self.selectedAccountID = selectedAccountID
         self.selectedAccountName = selectedAccountName
+        self.agentID = agentID
         self.createdAt = createdAt
         self.lastUsedAt = lastUsedAt
     }

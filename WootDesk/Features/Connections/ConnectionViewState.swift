@@ -15,6 +15,7 @@ public final class ConnectionViewState {
     public var errorMessage: String?
     public var discoveredAccounts: [ChatwootAccount] = []
     public var validatedProfileName: String = ""
+    public var validatedAgentID: Int?
     public var validatedURL: URL?
     public var validatedToken: String = ""
     public var isSelectingAccount: Bool = false
@@ -37,6 +38,7 @@ public final class ConnectionViewState {
         errorMessage = nil
         discoveredAccounts = []
         validatedProfileName = ""
+        validatedAgentID = nil
         validatedURL = nil
         validatedToken = ""
         isSelectingAccount = false
@@ -52,7 +54,7 @@ public final class ConnectionViewState {
                 return .failure("Please enter your Chatwoot personal access token.")
             }
 
-            let (profileName, accounts) = try await apiClient.fetchProfile(
+            let (profileName, agentID, accounts) = try await apiClient.fetchProfile(
                 baseURL: normalisedURL,
                 token: trimmedToken
             )
@@ -64,6 +66,7 @@ public final class ConnectionViewState {
             }
 
             self.validatedProfileName = profileName
+            self.validatedAgentID = agentID
             self.validatedURL = normalisedURL
             self.validatedToken = trimmedToken
             self.discoveredAccounts = accounts
@@ -74,10 +77,10 @@ public final class ConnectionViewState {
             }
 
             if accounts.count == 1, let singleAccount = accounts.first {
-                return .singleAccount(singleAccount, profileName: profileName, url: normalisedURL, token: trimmedToken)
+                return .singleAccount(singleAccount, profileName: profileName, agentID: agentID, url: normalisedURL, token: trimmedToken)
             } else {
                 self.isSelectingAccount = true
-                return .multipleAccounts(accounts, profileName: profileName, url: normalisedURL, token: trimmedToken)
+                return .multipleAccounts(accounts, profileName: profileName, agentID: agentID, url: normalisedURL, token: trimmedToken)
             }
         } catch let apiError as APIError {
             let message = apiError.errorDescription ?? "An error occurred while connecting to Chatwoot."
@@ -97,6 +100,7 @@ public final class ConnectionViewState {
         errorMessage = nil
         discoveredAccounts = []
         validatedProfileName = ""
+        validatedAgentID = nil
         validatedURL = nil
         validatedToken = ""
         isSelectingAccount = false
@@ -105,8 +109,8 @@ public final class ConnectionViewState {
     }
 
     public enum ValidationOutcome: Equatable {
-        case singleAccount(ChatwootAccount, profileName: String, url: URL, token: String)
-        case multipleAccounts([ChatwootAccount], profileName: String, url: URL, token: String)
+        case singleAccount(ChatwootAccount, profileName: String, agentID: Int?, url: URL, token: String)
+        case multipleAccounts([ChatwootAccount], profileName: String, agentID: Int?, url: URL, token: String)
         case failure(String)
     }
 }

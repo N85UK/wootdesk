@@ -301,14 +301,14 @@ private actor AvailabilityProfileTestAPI: ChatwootAPIProtocol {
     func fetchProfile(
         baseURL: URL,
         token: String
-    ) async throws -> (profileName: String, accounts: [ChatwootAccount]) {
+    ) async throws -> (profileName: String, agentID: Int?, accounts: [ChatwootAccount]) {
         guard let response = responses[baseURL] else {
             throw APIError.notFound
         }
         if response.delay > .zero {
             try await Task.sleep(for: response.delay)
         }
-        return ("Invented Agent", [response.account])
+        return (profileName: "Invented Agent", agentID: nil, accounts: [response.account])
     }
 
     func updateAvailability(

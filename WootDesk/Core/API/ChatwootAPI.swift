@@ -11,7 +11,7 @@ public protocol ChatwootAPIProtocol: Sendable {
     func fetchProfile(
         baseURL: URL,
         token: String
-    ) async throws -> (profileName: String, accounts: [ChatwootAccount])
+    ) async throws -> (profileName: String, agentID: Int?, accounts: [ChatwootAccount])
 
     /// Updates the authenticated agent's availability for one account.
     func updateAvailability(

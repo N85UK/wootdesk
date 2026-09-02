@@ -8,13 +8,31 @@ function object(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value)
 }
 
-function exactKeys(value, requiredKeys) {
-  const actual = Object.keys(value).sort()
-  const expected = [...requiredKeys].sort()
+function exactKeys(value, requiredKeys, optionalKeys = []) {
+  const actual = Object.keys(value)
+  const required = new Set(requiredKeys)
+  const permitted = new Set([...requiredKeys, ...optionalKeys])
   return (
-    actual.length === expected.length &&
-    actual.every((key, index) => key === expected[index])
+    actual.every((key) => permitted.has(key)) &&
+    [...required].every((key) => actual.includes(key))
   )
+}
+
+// The Chatwoot user this device belongs to. Optional so a client built before
+// per-agent routing can still enrol rather than being rejected outright. A
+// registration without it can never match an assigned conversation, which the
+// gateway logs, because guessing would defeat the isolation it provides.
+function optionalAgentID(value) {
+  if (value === undefined || value === null) {
+    return undefined
+  }
+  if (!Number.isSafeInteger(value) || value < 1) {
+    throw badRequest(
+      "invalid_registration",
+      "agentId must be a positive integer when present.",
+    )
+  }
+  return value
 }
 
 function uuid(value, field) {
@@ -73,14 +91,11 @@ function token(value) {
 export function validateCreateRegistration(value, expectedTopic) {
   if (
     !object(value) ||
-    !exactKeys(value, [
-      "deviceId",
-      "profileId",
-      "accountId",
-      "environment",
-      "topic",
-      "token",
-    ])
+    !exactKeys(
+      value,
+      ["deviceId", "profileId", "accountId", "environment", "topic", "token"],
+      ["agentId"],
+    )
   ) {
     throw badRequest(
       "invalid_registration",
@@ -92,6 +107,7 @@ export function validateCreateRegistration(value, expectedTopic) {
     deviceId: uuid(value.deviceId, "deviceId"),
     profileId: uuid(value.profileId, "profileId"),
     accountId: accountID(value.accountId),
+    agentId: optionalAgentID(value.agentId),
     environment: environment(value.environment),
     topic: topic(value.topic, expectedTopic),
     token: token(value.token),
@@ -101,13 +117,11 @@ export function validateCreateRegistration(value, expectedTopic) {
 export function validateUpdateRegistration(value, expectedTopic, deviceID) {
   if (
     !object(value) ||
-    !exactKeys(value, [
-      "profileId",
-      "accountId",
-      "environment",
-      "topic",
-      "token",
-    ])
+    !exactKeys(
+      value,
+      ["profileId", "accountId", "environment", "topic", "token"],
+      ["agentId"],
+    )
   ) {
     throw badRequest(
       "invalid_registration",
@@ -119,6 +133,7 @@ export function validateUpdateRegistration(value, expectedTopic, deviceID) {
     deviceId: uuid(deviceID, "deviceId"),
     profileId: uuid(value.profileId, "profileId"),
     accountId: accountID(value.accountId),
+    agentId: optionalAgentID(value.agentId),
     environment: environment(value.environment),
     topic: topic(value.topic, expectedTopic),
     token: token(value.token),
@@ -175,6 +190,15 @@ export function classifyChatwootEvent(value) {
       value.message?.conversation_id,
   )
   const messageId = positiveInteger(value.id ?? value.message?.id)
+  // Chatwoot spells the assignee differently across payload shapes and
+  // versions, so all three documented forms are accepted. Absent or
+  // unassigned leaves this undefined, which the gateway treats as "notify
+  // every agent on the account".
+  const assigneeId = positiveInteger(
+    value.conversation?.meta?.assignee?.id ??
+      value.conversation?.assignee_id ??
+      value.conversation?.assignee?.id,
+  )
 
   if (accountId === undefined || conversationId === undefined || messageId === undefined) {
     throw badRequest(
@@ -188,6 +212,7 @@ export function classifyChatwootEvent(value) {
     accountId,
     conversationId,
     messageId,
+    assigneeId,
   }
 }
 

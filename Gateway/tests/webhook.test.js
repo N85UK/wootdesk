@@ -5,6 +5,7 @@ import {
   createDevice,
   createHarness,
   incomingMessage,
+  profileID,
   registration,
   secondDeviceID,
   secondProfileID,
@@ -152,4 +153,149 @@ test("a wrong route secret is indistinguishable from a missing route", async (t)
     },
   )
   assert.equal(response.status, 404)
+})
+
+test("an assigned conversation reaches only the assignee's devices", async (t) => {
+  // N85-15 AC2. The pre-existing two-device test enrols its second device on
+  // account 77, so it proves account isolation and says nothing about two
+  // agents sharing one account, which is the case this covers.
+  const harness = await createHarness()
+  t.after(() => harness.close())
+
+  await createDevice(
+    harness,
+    registration({ agentId: 1, environment: "production" }),
+    "assignee-device-0001",
+  )
+  await createDevice(
+    harness,
+    registration({
+      deviceId: secondDeviceID,
+      profileId: secondProfileID,
+      agentId: 2,
+      environment: "production",
+      token: "cd".repeat(32),
+    }),
+    "colleague-device-001",
+  )
+
+  const response = await sendWebhook(
+    harness,
+    incomingMessage({
+      id: 900,
+      conversation: { id: 700, meta: { assignee: { id: 1 } } },
+    }),
+    { "x-chatwoot-delivery": "assigned-delivery-01" },
+  )
+
+  assert.equal(response.status, 202)
+  assert.equal(harness.calls.length, 1)
+  assert.equal(harness.calls[0].item.agentId, 1)
+  assert.equal(harness.calls[0].item.profileId, profileID)
+})
+
+test("an unassigned conversation reaches every agent on the account", async (t) => {
+  // The chosen fallback, matching how Chatwoot treats an unassigned
+  // conversation. Without it an unassigned message would reach nobody, which
+  // is worse in a support tool than notifying too many people.
+  const harness = await createHarness()
+  t.after(() => harness.close())
+
+  await createDevice(
+    harness,
+    registration({ agentId: 1, environment: "production" }),
+    "unassigned-device-01",
+  )
+  await createDevice(
+    harness,
+    registration({
+      deviceId: secondDeviceID,
+      profileId: secondProfileID,
+      agentId: 2,
+      environment: "production",
+      token: "cd".repeat(32),
+    }),
+    "unassigned-device-02",
+  )
+
+  const response = await sendWebhook(
+    harness,
+    incomingMessage({ id: 901, conversation: { id: 701 } }),
+    { "x-chatwoot-delivery": "unassigned-delivery" },
+  )
+
+  assert.equal(response.status, 202)
+  assert.equal(harness.calls.length, 2)
+  assert.deepEqual(
+    harness.calls.map((call) => call.item.agentId).sort(),
+    [1, 2],
+  )
+})
+
+test("a registration without an agent identity is excluded and reported", async (t) => {
+  // A client built before per-agent routing still enrols, because rejecting it
+  // would break setup outright. It cannot be matched to an assignee, so it is
+  // excluded rather than notified about a colleague's conversation, and the
+  // gateway says so instead of dropping it silently.
+  const harness = await createHarness()
+  t.after(() => harness.close())
+
+  await createDevice(
+    harness,
+    registration({ environment: "production" }),
+    "legacy-device-00001",
+  )
+
+  const response = await sendWebhook(
+    harness,
+    incomingMessage({
+      id: 902,
+      conversation: { id: 702, meta: { assignee: { id: 1 } } },
+    }),
+    { "x-chatwoot-delivery": "legacy-delivery-001" },
+  )
+
+  assert.equal(response.status, 202)
+  assert.equal(harness.calls.length, 0)
+  const reported = harness.logs.some(
+    (entry) => entry.context?.deliveryOutcome === "unroutable_registrations",
+  )
+  assert.equal(reported, true)
+})
+
+test("assignee_id is accepted as an alternative payload shape", async (t) => {
+  // Chatwoot spells the assignee differently between payload shapes, and
+  // reading only one of them would silently fall back to notifying everybody.
+  const harness = await createHarness()
+  t.after(() => harness.close())
+
+  await createDevice(
+    harness,
+    registration({ agentId: 5, environment: "production" }),
+    "alt-shape-device-01",
+  )
+  await createDevice(
+    harness,
+    registration({
+      deviceId: secondDeviceID,
+      profileId: secondProfileID,
+      agentId: 6,
+      environment: "production",
+      token: "cd".repeat(32),
+    }),
+    "alt-shape-device-02",
+  )
+
+  const response = await sendWebhook(
+    harness,
+    incomingMessage({
+      id: 903,
+      conversation: { id: 703, assignee_id: 5 },
+    }),
+    { "x-chatwoot-delivery": "alt-shape-delivery" },
+  )
+
+  assert.equal(response.status, 202)
+  assert.equal(harness.calls.length, 1)
+  assert.equal(harness.calls[0].item.agentId, 5)
 })

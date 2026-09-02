@@ -17,6 +17,10 @@ public struct PushGatewayDeviceRegistrationRequest: Codable, Equatable, Sendable
     public let deviceId: UUID
     public let profileId: UUID
     public let accountId: Int
+    /// Omitted from the encoded body when absent, which the gateway accepts.
+    /// A registration without it cannot be matched to an assigned
+    /// conversation, so the gateway excludes and reports it.
+    public let agentId: Int?
     public let environment: PushGatewayEnvironment
     public let topic: String
     public let token: String
@@ -25,6 +29,7 @@ public struct PushGatewayDeviceRegistrationRequest: Codable, Equatable, Sendable
         deviceId: UUID,
         profileId: UUID,
         accountId: Int,
+        agentId: Int? = nil,
         environment: PushGatewayEnvironment,
         topic: String,
         token: String
@@ -32,6 +37,7 @@ public struct PushGatewayDeviceRegistrationRequest: Codable, Equatable, Sendable
         self.deviceId = deviceId
         self.profileId = profileId
         self.accountId = accountId
+        self.agentId = agentId
         self.environment = environment
         self.topic = topic
         self.token = token

@@ -79,12 +79,17 @@ public struct StubChatwootAPI: ChatwootAPIProtocol {
         try await resolve(availabilityUpdateOutcome)
     }
 
+    /// An invented Chatwoot user identifier for the stubbed agent, so
+    /// enrolment carries an agent identity in previews and UI tests without
+    /// contacting a server.
+    public var stubAgentID: Int? = 1
+
     public func fetchProfile(
         baseURL: URL,
         token: String
-    ) async throws -> (profileName: String, accounts: [ChatwootAccount]) {
+    ) async throws -> (profileName: String, agentID: Int?, accounts: [ChatwootAccount]) {
         let result = try await resolve(profileOutcome)
-        return (profileName: result.name, accounts: result.accounts)
+        return (profileName: result.name, agentID: stubAgentID, accounts: result.accounts)
     }
 
     public func fetchConversations(

@@ -161,13 +161,62 @@ struct PushGatewayRegistrationManagerTests {
         )
     }
 
-    private func sampleProfile() -> ServerProfile {
+    @Test("Enrolment forwards the profile's Chatwoot agent identity")
+    func forwardsAgentIdentity() async throws {
+        // N85-15 AC2. Without this the gateway has no way to tell which agent a
+        // device belongs to, so it falls back to notifying the whole account.
+        let api = RecordingPushGatewayAPI()
+        let manager = makeManager(api: api, store: InMemoryPushGatewayConfigurationStore())
+        let profile = sampleProfile(agentID: 7)
+
+        _ = try await manager.configure(
+            baseURL: "https://push.example.com/wootdesk",
+            apiToken: validAPIToken("a"),
+            profile: profile,
+            deviceToken: Data([0x01, 0x02, 0x03, 0x04]),
+            environment: .development
+        )
+
+        let events = await api.events()
+        guard case .create(let registration, _) = events[0] else {
+            Issue.record("Expected a create event")
+            return
+        }
+        #expect(registration.agentId == 7)
+    }
+
+    @Test("A profile saved before per-agent routing enrols without an agent identity")
+    func enrolsWithoutAgentIdentity() async throws {
+        // Such a profile must still enrol rather than failing setup. The
+        // gateway excludes it from assigned conversations and reports it,
+        // which is visible, rather than silently routing to the wrong agent.
+        let api = RecordingPushGatewayAPI()
+        let manager = makeManager(api: api, store: InMemoryPushGatewayConfigurationStore())
+
+        _ = try await manager.configure(
+            baseURL: "https://push.example.com/wootdesk",
+            apiToken: validAPIToken("a"),
+            profile: sampleProfile(),
+            deviceToken: Data([0x01, 0x02, 0x03, 0x04]),
+            environment: .development
+        )
+
+        let events = await api.events()
+        guard case .create(let registration, _) = events[0] else {
+            Issue.record("Expected a create event")
+            return
+        }
+        #expect(registration.agentId == nil)
+    }
+
+    private func sampleProfile(agentID: Int? = nil) -> ServerProfile {
         ServerProfile(
             id: UUID(uuidString: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa")!,
             displayName: "Invented Support",
             baseURL: URL(string: "https://chatwoot.example.com")!,
             selectedAccountID: 42,
-            selectedAccountName: "Invented Account"
+            selectedAccountName: "Invented Account",
+            agentID: agentID
         )
     }
 

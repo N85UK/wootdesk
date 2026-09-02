@@ -304,10 +304,13 @@ struct ChatwootAPIClientTests {
         }
 
         let (client, baseURL) = makeClient()
-        let (name, accounts) = try await client.fetchProfile(baseURL: baseURL, token: "token")
+        let (name, agentID, accounts) = try await client.fetchProfile(baseURL: baseURL, token: "token")
 
         #expect(name == "Alex Multi Team")
         #expect(accounts.count == 3)
+        // The agent identity is what lets the push gateway route an assigned
+        // conversation to one agent rather than the whole account.
+        #expect(agentID != nil)
     }
 
     @Test("Updates availability using the account-scoped profile endpoint")

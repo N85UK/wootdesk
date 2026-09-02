@@ -228,12 +228,25 @@ async function deliverEvent({
     return { statusCode: 202, body: { status: "duplicate" } }
   }
 
-  const registrations = await store.registrationsForAccount(
-    event.accountId,
-    config.registrationTTLDays,
-  )
+  const { recipients: registrations, unroutable } =
+    await store.registrationsForEvent(
+      event.accountId,
+      event.assigneeId,
+      config.registrationTTLDays,
+    )
   if (registrations.length > config.maxRegistrationsPerEvent) {
     throw unavailable()
+  }
+  if (unroutable > 0) {
+    // Enrolled before the client sent an agent identity. Such a device cannot
+    // be matched to an assignee, so it is excluded rather than notified about
+    // another agent's conversation. Logged because a silent gap in delivery is
+    // harder to diagnose than a noisy one.
+    logger.warn("Registrations without an agent identity were not notified.", {
+      requestId: requestID,
+      deliveryOutcome: "unroutable_registrations",
+      count: unroutable,
+    })
   }
 
   const completed = new Set(state.completedDeviceIDs)

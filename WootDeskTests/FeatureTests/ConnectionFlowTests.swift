@@ -20,7 +20,7 @@ struct ConnectionFlowTests {
 
         let outcome = await state.validate(using: client, isDebug: false)
 
-        guard case .singleAccount(let account, _, let url, let token) = outcome else {
+        guard case .singleAccount(let account, _, _, let url, let token) = outcome else {
             #expect(Bool(false), "Expected a single-account outcome, got \(outcome)")
             return
         }
@@ -41,7 +41,7 @@ struct ConnectionFlowTests {
 
         let outcome = await state.validate(using: client, isDebug: false)
 
-        guard case .multipleAccounts(let accounts, _, _, _) = outcome else {
+        guard case .multipleAccounts(let accounts, _, _, _, _) = outcome else {
             #expect(Bool(false), "Expected a multiple-account outcome, got \(outcome)")
             return
         }

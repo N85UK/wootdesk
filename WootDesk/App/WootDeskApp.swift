@@ -135,12 +135,13 @@ struct MainAppView: View {
         }
         .sheet(isPresented: $appModel.showAddConnectionSheet) {
             AddConnectionView(
-                onSaveSuccess: { displayName, url, token, account in
+                onSaveSuccess: { displayName, url, token, account, agentID in
                     try await appModel.addConnection(
                         displayName: displayName,
                         baseURL: url,
                         token: token,
-                        account: account
+                        account: account,
+                        agentID: agentID
                     )
                 }
             )

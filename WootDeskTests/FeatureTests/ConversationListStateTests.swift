@@ -184,8 +184,8 @@ private struct DelayedConversationAPI: ChatwootAPIProtocol {
     let slowResult: [Conversation]
     let fastResult: [Conversation]
 
-    func fetchProfile(baseURL: URL, token: String) async throws -> (profileName: String, accounts: [ChatwootAccount]) {
-        ("Sample Agent", [ChatwootAccount(id: 1, name: "Sample Account")])
+    func fetchProfile(baseURL: URL, token: String) async throws -> (profileName: String, agentID: Int?, accounts: [ChatwootAccount]) {
+        (profileName: "Sample Agent", agentID: nil, accounts: [ChatwootAccount(id: 1, name: "Sample Account")])
     }
 
     func updateAvailability(

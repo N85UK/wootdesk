@@ -5,7 +5,7 @@ public struct AddConnectionView: View {
     @Environment(\.appEnvironment) private var environment
     @Environment(\.dismiss) private var dismiss
 
-    var onSaveSuccess: ((String, URL, String, ChatwootAccount) async throws -> Void)?
+    var onSaveSuccess: ((String, URL, String, ChatwootAccount, Int?) async throws -> Void)?
 
     @State private var state = ConnectionViewState()
     @State private var operationTask: Task<Void, Never>?
@@ -28,7 +28,7 @@ public struct AddConnectionView: View {
         initialDisplayName: String = "",
         mode: ConnectionEditorMode = .add,
         validatesOnAppear: Bool = false,
-        onSaveSuccess: ((String, URL, String, ChatwootAccount) async throws -> Void)? = nil
+        onSaveSuccess: ((String, URL, String, ChatwootAccount, Int?) async throws -> Void)? = nil
     ) {
         self._state = State(initialValue: ConnectionViewState(
             initialURL: initialURL,
@@ -213,7 +213,7 @@ public struct AddConnectionView: View {
     private func validateAndProceed() async {
         let outcome = await state.validate(using: environment.apiClient, isDebug: environment.isDebug)
         switch outcome {
-        case .singleAccount(let account, _, _, _):
+        case .singleAccount(let account, _, _, _, _):
             await saveAndDismiss(account: account)
         case .multipleAccounts:
             // State automatically switches to account selection
@@ -237,7 +237,13 @@ public struct AddConnectionView: View {
         defer { state.isSaving = false }
         do {
             if let onSaveSuccess {
-                try await onSaveSuccess(state.displayName, url, state.validatedToken, account)
+                try await onSaveSuccess(
+                    state.displayName,
+                    url,
+                    state.validatedToken,
+                    account,
+                    state.validatedAgentID
+                )
             }
             dismiss()
         } catch {

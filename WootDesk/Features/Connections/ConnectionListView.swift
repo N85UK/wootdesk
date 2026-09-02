@@ -119,13 +119,14 @@ public struct ConnectionListView: View {
                 initialToken: context.token,
                 initialDisplayName: context.profile.displayName,
                 mode: .edit,
-                onSaveSuccess: { displayName, url, token, account in
+                onSaveSuccess: { displayName, url, token, account, agentID in
                     try await appModel.updateConnection(
                         profileID: context.profile.id,
                         displayName: displayName,
                         baseURL: url,
                         token: token,
-                        account: account
+                        account: account,
+                        agentID: agentID
                     )
                 }
             )

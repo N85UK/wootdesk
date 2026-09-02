@@ -202,6 +202,7 @@ public actor PushGatewayRegistrationManager: PushGatewayRegistrationManaging {
             deviceId: deviceID,
             profileId: profile.id,
             accountId: profile.selectedAccountID,
+            agentId: profile.agentID,
             environment: environment,
             topic: Self.appTopic,
             token: deviceToken.hexadecimalString
