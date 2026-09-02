@@ -121,7 +121,7 @@ No platform version has been submitted for App Review.
 | App icons | Asset catalogue validates on both platforms | Debug and Release platform builds passed | Pass |
 | iOS distribution | App Store package signs and exports | Build 24 archived, exported, uploaded, and processed to `VALID` on 1 September 2026, which proves distribution signing end to end | Pass |
 | macOS distribution | Sandboxed universal archive validates and exports | Build 3 archive and signed App Store installer export pass; upload has not started | Pass locally, upload pending |
-| Real devices | Supported-device behaviour | Build 24 `INSTALLED` on one internal tester's device; no documented matrix run recorded | Unblocked, evidence outstanding |
+| Real devices | Supported-device behaviour | Push delivery to a physical iPhone 17 Pro Max proven on 2 September. The UI suite now **builds, signs and installs** on that handset after `TEST_HOST` and signing were fixed for `sdk=iphoneos`; the run itself has not completed because each app launch requires the device to be unlocked at that moment | Partly evidenced; UI journeys outstanding |
 
 ## Required release test matrix
 
@@ -151,7 +151,7 @@ whether the source was signable with the push capability: it is.
 | Signed macOS Release archive | Passed for build 3, universal arm64 and x86_64, macOS 15 minimum, App Sandbox with network and user-selected read-only file access, hardened runtime, icon, privacy manifest, and copyright metadata |
 | macOS local App Store package export | Passed on 31 August 2026; one Mac Installer Distribution identity has an accessible private key, the package signature validates, and the embedded Mac App Store profile matches the bundle |
 | App Store Connect upload | Build 24 processed to `VALID` and is `IN_BETA_TESTING` with one tester `INSTALLED`. Uploaded by an authorised local run, not by CI |
-| Signing and App Store Connect access | An App Store Connect Team Key authenticates (`GET /v1/apps` returns HTTP 200). `PUSH_NOTIFICATIONS` is confirmed on the `dev.n85.wootdesk` App ID. The key refreshes managed profiles during a build, which cleared the earlier stale-profile blocker. The stored distribution `.p12` covers iOS and the macOS app but not the macOS installer |
+| Signing and App Store Connect access | An App Store Connect Team Key authenticates (`GET /v1/apps` returns HTTP 200). `PUSH_NOTIFICATIONS` is confirmed on the `dev.n85.wootdesk` App ID. The `3rd Party Mac Developer Installer` certificate **exists on the team and its private key is present on the maintainer's Mac**, so macOS installer signing is not blocked; it is simply absent from the CI secret bundle. Ten CI-created development certificates were revoked on 2 September after the account hit Apple's cap and every build began failing |
 
 Xcode emitted its normal destination-selection warning because the Mac can be
 addressed as either arm64 or x86_64, and a metadata-extraction warning because

@@ -185,8 +185,10 @@ Xcode requirement in AC2.
 4. Re-run the iPhone and iPad UI journeys on hardware against the current
    source, and record VoiceOver and keyboard acceptance for the conversation
    actions.
-5. Add the `3rd Party Mac Developer Installer` identity before enabling macOS
-   delivery.
+5. Add the `3rd Party Mac Developer Installer` identity to the CI secret
+   bundle before enabling macOS delivery. The certificate already exists on
+   the team and its private key is on the maintainer's Mac, so this is an
+   export and a secret, not a provisioning request.
 6. Install a stable Xcode before creating any App Store submission build.
    TestFlight does not require it.
 7. Complete physical-device, remote-delivery, and Mac acceptance before
