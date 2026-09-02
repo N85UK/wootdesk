@@ -122,6 +122,41 @@ Answering the declaration cleared it immediately, with no change to the
 repository. Run 33544372320 uploaded build 34, which processed to `VALID` and
 is `IN_BETA_TESTING`.
 
+## Signing certificates accumulate, and the cap breaks delivery silently
+
+The archive uses automatic signing. Xcode provisions the target's development
+configuration alongside Release, and an ephemeral runner has no development
+identity, so **it mints a new development certificate on every archive**.
+
+Ten accumulated over 1 and 2 September 2026. The account then hit Apple's cap
+and every subsequent build failed:
+
+```text
+error: Choose a certificate to revoke. Your account has reached the maximum
+number of certificates.
+error: No profiles for 'dev.n85.wootdesk' were found
+```
+
+Builds 44 and 45 never reached TestFlight because of this, and nothing said so
+except the build log. Delivery had stopped while the pipeline looked configured
+and healthy.
+
+Cleared on 2 September by revoking the ten certificates whose display name is
+`Created via API`. They are safe to revoke: they carry the API key's identity
+(`UID=JPP4K8LHHQ`), not the maintainer's local development certificate
+(`UID=2T338U4U4A`), which must be kept. Check the serial against
+`security find-certificate -c "Apple Development: ..." -p | openssl x509 -noout -serial`
+before revoking anything.
+
+The workflow now counts them before archiving and warns at five or more, so the
+quota cannot be exhausted silently again. That is a guard, not a cure.
+
+**The permanent fix is still open.** Options, roughly in order of preference:
+import a single long-lived development certificate into the CI keychain so
+Xcode reuses it instead of creating one; or switch the archive to manual
+signing with an explicit distribution profile so development provisioning never
+runs. Neither has been tried yet, and each costs a build to verify.
+
 ## Where the secrets live## Where the secrets live
 
 The values are held in Infisical on the self-hosted instance at
