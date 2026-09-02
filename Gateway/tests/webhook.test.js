@@ -113,14 +113,17 @@ test("APNs invalid tokens are removed without affecting a rotated token", async 
 })
 
 test("configured timestamped webhook signatures are verified", async (t) => {
-  const signingKey = randomBytes(32)
-  const harness = await createHarness({
-    signingSecret: signingKey.toString("base64url"),
-  })
+  // The secret is signed with as issued. This test previously generated 32
+  // random bytes, passed the base64url text as the secret, and then signed
+  // with the raw bytes, which matched only because the gateway decoded it
+  // again. That is not what Chatwoot does, so the round trip agreed with
+  // itself while disagreeing with every real webhook.
+  const signingSecret = randomBytes(24).toString("base64url")
+  const harness = await createHarness({ signingSecret })
   t.after(() => harness.close())
   const body = JSON.stringify(incomingMessage())
   const timestamp = String(Math.floor(Date.now() / 1000))
-  const signature = createHmac("sha256", signingKey)
+  const signature = createHmac("sha256", signingSecret)
     .update(Buffer.from(`${timestamp}.${body}`, "utf8"))
     .digest("hex")
 
@@ -298,4 +301,29 @@ test("assignee_id is accepted as an alternative payload shape", async (t) => {
   assert.equal(response.status, 202)
   assert.equal(harness.calls.length, 1)
   assert.equal(harness.calls[0].item.agentId, 5)
+})
+
+test("the signing secret is used as issued, not base64url decoded", async (t) => {
+  // Chatwoot issues a plain alphanumeric secret and signs with its literal
+  // bytes. The gateway previously ran Buffer.from(secret, "base64url") over
+  // it, which is self-consistent only when the gateway generates the secret
+  // itself. Against a real Chatwoot every signature failed, and the failure
+  // was indistinguishable from an attack.
+  const signingSecret = "H8kPq2mWvR7nT4xL9cJd3Bza"
+  const harness = await createHarness({ signingSecret })
+  t.after(() => harness.close())
+  await createDevice(harness, registration({ environment: "production" }), "sig-device-000001")
+
+  const body = JSON.stringify(incomingMessage({ id: 910, conversation: { id: 700 } }))
+  const timestamp = String(Math.floor(Date.now() / 1000))
+  const signature = createHmac("sha256", signingSecret)
+    .update(Buffer.concat([Buffer.from(`${timestamp}.`, "utf8"), Buffer.from(body, "utf8")]))
+    .digest("hex")
+
+  const response = await sendWebhook(harness, body, {
+    "x-chatwoot-signature": `sha256=${signature}`,
+    "x-chatwoot-timestamp": timestamp,
+    "x-chatwoot-delivery": "literal-secret-0001",
+  })
+  assert.equal(response.status, 202)
 })

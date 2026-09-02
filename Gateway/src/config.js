@@ -50,6 +50,28 @@ function secret(environment, name, { optional = false, exactBytes } = {}) {
   return raw
 }
 
+// A secret issued by Chatwoot rather than chosen by the operator.
+//
+// The strict `secret` rule above demands 32 bytes of base64url, which is right
+// for values we generate but wrong here: Chatwoot issues a 24-character
+// alphanumeric secret, so requiring our own format made signature
+// verification impossible to enable against a real server. The floor is set at
+// 16 characters, which is still roughly 80 bits for an alphanumeric value,
+// while rejecting anything obviously weak.
+function externalSecret(environment, name, { optional = false } = {}) {
+  const raw = environment[name]
+  if (optional && (raw === undefined || raw === "")) {
+    return undefined
+  }
+  required(environment, name)
+  if (!/^[A-Za-z0-9_-]{16,256}$/.test(raw)) {
+    throw new Error(
+      `${name} must be 16 to 256 characters of letters, digits, underscore or hyphen.`,
+    )
+  }
+  return raw
+}
+
 function identifier(environment, name) {
   const value = required(environment, name)
   if (!/^[A-Z0-9]{10}$/.test(value)) {
@@ -99,7 +121,7 @@ export function loadConfig(environment = process.env) {
     dataEncryptionKey: Buffer.from(dataEncryptionKey, "base64url"),
     deviceAPIToken,
     webhookRouteSecret: routeSecret,
-    webhookSigningSecret: secret(
+    webhookSigningSecret: externalSecret(
       environment,
       "CHATWOOT_WEBHOOK_SIGNING_SECRET",
       { optional: true },

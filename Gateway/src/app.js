@@ -138,10 +138,10 @@ export function createGatewayHandler({ config, store, sender, logger }) {
             rawBody: body.raw,
             signature: request.headers["x-chatwoot-signature"],
             timestamp: request.headers["x-chatwoot-timestamp"],
-            secret: Buffer.from(
-              config.webhookSigningSecret,
-              "base64url",
-            ),
+            // Chatwoot signs with the literal bytes of the secret it
+            // issued. Decoding it as base64url only ever matched secrets the
+            // gateway generated for itself.
+            secret: Buffer.from(config.webhookSigningSecret, "utf8"),
             toleranceSeconds: config.webhookSignatureToleranceSeconds,
           })
         }

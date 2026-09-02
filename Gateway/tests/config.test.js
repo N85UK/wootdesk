@@ -46,3 +46,30 @@ test("loadConfig rejects insecure mode in production", () => {
     /cannot be enabled in production/,
   )
 })
+
+test("loadConfig accepts the webhook signing secret Chatwoot actually issues", () => {
+  // Chatwoot generates this secret, not us, so we do not get to dictate its
+  // shape. A real one is 24 alphanumeric characters, roughly 105 bits of
+  // entropy, which the earlier 32-byte base64url rule rejected outright. That
+  // made signature verification impossible to enable against a real Chatwoot.
+  const config = loadConfig(
+    environment({ CHATWOOT_WEBHOOK_SIGNING_SECRET: "H8kPq2mWvR7nT4xL9cJd3Bza" }),
+  )
+  assert.equal(config.webhookSigningSecret, "H8kPq2mWvR7nT4xL9cJd3Bza")
+})
+
+test("loadConfig still rejects a webhook signing secret that is too short to be safe", () => {
+  assert.throws(
+    () => loadConfig(environment({ CHATWOOT_WEBHOOK_SIGNING_SECRET: "tooshort" })),
+    /CHATWOOT_WEBHOOK_SIGNING_SECRET/,
+  )
+})
+
+test("loadConfig keeps the strict rule for secrets the operator generates", () => {
+  // DEVICE_API_TOKEN and WEBHOOK_ROUTE_SECRET are ours to choose, so the
+  // stricter requirement still applies to them.
+  assert.throws(
+    () => loadConfig(environment({ DEVICE_API_TOKEN: "H8kPq2mWvR7nT4xL9cJd3Bza" })),
+    /DEVICE_API_TOKEN/,
+  )
+})
