@@ -1,6 +1,6 @@
 # Chatwoot Live Compatibility Testing
 
-Status: Server verified and seeded; checks reach it and stop at the CA trust step
+Status: Matrix run and passing against Chatwoot v4.9.0
 
 Last reviewed: 1 September 2026
 
@@ -144,15 +144,41 @@ worth keeping in the record: it reproduces a real self-hosted deployment
 hazard, and it independently confirms that defence is load-bearing rather than
 decorative.
 
-### Remaining step
+### Matrix run, 2 September 2026
 
-The three compatibility cases now execute and reach the network. They fail with
-`tlsFailure` until Caddy's local CA is trusted, which needs `sudo` against the
-System keychain:
+All three cases passed against `chatwoot/chatwoot:v4.9.0` over the proxied
+HTTPS endpoint, with both write gates set:
+
+| Case | Result |
+|---|---|
+| `testProfileConversationListAndHistoryCompatibility` | Passed |
+| `testPublicReplyPrivateNoteAndAttachmentCompatibility` | Passed |
+| `testAvailabilityAndTriageCompatibility` | Passed |
+
+The run is mutating, and the state it is expected to restore was restored:
+status back to `open`, priority back to none, labels back to `billing`, and the
+assignee unchanged. That confirms the suite's own restore path rather than
+taking it on trust.
+
+Messages are not restored, and should not be, because a reply cannot be
+unsent. The seeded conversation grew from 4 messages to 13. Run
+`script/compat_env.sh reset` to return the server to a clean seeded state
+before recording another matrix run.
+
+### Trusting the CA
+
+The run requires Caddy's local certificate authority to be trusted, because
+the tests deliberately construct the client with `isDebug: false` so that
+production transport rules are what gets verified. Plain HTTP on localhost is
+rejected by design, so this cannot be worked around in code.
 
 ```bash
 script/compat_env.sh trust
 ```
+
+That prints the two commands. The trust step needs `sudo` against the System
+keychain. Remove it once the run is finished; the CA is generated locally by
+the Caddy container and should not outlive the run.
 
 ## Supported-version matrix
 
@@ -160,7 +186,7 @@ Record evidence without credentials or message bodies:
 
 | Chatwoot release | Deployment | Read-only | Public reply | Private note | Attachment | Availability | Triage | Date | Reviewer |
 |---|---|---|---|---|---|---|---|---|---|
-| `chatwoot/chatwoot:v4.9.0` | Dedicated container | Blocked on CA trust | Blocked on CA trust | Blocked on CA trust | Blocked on CA trust | Blocked on CA trust | Blocked on CA trust | 1 Sep 2026 | Environment verified over the API; Swift suite pending CA trust |
+| `chatwoot/chatwoot:v4.9.0` | Dedicated container | Pass | Pass | Pass | Pass | Pass | Pass | 2 Sep 2026 | `script/live_compatibility.sh --allow-writes --confirm-invented-data`, 3 of 3 passed |
 | Previous supported release | Dedicated container | Pending | Pending | Pending | Pending | Pending | Pending | | |
 
 Pin exact Chatwoot image versions for each run. Do not use a floating `latest`
