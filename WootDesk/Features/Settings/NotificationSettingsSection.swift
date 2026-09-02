@@ -18,6 +18,23 @@ struct NotificationSettingsSection: View {
             LabeledContent("Apple Registration", value: registrationDescription)
             LabeledContent("Remote Delivery", value: gatewayDescription)
 
+            if state.isEnrolledWithoutAgentIdentity {
+                Label {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Assigned conversations will not alert this device")
+                            .font(.subheadline.weight(.semibold))
+                        Text("This server profile has no Chatwoot agent identity, so the gateway cannot tell which conversations belong to you. Open the server in Servers and save it again, then update the enrolment.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                } icon: {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.orange)
+                }
+                .padding(.vertical, 4)
+                .accessibilityElement(children: .combine)
+            }
+
             VStack(alignment: .leading, spacing: 6) {
                 Label("New Message Alerts", systemImage: "bell.badge")
                     .font(.headline)

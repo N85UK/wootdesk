@@ -416,14 +416,20 @@ struct MainAppView: View {
     #endif
 }
 
-private struct ActiveProfileDataContext: Equatable {
+struct ActiveProfileDataContext: Equatable {
     let profileID: UUID?
     let baseURL: URL?
     let accountID: Int?
+    /// Included because filling in a missing agent identity has to count as a
+    /// change. Without it the observer that re-enrols this device with the push
+    /// gateway never fires, so the gateway keeps an identity-less registration
+    /// and excludes the device from every assigned conversation.
+    let agentID: Int?
 
     init(profile: ServerProfile?) {
         profileID = profile?.id
         baseURL = profile?.baseURL
         accountID = profile?.selectedAccountID
+        agentID = profile?.agentID
     }
 }

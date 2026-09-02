@@ -39,6 +39,11 @@ public final class PushNotificationState {
     @ObservationIgnored private let gatewayEnvironment: PushGatewayEnvironment
     @ObservationIgnored private var registrationAction: (@MainActor @Sendable () -> Void)?
     @ObservationIgnored private var currentDeviceToken: Data?
+    /// True when this device is enrolled but the profile has no Chatwoot agent
+    /// identity, which means the gateway cannot route an assigned conversation
+    /// to it and will silently exclude it.
+    public private(set) var isEnrolledWithoutAgentIdentity = false
+
     @ObservationIgnored private var savedProfiles: [ServerProfile] = []
     @ObservationIgnored private var activeProfile: ServerProfile?
     @ObservationIgnored private var isConfigured = false
@@ -294,6 +299,12 @@ public final class PushNotificationState {
     }
 
     private func updateGatewayStatusFromCurrentState() {
+        // An enrolment carrying no agent identity is accepted by the gateway
+        // but excluded from every assigned conversation, so the agent receives
+        // nothing and nothing on screen says why. Surface it.
+        isEnrolledWithoutAgentIdentity =
+            gatewaySummary != nil && activeProfile?.agentID == nil
+
         guard let gatewaySummary else {
             gatewayStatus = .notConfigured
             return

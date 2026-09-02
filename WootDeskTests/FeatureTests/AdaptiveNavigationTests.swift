@@ -163,3 +163,49 @@ struct AdaptiveNavigationTests {
         #expect(ConversationRowMetadataLayout.preferred(for: size) == .stacked)
     }
 }
+
+@Suite("Profile data context")
+struct ProfileDataContextTests {
+    @Test("A newly backfilled agent identity is treated as a profile change")
+    func agentIdentityChangeIsObserved() {
+        // The context drives the observer that re-enrols the device with the
+        // push gateway. It previously carried only the profile id, base URL
+        // and account, so filling in a missing agent identity left it equal to
+        // its previous value, no re-enrolment happened, and the gateway went on
+        // excluding the device from every assigned conversation.
+        let base = ServerProfile(
+            id: UUID(uuidString: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa")!,
+            displayName: "Invented",
+            baseURL: URL(string: "https://chatwoot.example.invalid")!,
+            selectedAccountID: 1,
+            selectedAccountName: "Invented Account",
+            agentID: nil
+        )
+        var backfilled = base
+        backfilled.agentID = 7
+
+        #expect(
+            ActiveProfileDataContext(profile: base)
+                != ActiveProfileDataContext(profile: backfilled)
+        )
+    }
+
+    @Test("An unrelated change does not look like a new profile")
+    func unrelatedChangeIsIgnored() {
+        let base = ServerProfile(
+            id: UUID(uuidString: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa")!,
+            displayName: "Invented",
+            baseURL: URL(string: "https://chatwoot.example.invalid")!,
+            selectedAccountID: 1,
+            selectedAccountName: "Invented Account",
+            agentID: 7
+        )
+        var renamed = base
+        renamed.displayName = "Renamed"
+
+        #expect(
+            ActiveProfileDataContext(profile: base)
+                == ActiveProfileDataContext(profile: renamed)
+        )
+    }
+}
