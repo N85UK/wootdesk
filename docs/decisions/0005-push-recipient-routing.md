@@ -81,8 +81,26 @@ than notified about a colleague's conversation, and the gateway logs
 `unroutable_registrations` with a count. A visible gap is easier to diagnose
 than a silent one.
 
-Because the client and gateway ship from this repository together, there is no
-window in which a deployed gateway sees only identity-less registrations.
+That reasoning was originally written as "client and gateway ship together, so
+there is no window in which a deployed gateway sees only identity-less
+registrations". **That was wrong**, and deploying proved it within the hour. A
+TestFlight build was already on a device, and the saved server profile predated
+the field, so the first real webhook produced:
+
+```text
+"Registrations without an agent identity were not notified."
+"deliveryOutcome":"unroutable_registrations","count":1
+```
+
+Two things were missing. A build carrying the field has to reach the device,
+which TestFlight handles. More subtly, **an existing profile never gained an
+identity even on a new build**, because only the add and edit flows set it. A
+profile saved before the change would have stayed unroutable forever, and the
+agent would have received nothing with no visible reason.
+
+`AppModel.backfillAgentIdentityIfNeeded` now fills it in when a profile becomes
+active, using the identity the profile endpoint already returns. It is best
+effort: a failure never blocks the app and the next activation retries.
 
 ### Coverage
 

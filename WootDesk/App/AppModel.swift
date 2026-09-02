@@ -92,6 +92,13 @@ public final class AppModel {
             activeProfile = updatedProfile
             activeToken = token
             lastError = nil
+
+            // Profiles saved before per-agent push routing existed carry no
+            // agent identity, which makes the gateway exclude the device from
+            // every assigned conversation. Fill it in on activation so an
+            // existing profile recovers without the agent having to remove and
+            // re-add the server.
+            await backfillAgentIdentityIfNeeded()
         } catch {
             AppLogger.auth.error("Failed to select a server profile.")
             lastError = Self.userMessage(for: error)
@@ -163,6 +170,42 @@ public final class AppModel {
 
     /// Updates an existing profile only after its server, token, and account have
     /// been revalidated by the connection editor.
+    /// Fills in the Chatwoot agent identity for the active profile when it has
+    /// none.
+    ///
+    /// Profiles saved before per-agent push routing existed carry no agent
+    /// identity, and nothing outside the add and edit flows sets one. Such a
+    /// device enrols without it, and the push gateway then excludes it from
+    /// every assigned conversation, so the agent silently receives nothing.
+    /// The identity is already returned by the profile endpoint the app calls
+    /// anyway, so this costs one request the first time and nothing after.
+    public func backfillAgentIdentityIfNeeded() async {
+        guard let profile = activeProfile, profile.agentID == nil else { return }
+        guard let token = (try? environment.credentialStore.loadToken(for: profile.id)) ?? nil,
+              !token.isEmpty else { return }
+
+        do {
+            let result = try await environment.apiClient.fetchProfile(
+                baseURL: profile.baseURL,
+                token: token
+            )
+            guard let agentID = result.agentID else { return }
+            guard let index = profiles.firstIndex(where: { $0.id == profile.id }) else { return }
+
+            var updated = profiles
+            updated[index].agentID = agentID
+            try await environment.profileRepository.saveProfiles(updated)
+            profiles = updated
+            if activeProfile?.id == profile.id {
+                activeProfile = updated[index]
+            }
+        } catch {
+            // A backfill is best effort. Failing it must never block the app,
+            // and the next launch will try again.
+            AppLogger.network.debug("The agent identity backfill did not complete.")
+        }
+    }
+
     public func updateConnection(
         profileID: UUID,
         displayName: String,

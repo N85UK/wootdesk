@@ -512,3 +512,47 @@ private final class FaultInjectingCredentialStore: CredentialStore, @unchecked S
         lock.withLock { tokens.count }
     }
 }
+
+@Suite("Agent identity backfill")
+@MainActor
+struct AgentIdentityBackfillTests {
+    @Test("A profile saved before per-agent routing gains its agent identity")
+    func backfillsMissingAgentIdentity() async throws {
+        // Profiles created before ServerProfile.agentID existed carry nil, and
+        // nothing else sets it outside the add and edit flows. Without a
+        // backfill such a device enrols with no agent identity, and the push
+        // gateway then excludes it from every assigned conversation, so the
+        // agent silently receives nothing.
+        let environment = AppEnvironment.preview()
+        let appModel = AppModel(environment: environment)
+        try await appModel.addConnection(
+            displayName: "Invented",
+            baseURL: URL(string: "https://chatwoot.example.com")!,
+            token: "invented-token",
+            account: ChatwootAccount(id: 1, name: "Invented Account"),
+            agentID: nil
+        )
+        #expect(appModel.activeProfile?.agentID == nil)
+
+        await appModel.backfillAgentIdentityIfNeeded()
+
+        #expect(appModel.activeProfile?.agentID != nil)
+    }
+
+    @Test("An existing agent identity is left alone")
+    func leavesExistingIdentityAlone() async throws {
+        let environment = AppEnvironment.preview()
+        let appModel = AppModel(environment: environment)
+        try await appModel.addConnection(
+            displayName: "Invented",
+            baseURL: URL(string: "https://chatwoot.example.com")!,
+            token: "invented-token",
+            account: ChatwootAccount(id: 1, name: "Invented Account"),
+            agentID: 99
+        )
+
+        await appModel.backfillAgentIdentityIfNeeded()
+
+        #expect(appModel.activeProfile?.agentID == 99)
+    }
+}
