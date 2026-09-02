@@ -88,8 +88,21 @@ targets:
         IPHONEOS_DEPLOYMENT_TARGET: "18.0"
         "TEST_HOST[sdk=macosx*]": "$(BUILT_PRODUCTS_DIR)/WootDesk.app/Contents/MacOS/WootDesk"
         "TEST_HOST[sdk=iphonesimulator*]": "$(BUILT_PRODUCTS_DIR)/WootDesk.app/WootDesk"
+        # Without a device entry the build falls back to the macOS path and
+        # fails with "Could not find test host", which made running any test on
+        # a physical iPhone impossible.
+        "TEST_HOST[sdk=iphoneos*]": "$(BUILT_PRODUCTS_DIR)/WootDesk.app/WootDesk"
         "BUNDLE_LOADER[sdk=macosx*]": "$(TEST_HOST)"
         "BUNDLE_LOADER[sdk=iphonesimulator*]": "$(TEST_HOST)"
+        "BUNDLE_LOADER[sdk=iphoneos*]": "$(TEST_HOST)"
+        # A physical device refuses an unsigned test bundle. Signing stays off
+        # for macOS and the simulator, where CI runs unsigned on purpose.
+        "CODE_SIGNING_ALLOWED[sdk=iphoneos*]": "YES"
+        "CODE_SIGNING_REQUIRED[sdk=iphoneos*]": "YES"
+        "CODE_SIGN_STYLE[sdk=iphoneos*]": "Automatic"
+        # The base setting is an empty identity, which a device build rejects
+        # outright for a test bundle.
+        "CODE_SIGN_IDENTITY[sdk=iphoneos*]": "Apple Development"
       configs:
         Debug:
           SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG
@@ -114,6 +127,13 @@ targets:
         MACOSX_DEPLOYMENT_TARGET: "15.0"
         IPHONEOS_DEPLOYMENT_TARGET: "18.0"
         "TEST_TARGET_NAME": "WootDesk"
+        # As above: a physical device refuses an unsigned UI test runner.
+        "CODE_SIGNING_ALLOWED[sdk=iphoneos*]": "YES"
+        "CODE_SIGNING_REQUIRED[sdk=iphoneos*]": "YES"
+        "CODE_SIGN_STYLE[sdk=iphoneos*]": "Automatic"
+        # The base setting is an empty identity, which a device build rejects
+        # outright for a test bundle.
+        "CODE_SIGN_IDENTITY[sdk=iphoneos*]": "Apple Development"
 
 schemes:
   WootDesk:
