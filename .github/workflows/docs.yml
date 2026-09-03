@@ -213,10 +213,34 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           set -euo pipefail
-          version="$(npx wrangler deployments list --json 2>/dev/null \
-            | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{try{const j=JSON.parse(d);console.log(j?.[0]?.version_id??j?.deployments?.[0]?.versions?.[0]?.version_id??"")}catch{console.log("")}})' || true)"
+          # Search the response for the first version_id at any depth rather
+          # than assuming a shape. The first attempt assumed one, found nothing,
+          # and recorded "unknown", which is a rollback target that cannot be
+          # rolled back to.
+          npx wrangler versions list --json > versions.json 2>/dev/null \
+            || npx wrangler deployments list --json > versions.json 2>/dev/null \
+            || echo '[]' > versions.json
+          version="$(node -e '
+            const data = JSON.parse(require("fs").readFileSync("versions.json", "utf8"));
+            const find = (node) => {
+              if (Array.isArray(node)) { for (const item of node) { const hit = find(item); if (hit) return hit; } return null; }
+              if (node && typeof node === "object") {
+                for (const key of ["version_id", "versionId", "id"]) {
+                  if (typeof node[key] === "string" && /^[0-9a-f-]{36}$/.test(node[key])) return node[key];
+                }
+                for (const value of Object.values(node)) { const hit = find(value); if (hit) return hit; }
+              }
+              return null;
+            };
+            process.stdout.write(find(data) ?? "");
+          ')"
           echo "version=${version}" >> "$GITHUB_OUTPUT"
-          echo "Replacing version: ${version:-unknown}"
+          if [ -z "$version" ]; then
+            echo "::warning::No previous version found, so no rollback target is recorded."
+            head -c 300 versions.json
+          else
+            echo "Replacing version: ${version}"
+          fi
 
       - name: Deploy the Worker
         if: steps.credentials.outputs.configured == 'true'
