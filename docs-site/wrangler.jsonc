@@ -1,0 +1,38 @@
+{
+  // Public WootDesk documentation, served from a dedicated Worker.
+  //
+  // Dedicated is the point, not a detail. The private N85 documentation at
+  // docs.n85.dev is a separate Worker with a separate build and a separate
+  // search index, so that no shared route, asset or index can serve private
+  // page text from this hostname. See
+  // docs/decisions/0007-documentation-publication-boundary.md.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "wootdesk-docs",
+  "compatibility_date": "2026-09-03",
+
+  // Static assets only. There is no server-side code, so there is nothing on
+  // this Worker that could read a binding or a secret.
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page"
+  },
+
+  // N85-47 AC4. A workers.dev hostname would be an unmanaged second copy of the
+  // public site, outside the canonical address, the sitemap and the certificate
+  // for docs.n85.app. Disabled so docs.n85.app is the only way in.
+  "workers_dev": false,
+  "preview_urls": false,
+
+  // N85-47 AC2. Cloudflare provisions and renews the certificate for this
+  // hostname and redirects HTTP to HTTPS.
+  "routes": [
+    {
+      "pattern": "docs.n85.app",
+      "custom_domain": true
+    }
+  ],
+
+  "observability": {
+    "enabled": true
+  }
+}

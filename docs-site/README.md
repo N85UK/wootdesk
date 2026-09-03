@@ -106,3 +106,60 @@ docs-site/
 ├── public/                   Files copied verbatim, including the favicon
 └── scripts/                  Boundary and link checks run by CI
 ```
+
+## Deployment
+
+The site is served from a dedicated Cloudflare Worker configured in
+`wrangler.jsonc`. Dedicated is deliberate: the private documentation at
+`docs.n85.dev` is a separate Worker with its own build and search index, so no
+shared route or index can serve private text from this hostname.
+
+Deployment is automatic. A push to `main` that touches `docs-site/` runs the
+checks, and the `deploy` job publishes the artefact those checks passed
+against, rather than rebuilding. Nothing is deployed from a pull request.
+
+### One-time setup
+
+Two repository secrets are required. Until both exist the deploy job emits a
+warning and publishes nothing:
+
+| Secret | Value |
+| --- | --- |
+| `CLOUDFLARE_API_TOKEN` | An API token scoped as below |
+| `CLOUDFLARE_ACCOUNT_ID` | The Cloudflare account that owns the `n85.app` zone |
+
+The token needs three permissions, and no more:
+
+* **Account**, Workers Scripts, Edit. Publishes the Worker.
+* **Zone**, Workers Routes, Edit, on `n85.app`. Attaches the custom domain.
+* **Zone**, DNS, Edit, on `n85.app`. Creates the `docs.n85.app` record.
+
+Cloudflare provisions and renews the certificate for a custom domain and
+redirects HTTP to HTTPS, so no certificate handling is needed here.
+
+### What the deployment proves
+
+`wrangler deploy` exiting zero means Cloudflare accepted the upload. It does
+not mean visitors receive the new pages. The workflow therefore stamps the
+commit into `build-info.json` before building, and after deploying fetches
+`https://docs.n85.app/build-info.json` and fails unless the live site returns
+that commit. A deployment that silently changed nothing fails the job.
+
+### Deploying by hand
+
+Only for recovery. Normal changes go through `main`.
+
+```bash
+cd docs-site
+npm ci
+npm run build
+npm run verify
+CLOUDFLARE_API_TOKEN=... CLOUDFLARE_ACCOUNT_ID=... npx wrangler deploy
+```
+
+### The workers.dev hostname is disabled
+
+`workers_dev` and `preview_urls` are both off. A workers.dev address would be
+an unmanaged second copy of the public site, outside the canonical address,
+the sitemap and the certificate, which is the situation N85-47 AC4 exists to
+prevent.

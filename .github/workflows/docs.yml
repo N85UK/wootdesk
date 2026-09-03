@@ -52,6 +52,16 @@ jobs:
       - name: Type-check the site
         run: npm run check
 
+      # Stamped before the build so it travels inside the verified artifact. The
+      # deploy job fetches this back from the live site to prove the deployment
+      # actually replaced what was there, rather than trusting an exit status.
+      - name: Stamp the build with its commit
+        run: |
+          set -euo pipefail
+          printf '{"commit":"%s","built":"%s"}\n' "$GITHUB_SHA" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            > public/build-info.json
+          cat public/build-info.json
+
       - name: Build
         run: npm run build
 
@@ -137,3 +147,93 @@ jobs:
           name: docs-site-dist
           path: docs-site/dist
           retention-days: 14
+
+  deploy:
+    name: Deploy to docs.n85.app
+    needs: build-and-verify
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: docs-production
+      url: https://docs.n85.app
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      # N85-47 AC6. The deployed bytes are the ones the checks passed against,
+      # not a rebuild that could differ from what was verified.
+      - name: Download the verified build
+        uses: actions/download-artifact@v4
+        with:
+          name: docs-site-dist
+          path: docs-site/dist
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: docs-site/package-lock.json
+
+      # Locked, so the deployment uses the wrangler version the repository
+      # pins rather than whatever npx resolves on the day.
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Confirm the deployment credentials are present
+        id: credentials
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CLOUDFLARE_API_TOKEN}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID}" ]; then
+            # A warning, not a notice. A deployment that quietly does nothing and
+            # reports success is how this project lost two TestFlight builds.
+            echo "::warning::Cloudflare credentials are absent, so nothing was deployed. Add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID to deploy docs.n85.app."
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Deploy the Worker
+        if: steps.credentials.outputs.configured == 'true'
+        id: deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler deploy
+
+      # N85-47 AC2 and AC6, and the rule this project keeps relearning: fetch the
+      # live site and confirm it serves this commit. A deploy step's exit status
+      # says the upload was accepted, not that visitors receive the new pages.
+      - name: Prove the live site serves this commit
+        if: steps.credentials.outputs.configured == 'true'
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3 4 5 6; do
+            served="$(curl -fsS --max-time 20 https://docs.n85.app/build-info.json || true)"
+            if echo "$served" | grep -q "$GITHUB_SHA"; then
+              echo "docs.n85.app is serving $GITHUB_SHA"
+              status="$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 https://docs.n85.app/)"
+              [ "$status" = "200" ] || { echo "Home page returned $status"; exit 1; }
+              exit 0
+            fi
+            echo "Attempt $attempt: not serving this commit yet."
+            sleep 10
+          done
+          echo "docs.n85.app did not serve $GITHUB_SHA after the deployment."
+          exit 1
+
+      - name: Record the deployment
+        if: always() && steps.credentials.outputs.configured == 'true'
+        run: |
+          {
+            echo "### Documentation deployment"
+            echo ""
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| Commit | \`${GITHUB_SHA}\` |"
+            echo "| Address | https://docs.n85.app |"
+            echo "| Result | ${{ steps.deploy.outcome }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
