@@ -42,17 +42,29 @@ believed.
 | Promotional text | Set, 97 characters |
 | Support and marketing URLs | Both set |
 | Screenshots | Two sets: `APP_IPHONE_65` and `APP_IPAD_PRO_3GEN_129` |
-| What's New | **Empty** |
-| App Review contact name and email | **Empty** |
-| Demo account | **Empty**, and `demoAccountRequired` is unset |
-| Review notes | **Empty** |
+| What's New | Empty, which is correct for a first release |
+| App Review contact | **Set** for both platforms: name, email and phone |
+| `demoAccountRequired` | **Set to true** on both platforms |
+| Review notes | **Set**, 2044 characters, on both platforms |
+| Demo account name and password | **Still empty. These are the remaining fields.** |
 
-The review details are the gap that matters. WootDesk cannot be assessed
-without a Chatwoot server, so a reviewer given no demo environment and no notes
-will reject it as non-functional. `AC5` of N85-18 and `GO-008` both depend on
-this, and the compatibility stack in `compat/` is the obvious candidate for a
-review environment, though it is currently torn down after each run and would
-need to stay up for the review window.
+The review environment now exists at `https://review.n85.app`, described in
+`review/README.md`, so `GO-008` is satisfied and the notes reference a server
+that is actually reachable.
+
+Two fields remain, and both hold credentials, so they are entered by hand
+rather than through tooling:
+
+| Field | Value |
+|---|---|
+| Demo account name | `REVIEW_AGENT_EMAIL` from Infisical `prod:/review` |
+| Demo account password | `REVIEW_ACCESS_TOKEN` from Infisical `prod:/review` |
+
+The password field holds the **access token**, not the Chatwoot password. That
+is deliberate: WootDesk asks for a token rather than a login, so the token is
+what makes the reviewer's flow work. The Chatwoot password in
+`REVIEW_AGENT_PASSWORD` is only needed if a reviewer wants to sign in to
+Chatwoot's own web interface, which the notes do not ask them to do.
 
 macOS has no screenshot set of its own recorded here.
 
