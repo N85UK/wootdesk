@@ -56,7 +56,7 @@ certificate and the data volumes are kept, so one command restores it with the
 same access token and no App Store Connect changes:
 
 ```bash
-ssh n85 'cd /opt/wootdesk-review && docker compose start'
+ssh <vps> 'cd <deploy-root>/wootdesk-review && docker compose start'
 ```
 
 **Start it before submitting.** The review notes name this address, and a

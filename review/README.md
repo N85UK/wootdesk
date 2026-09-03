@@ -43,14 +43,14 @@ infisical secrets get REVIEW_ACCESS_TOKEN --env=prod --path=/review --plain
 
 ## Operating it
 
-The stack lives at `/opt/wootdesk-review` on the n85 VPS, published to
+The stack lives at `<deploy-root>/wootdesk-review` on the deployment host, published to
 `127.0.0.1:8100` only, with the host's nginx terminating TLS. The certificate
 renews through the host's existing certbot timer.
 
 ```bash
-ssh n85 'cd /opt/wootdesk-review && docker compose ps'
-ssh n85 'cd /opt/wootdesk-review && docker compose logs --tail 50 rails'
-ssh n85 'cd /opt/wootdesk-review && docker compose restart rails sidekiq'
+ssh <vps> 'cd <deploy-root>/wootdesk-review && docker compose ps'
+ssh <vps> 'cd <deploy-root>/wootdesk-review && docker compose logs --tail 50 rails'
+ssh <vps> 'cd <deploy-root>/wootdesk-review && docker compose restart rails sidekiq'
 ```
 
 Account signup is disabled (`ENABLE_ACCOUNT_SIGNUP=false`), so the environment
@@ -62,7 +62,7 @@ The seed is idempotent and safe to re-run. A reviewer may leave replies or
 change conversation states, which is expected and harmless.
 
 ```bash
-ssh n85 'cd /opt/wootdesk-review && docker compose exec -T \
+ssh <vps> 'cd <deploy-root>/wootdesk-review && docker compose exec -T \
   -e REVIEW_AGENT_EMAIL=... -e REVIEW_AGENT_PASSWORD=... \
   rails bundle exec rails runner /app/seed_review_data.rb'
 ```
@@ -76,7 +76,7 @@ and, importantly, the **same access token**. Nothing in App Store Connect needs
 re-entering.
 
 ```bash
-ssh n85 'cd /opt/wootdesk-review && docker compose start'
+ssh <vps> 'cd <deploy-root>/wootdesk-review && docker compose start'
 ```
 
 Allow about forty seconds for Chatwoot to answer, then confirm:
@@ -96,7 +96,7 @@ This environment is public. Once the review is finished and the app is
 approved, tear it down rather than leaving it running:
 
 ```bash
-ssh n85 'cd /opt/wootdesk-review && docker compose down -v'
+ssh <vps> 'cd <deploy-root>/wootdesk-review && docker compose down -v'
 ```
 
 Then remove the nginx site, the certificate, and the `review.n85.app` DNS

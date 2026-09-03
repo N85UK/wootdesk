@@ -197,7 +197,7 @@ automatic, the export would provision for development again and reintroduce the
 leak the archive change exists to close.
 
 Verified by a full local archive and export: the archive signs with
-`Apple Distribution: Paul McCann (Z85CK5CNS3)` using `WootDesk iOS App Store`,
+`Apple Distribution: <maintainer> (<TEAM_ID>)` using `WootDesk iOS App Store`,
 `verify_exported_signing` passes, and the account's development certificate
 count stayed at one.
 
@@ -228,18 +228,18 @@ success.
 ### Revoking safely
 
 Certificates named `Created via API` carry the API key's identity
-(`UID=JPP4K8LHHQ`), not the maintainer's local development certificate
-(`UID=2T338U4U4A`), which must be kept. Match the serial against the local
+(the API key's own identity), not the maintainer's local development certificate
+(the maintainer's identity), which must be kept. Match the serial against the local
 keychain before revoking anything:
 
 ```bash
-security find-certificate -c "Apple Development: paul.mccann@n85.uk (8V9NP97C4Z)" -p | openssl x509 -noout -serial
+security find-certificate -c "Apple Development: <maintainer>" -p | openssl x509 -noout -serial
 ```
 
 ## Where the secrets live
 
 The values are held in Infisical on the self-hosted instance at
-`https://id.n85.dev`, in the **WootDesk** project under the **prod**
+the self-hosted Infisical instance, in the **WootDesk** project under the **prod**
 environment at path **`/apple`**. The repository is linked to that project
 through `.infisical.json`, which contains only the project identifier and no
 secret material.
@@ -248,7 +248,7 @@ All six hold real, verified values. None is a `REPLACE_ME` placeholder:
 
 | Key | Current |
 |---|---|
-| `APPLE_TEAM_ID` | `Z85CK5CNS3`, set |
+| `APPLE_TEAM_ID` | Set, read from the secret store |
 | `ASC_KEY_ID` | set |
 | `ASC_ISSUER_ID` | set |
 | `ASC_KEY_P8` | set, PEM verified, authenticates against App Store Connect |
@@ -262,7 +262,7 @@ Infisical can inject them directly. `ASC_KEY_P8` is decoded into a private
 temporary file automatically, which is removed when the script exits.
 
 ```bash
-infisical run --env=prod --path=/apple -- ./script/release_archive.sh --team Z85CK5CNS3 --allow-beta-xcode --upload --authorised-build <commit>
+infisical run --env=prod --path=/apple -- ./script/release_archive.sh --team "$APPLE_TEAM_ID" --allow-beta-xcode --upload --authorised-build <commit>
 ```
 
 ### Getting them into GitHub Actions
@@ -281,7 +281,7 @@ Add these under Settings, Secrets and variables, Actions.
 
 | Secret | Value |
 |---|---|
-| `APPLE_TEAM_ID` | `Z85CK5CNS3` |
+| `APPLE_TEAM_ID` | The Apple Developer team identifier |
 | `ASC_KEY_ID` | Key ID from the API key page |
 | `ASC_ISSUER_ID` | Issuer ID from the API key page |
 | `ASC_KEY_P8` | The `.p8` file, base64 encoded |
@@ -311,7 +311,7 @@ security import candidate.p12 -k /tmp/verify.keychain-db -P "$PASS" -T /usr/bin/
 ```
 
 `security find-identity -v -p codesigning /tmp/verify.keychain-db` must list
-exactly `Apple Distribution: Paul McCann (Z85CK5CNS3)`. A `.p12` exported
+exactly `Apple Distribution: <maintainer> (<TEAM_ID>)`. A `.p12` exported
 without its private key imports without error but signs nothing, so checking the
 identity list rather than the exit code is what catches it.
 
@@ -355,7 +355,7 @@ base64 -i distribution.p12 | tr -d '\n' | pbcopy
 ```
 
 Export the `.p12` from Keychain Access: find **Apple Distribution: Paul McCann
-(Z85CK5CNS3)**, expand it to confirm the private key is present, select both
+(<TEAM_ID>)**, expand it to confirm the private key is present, select both
 rows, then Export Items. A certificate exported without its private key cannot
 sign.
 
@@ -408,7 +408,7 @@ in App Store Connect under TestFlight, Internal Testing.
 The same script drives a local delivery once the signing account is available:
 
 ```bash
-./script/release_archive.sh --team Z85CK5CNS3 --build-number 5 --allow-beta-xcode --upload --authorised-build <commit>
+./script/release_archive.sh --team "$APPLE_TEAM_ID" --build-number 5 --allow-beta-xcode --upload --authorised-build <commit>
 ```
 
 Locally the credentials come from `ASC_KEY_ID`, `ASC_ISSUER_ID` and
