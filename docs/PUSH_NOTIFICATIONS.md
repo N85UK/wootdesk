@@ -175,6 +175,8 @@ single-deployment gateway, which is what is deployed, but it is a real
 constraint on the multi-profile feature the app otherwise supports, and it
 should be closed before the gateway serves more than one Chatwoot.
 
+Tracked as N85-64 under the post-1.0 epic N85-37.
+
 The Chatwoot webhook route secret and gateway device API token are secrets.
 They belong in server secret storage and Apple Keychain respectively, never in
 the server-profile JSON file, screenshots, source, or logs.
