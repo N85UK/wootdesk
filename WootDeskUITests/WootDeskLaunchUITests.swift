@@ -26,6 +26,66 @@ final class WootDeskLaunchUITests: XCTestCase {
         return app
     }
 
+    /// N85-13 AC5 and N85-14 AC2.
+    ///
+    /// Unit tests already cover the layout *decision* at accessibility sizes:
+    /// that the status filter becomes a menu and that row metadata stacks. They
+    /// cannot show that the result is actually readable, because they never
+    /// render anything. This launches the real interface at the largest
+    /// accessibility text size and checks that nothing runs off the side.
+    ///
+    /// iOS only. macOS has no equivalent system control for text size, so the
+    /// same assertion there would pass without testing anything.
+    @MainActor
+    func testConversationListStaysOperableAtAccessibilityTextSize() throws {
+        #if os(macOS)
+        throw XCTSkip("Accessibility text sizes are an iOS setting; this runs on iPhone and iPad.")
+        #else
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "--uitesting-conversations",
+            "-UIPreferredContentSizeCategoryName",
+            "UICTContentSizeCategoryAccessibilityXXXL",
+        ]
+        app.launch()
+
+        // Matched on a contained string, not equality: at accessibility sizes the
+        // control becomes a menu button whose label composes the value with the
+        // accessibility label, reading "Status Filter, Filter conversations by
+        // status". An exact match silently finds nothing.
+        let filter = app.descendants(matching: .any).matching(
+            NSPredicate(format: "label CONTAINS %@", "Filter conversations by status")
+        ).firstMatch
+        XCTAssertTrue(
+            filter.waitForExistence(timeout: 20),
+            "The status filter must remain present at the largest accessibility text size."
+        )
+        XCTAssertTrue(filter.isHittable, "The status filter must remain operable, not merely present.")
+
+        let window = app.windows.firstMatch
+        XCTAssertTrue(window.waitForExistence(timeout: 5))
+        let bounds = window.frame
+
+        // A control pushed off the right edge is the failure this guards against:
+        // it reads as missing rather than as broken, so nobody reports it.
+        var clipped: [String] = []
+        for kind in [XCUIElement.ElementType.button, .staticText] {
+            let matches = app.descendants(matching: kind).allElementsBoundByIndex
+            for element in matches.prefix(40) where element.exists && element.frame.width > 0 {
+                let frame = element.frame
+                if frame.maxX > bounds.maxX + 1 || frame.minX < bounds.minX - 1 {
+                    let label = element.label.isEmpty ? element.identifier : element.label
+                    clipped.append("\(label.prefix(40)) at x \(Int(frame.minX))...\(Int(frame.maxX))")
+                }
+            }
+        }
+        XCTAssertTrue(
+            clipped.isEmpty,
+            "Content extends beyond the window at the largest accessibility text size: \(clipped.joined(separator: "; "))"
+        )
+        #endif
+    }
+
     @MainActor
     func testFirstRunLaunchReachesSetupScreen() throws {
         let app = launchForFirstRun()

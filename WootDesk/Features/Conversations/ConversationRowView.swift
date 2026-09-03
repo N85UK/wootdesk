@@ -26,17 +26,25 @@ public struct ConversationRowView: View {
 
     public var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            // Avatar
-            ZStack {
-                Circle()
-                    .fill(Color.accentColor.opacity(0.15))
-                    .frame(width: 40, height: 40)
+            // Avatar. Dropped at accessibility text sizes: the details column
+            // beside it grows until the row is wider than the window, and the
+            // avatar is what gets pushed off the left edge, half of it clipped
+            // by the screen. It carries no information VoiceOver can use, being
+            // accessibilityHidden already, so the width is better spent on the
+            // text. Caught by a UI test at the largest accessibility size,
+            // which passes at the default size.
+            if !dynamicTypeSize.isAccessibilitySize {
+                ZStack {
+                    Circle()
+                        .fill(Color.accentColor.opacity(0.15))
+                        .frame(width: 40, height: 40)
 
-                Text(conversation.contact?.initials ?? "#\(conversation.id.identifierText)")
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundStyle(Color.accentColor)
+                    Text(conversation.contact?.initials ?? "#\(conversation.id.identifierText)")
+                        .font(.system(size: 14, weight: .bold))
+                        .foregroundStyle(Color.accentColor)
+                }
+                .accessibilityHidden(true)
             }
-            .accessibilityHidden(true)
 
             // Conversation details
             VStack(alignment: .leading, spacing: 4) {
