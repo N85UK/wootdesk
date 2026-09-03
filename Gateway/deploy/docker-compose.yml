@@ -30,7 +30,13 @@ services:
       - data:/data
       - ./apns.p8:/run/secrets/apns.p8:ro
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8080/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      # The header is required, not decorative. The gateway refuses any request
+      # that does not arrive as HTTPS, and in production the loopback exemption
+      # is switched off, so a plain probe gets 426 and can never pass. Without
+      # it this container reported unhealthy continuously from the moment it
+      # started, 2084 consecutive failures, while the service was serving
+      # traffic correctly. An alarm that is always on carries no signal.
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8080/healthz',{headers:{'x-forwarded-proto':'https'}}).then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 30s
       timeout: 5s
       retries: 3

@@ -128,9 +128,52 @@ can never match an assigned conversation, so it is excluded and reported as
 `unroutable_registrations` rather than being notified about a colleague's
 conversation.
 
-This is proven by unit tests on both sides only. It has not been exercised
-against a real APNs delivery, so physical-device acceptance is still required
-before the routing can be trusted in production.
+### Acceptance evidence, 3 September 2026
+
+Exercised against the deployed gateway and a real APNs delivery path, not unit
+tests. Three registrations were created on an invented account (`424242`) with
+invented agent identifiers, so a genuine Chatwoot webhook could never select
+them and these events could never select a genuine registration:
+
+| Registration | Agent | APNs token |
+| --- | --- | --- |
+| A | 9001 | The maintainer's real iPhone token, recovered from the store |
+| B | 9002 | Well formed, deliberately unregistered |
+| C | none | Well formed, deliberately unregistered |
+
+Signed webhooks were posted to the live endpoint, matching how Chatwoot signs.
+
+| Case | Assignee | Result | Reading |
+| --- | --- | --- | --- |
+| 1 | agent 9001 | `delivered 1, invalidated 0`, plus a warning `unroutable_registrations count 1` | Only A was selected. The real iPhone was notified. B was excluded as a different agent, C as identity-less |
+| 2 | agent 9002 | `delivered 0, invalidated 1` | Only B was selected, and APNs rejected its token. **A was not selected**, so the real device stayed silent for another agent's conversation |
+| 3 | unassigned | `delivered 1, invalidated 2` | All three were selected, including the identity-less C, matching the documented fallback |
+
+Case 2 is the isolation proof: had A been selected, `delivered` would have been
+at least 1. Every test registration was deleted afterwards and the maintainer's
+own registration was left untouched.
+
+The one gap: the negative side used a stand-in token rather than a second
+physical device, because enrolling a second device requires notification
+permission and profile entry that cannot be automated. What is proven is that
+the gateway does not select another agent's device and that the real device
+receives nothing. What is not proven is a second handset visibly staying quiet.
+
+Two behaviours were confirmed as a side effect. A registration whose token APNs
+rejects is pruned immediately, so B had to be recreated between cases. And the
+identity-less exclusion is reported as a `warn`, not an error, which is why it
+went unnoticed when it was excluding the only enrolled device.
+
+### Recipient scoping is single-tenant
+
+Recipients are selected by Chatwoot account id and agent id alone. Nothing
+identifies which Chatwoot server the event came from, and the gateway holds one
+webhook signing secret. Two Chatwoot deployments that both have an account `1`,
+pointed at the same gateway, therefore share a routing namespace: an event from
+one can notify devices enrolled against the other. This is acceptable for a
+single-deployment gateway, which is what is deployed, but it is a real
+constraint on the multi-profile feature the app otherwise supports, and it
+should be closed before the gateway serves more than one Chatwoot.
 
 The Chatwoot webhook route secret and gateway device API token are secrets.
 They belong in server secret storage and Apple Keychain respectively, never in
