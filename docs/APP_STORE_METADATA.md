@@ -28,6 +28,34 @@ customer data, or a real server address to this repository.
 The privacy-policy URL becomes a valid release URL only after `PRIVACY.md` is
 confirmed accessible from the public default branch without authentication.
 
+## TestFlight test information, set 3 September 2026
+
+External testing was blocked by "Missing Test Information". The beta
+localisation did not exist at all, and every beta review field was empty.
+
+| Field | Value |
+| --- | --- |
+| Feedback email | `app.support@n85.dev` |
+| Beta app description | Set, 1305 characters |
+| Privacy policy URL | `https://docs.n85.app/trust/privacy/` |
+| Marketing URL | **Left empty, deliberately.** See below |
+| Review contact | Paul McCann, `app.support@n85.dev`, phone set |
+| Sign-in required | Yes |
+| Review notes | Set, 1509 characters |
+| Demo account name and password | **Outstanding.** Credentials, entered by hand |
+
+The marketing URL is empty because `https://n85.app` currently returns HTTP
+525 and the field is optional for a beta. Giving a reviewer a link that fails
+invites a rejection for no benefit. It goes in as soon as the site serves.
+
+Sign-in is genuinely required: WootDesk has no account system of its own and
+shows nothing beyond the connection screen until it is pointed at a Chatwoot
+server with an access token, which is why a demo environment exists.
+
+**The demo server must be running before submission.** `review.n85.app` is
+stopped, and returns 502 while it is. The review notes walk a reviewer through
+connecting to it, so a stopped server means a failed review.
+
 ## Support and marketing addresses, set 3 September 2026
 
 | Field | Value |
