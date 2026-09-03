@@ -58,6 +58,13 @@ public struct ConversationListView: View {
     public var body: some View {
         VStack(spacing: 0) {
             filterPicker
+                // The Picker carries the label "Status Filter". macOS reserves
+                // vertical space for a Picker's label even under the segmented
+                // style and centres the control inside it, which left about 90
+                // points of dead space above and below the filter. The label is
+                // never drawn, so hiding it costs nothing visually, and
+                // VoiceOver still reads the accessibilityLabel below.
+                .labelsHidden()
                 .padding(.horizontal)
                 .padding(.vertical, 8)
 

@@ -71,87 +71,37 @@ and only the list one carries the Command R shortcut.
 The detail action now uses `arrow.clockwise.circle`, so the two are
 distinguishable.
 
-### Still outstanding: dead space in the macOS conversation list
+### Fixed: dead space in the macOS conversation list
 
-The conversation list column has a band of empty space above and below the
-status filter on macOS. It is cosmetic, visible in the current capture, and not
-yet diagnosed. What is known, measured through the accessibility API with the
-window at 1440 x 900 points:
+The conversation list column had a band of empty space above and below the
+status filter, roughly 92 points on each side, with the 24 point control
+centred inside it.
 
-| Element | Position |
+**Cause.** `Picker("Status Filter", selection:)` carries a label. macOS
+reserves vertical space for a Picker's label even under `.segmented` style and
+centres the control within that reservation. The label is never drawn, so the
+space was invisible and unexplained. `.labelsHidden()` removes the reservation.
+VoiceOver is unaffected: the control still reports
+"Status Filter, Filter conversations by status", read from the running app.
+
+**How it was found.** Reasoning about the view hierarchy was consistently
+wrong, and five rebuilds ruled out plausible-sounding causes without getting
+closer:
+
+| Ruled out | Evidence |
 |---|---|
-| Column content begins | y = 112, below the toolbar |
-| Status filter | y = 204, height 24 |
-| List scroll area | y = 321, extending to the window bottom |
+| `.searchable` | Moved onto the list, then removed entirely. Identical measurements both times |
+| Flexible layout | Gaps stayed at exactly 92 and 93 points with the window at 700 and 1200 points tall |
+| `.safeAreaInset` | The one omitting `spacing: 0` wraps `profileRecoveryState`, which this view never goes through |
+| `.navigationTitle` | Removed, no change |
+| `.toolbar` | Removed, verified gone from the screenshot, no change |
+| `.listStyle(.inset)` | Switched to `.plain`, no change |
+| `.fixedSize(vertical:)` | No change, which proved the large height was the Picker's *ideal* size rather than expansion |
 
-That leaves **92 points above the filter and 93 points below it**, almost
-perfectly symmetric, as though the 24 point control is centred in a 208 point
-band.
+What actually found it was giving the picker and its padded container different
+background colours and looking at the result. The Picker's own bounds filled
+the whole band immediately and unambiguously.
 
-Ruled out so far:
-
-- **`.searchable`.** Moving it from the `VStack` onto the list changed nothing,
-  and removing it entirely changed nothing. The measurements were identical in
-  all three builds.
-- **Flexible layout.** The gaps stay at exactly 92 and 93 points with the
-  window at 700 and at 1200 points tall, so this is fixed spacing rather than
-  a stack distributing free space.
-- **The `safeAreaInset` in `profileRecoveryState`.** That inset omits
-  `spacing: 0` and would contribute default spacing, but it wraps a different
-  view that the conversation list never goes through.
-
-The `VStack(spacing: 0)` in `ConversationListView.body` applies only
-`.padding(.vertical, 8)` around the filter, so the space is being introduced by
-something outside that view, most likely the surrounding `NavigationSplitView`
-column or a modifier applied to it in `WootDeskApp`.
-
-## Uploaded to App Store Connect
-
-`iphone-6.5/01-conversation-list.png` is uploaded against iOS version 1.0 and
-build 24. The listing shows "1 of 10 Screenshots".
-
-## Known gaps
-
-* Only one 6.5 inch screenshot is uploaded. The conversation detail and the
-  triage menu still need capturing at 1284 x 2778. Driving taps on the
-  simulator needs simulator device access to be granted from the panel; the
-  request went unanswered, so only the launch screen could be captured
-  unattended.
-* The iPad set shows the empty detail column, for the same reason.
-* No macOS screenshots are captured yet. macOS App Store listings need their own
-  set at 2880 x 1800 or another accepted Mac size.
-* The set has not been reviewed or ordered for the store listing. Ordering,
-  captions, and any framing are the release owner's decision.
-
-## Regenerating
-
-Build once for the simulator, then install and launch with the invented-data
-argument. The simulator is sandboxed away from external volumes, so capture to a
-local path and copy the file into the repository afterwards.
-
-```bash
-xcodebuild build -project WootDesk.xcodeproj -scheme WootDesk \
-  -destination "generic/platform=iOS Simulator" -configuration Debug \
-  -derivedDataPath build/sim \
-  CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
-```
-
-```bash
-xcrun simctl boot "iPhone 17 Pro Max"
-```
-
-```bash
-xcrun simctl install booted build/sim/Build/Products/Debug-iphonesimulator/WootDesk.app
-```
-
-```bash
-xcrun simctl launch booted dev.n85.wootdesk --uitesting-conversations
-```
-
-```bash
-xcrun simctl io booted screenshot --type=png ~/Desktop/wootdesk-shot.png
-```
-
-Never capture a screenshot from a build connected to a real Chatwoot server. A
-store screenshot is published, and a real conversation in one would disclose
-customer data.
+The lesson worth keeping: measuring the accessibility tree gave precise numbers
+but never identified the culprit, because SwiftUI's internal containers are not
+exposed there. Colouring the suspect view answered it in one build.
