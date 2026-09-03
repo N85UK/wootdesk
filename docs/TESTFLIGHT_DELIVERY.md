@@ -201,12 +201,29 @@ Verified by a full local archive and export: the archive signs with
 `verify_exported_signing` passes, and the account's development certificate
 count stayed at one.
 
-### The canary
+Confirmed in CI on run 33742143745, which is the case that matters because the
+runner has no development identity to fall back on. The archive signed with
+`Apple Distribution: Paul McCann` using `WootDesk iOS App Store`, the export
+verification passed, the build uploaded, and the account's development
+certificate count stayed at one with zero named `Created via API`.
 
-The workflow still counts development certificates before archiving, but the
-threshold is now **one**, not five. Any certificate named `Created via API` is a
-regression, meaning something has put the Release configuration back on
-automatic signing.
+### The canary, which had never actually run
+
+The workflow counts development certificates before archiving. The threshold is
+now **one**, not five: any certificate named `Created via API` is a regression
+meaning something has put the Release configuration back on automatic signing.
+
+The first version of this check never ran. It imported `pyjwt`, whose install
+failed under PEP 668 on the runner; the error went to `/dev/null` behind
+`|| true`, the script printed "Certificate check skipped, pyjwt unavailable"
+and exited 0, and the step showed green on every run. The guard that was
+supposed to stop the quota being exhausted silently was itself silent, for the
+entire period the leak was running.
+
+It is now `script/check_ci_certificates.py`, built on the shared
+`script/asc_api.py` client, with the dependency installed by a step that is
+allowed to fail the job. A check that cannot run reports a warning rather than
+success.
 
 ### Revoking safely
 

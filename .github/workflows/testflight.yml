@@ -95,6 +95,15 @@ jobs:
             exit 1
           fi
 
+      # Both the certificate canary and release_archive.sh talk to the App Store
+      # Connect API, which needs this. Installing it is not optional: the canary
+      # this replaced depended on pyjwt, failed to install it, swallowed the
+      # error and skipped every run while reporting success, which is how the
+      # certificate leak ran unseen for two days.
+      - name: Install the App Store Connect client dependency
+        if: steps.secrets.outputs.configured == 'true'
+        run: python3 -m pip install --quiet --disable-pip-version-check --break-system-packages cryptography
+
       # The iOS archive signs manually now, so nothing here should ever create a
       # development certificate. It used to: automatic signing signed the
       # archive with a development identity and only re-signed for distribution
@@ -102,8 +111,7 @@ jobs:
       # runner minted a fresh certificate. Seventeen accumulated before the
       # account hit Apple's cap, after which every build failed with "Choose a
       # certificate to revoke" and nothing reached TestFlight. One appearing
-      # again means the signing configuration has regressed, so say so at once
-      # rather than waiting for the quota to run out silently.
+      # again means the signing configuration has regressed.
       - name: Warn when development certificates are accumulating
         if: steps.secrets.outputs.configured == 'true'
         continue-on-error: true
@@ -111,35 +119,7 @@ jobs:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
-        run: |
-          set -euo pipefail
-          python3 -m pip install --quiet --disable-pip-version-check pyjwt cryptography 2>/dev/null || true
-          python3 - <<'PY'
-          import base64, json, os, time, urllib.request
-          try:
-              import jwt
-          except Exception:
-              print("::notice::Certificate check skipped, pyjwt unavailable."); raise SystemExit(0)
-          key = base64.b64decode(os.environ["ASC_KEY_P8"]).decode()
-          token = jwt.encode({"iss": os.environ["ASC_ISSUER_ID"], "iat": int(time.time()),
-                              "exp": int(time.time()) + 600, "aud": "appstoreconnect-v1"},
-                             key, algorithm="ES256",
-                             headers={"kid": os.environ["ASC_KEY_ID"], "typ": "JWT"})
-          req = urllib.request.Request(
-              "https://api.appstoreconnect.apple.com/v1/certificates?limit=200",
-              headers={"Authorization": f"Bearer {token}"})
-          data = json.load(urllib.request.urlopen(req, timeout=30))
-          dev = [c for c in data.get("data", [])
-                 if c["attributes"].get("certificateType") == "DEVELOPMENT"]
-          api = [c for c in dev if c["attributes"].get("displayName") == "Created via API"]
-          print(f"Development certificates: {len(dev)}, of which CI-created: {len(api)}")
-          if api:
-              print(f"::warning::{len(api)} CI-created development certificate(s) exist. "
-                    "The iOS archive signs manually, so this should be zero. Something has "
-                    "reverted the release configuration to automatic signing, which will "
-                    "mint one per run until Apple's cap stops delivery entirely. Revoke the "
-                    "surplus and check CODE_SIGN_STYLE for the Release configuration.")
-          PY
+        run: python3 script/check_ci_certificates.py
 
       - name: Install XcodeGen
         if: steps.secrets.outputs.configured == 'true'
@@ -197,14 +177,6 @@ jobs:
           echo "$ASC_KEY_P8" | base64 --decode > "$KEY_PATH"
           chmod 600 "$KEY_PATH"
           echo "ASC_KEY_PATH=$KEY_PATH" >> "$GITHUB_ENV"
-
-      # release_archive.sh installs the distribution profile from the App Store
-      # Connect API, which needs this. The certificate canary above installs it
-      # too, but that step is best-effort and may be skipped, so the archive
-      # cannot depend on it having run.
-      - name: Install the App Store Connect client dependency
-        if: steps.secrets.outputs.configured == 'true'
-        run: python3 -m pip install --quiet --disable-pip-version-check --break-system-packages cryptography
 
       - name: Archive, export and upload to TestFlight
         if: steps.secrets.outputs.configured == 'true'
