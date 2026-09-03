@@ -202,18 +202,39 @@ jobs:
             echo "configured=true" >> "$GITHUB_OUTPUT"
           fi
 
+      # N85-50 AC8 wants a rollback target recorded, which means knowing what
+      # this deployment replaced. Read before, not after.
+      - name: Record the version being replaced
+        if: steps.credentials.outputs.configured == 'true'
+        id: previous
+        continue-on-error: true
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          version="$(npx wrangler deployments list --json 2>/dev/null \
+            | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{try{const j=JSON.parse(d);console.log(j?.[0]?.version_id??j?.deployments?.[0]?.versions?.[0]?.version_id??"")}catch{console.log("")}})' || true)"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "Replacing version: ${version:-unknown}"
+
       - name: Deploy the Worker
         if: steps.credentials.outputs.configured == 'true'
         id: deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: npx wrangler deploy
+        run: |
+          set -euo pipefail
+          npx wrangler deploy 2>&1 | tee deploy.log
+          version="$(sed -n 's/.*Current Version ID: *//p' deploy.log | tail -1)"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
 
       # N85-47 AC2 and AC6, and the rule this project keeps relearning: fetch the
       # live site and confirm it serves this commit. A deploy step's exit status
       # says the upload was accepted, not that visitors receive the new pages.
       - name: Prove the live site serves this commit
+        id: smoke
         if: steps.credentials.outputs.configured == 'true'
         run: |
           set -euo pipefail
@@ -234,12 +255,20 @@ jobs:
       - name: Record the deployment
         if: always() && steps.credentials.outputs.configured == 'true'
         run: |
+          lock="$(sha256sum docs-site/package-lock.json 2>/dev/null | cut -c1-16)"
           {
             echo "### Documentation deployment"
             echo ""
             echo "| Field | Value |"
             echo "| --- | --- |"
             echo "| Commit | \`${GITHUB_SHA}\` |"
+            echo "| Dependency lock | \`${lock:-unknown}\` (sha256 prefix of package-lock.json) |"
             echo "| Address | https://docs.n85.app |"
-            echo "| Result | ${{ steps.deploy.outcome }} |"
+            echo "| Build and checks | ${{ needs.build-and-verify.result }} |"
+            echo "| Deploy | ${{ steps.deploy.outcome }} |"
+            echo "| Worker version | \`${{ steps.deploy.outputs.version || 'unknown' }}\` |"
+            echo "| Smoke test | ${{ steps.smoke.outcome }} |"
+            echo "| Rollback target | \`${{ steps.previous.outputs.version || 'none recorded' }}\` |"
+            echo ""
+            echo "To roll back: \`npx wrangler rollback <rollback target> --name wootdesk-docs\`"
           } >> "$GITHUB_STEP_SUMMARY"
