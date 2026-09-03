@@ -137,3 +137,8 @@ but not attached, and the run fails with an unhelpful
 has none. That is fine on a developer Mac, which already has one and reuses it,
 and destructive on an ephemeral CI runner, which creates a fresh one every
 build until the account hits Apple's cap. See `docs/TESTFLIGHT_DELIVERY.md`.
+
+This applies to test and device builds, which is where it is still worth
+watching. The release archive no longer behaves this way: it signs manually
+against an explicit distribution profile, so it never provisions for
+development.

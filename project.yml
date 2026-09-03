@@ -55,6 +55,19 @@ targets:
           INFOPLIST_FILE: WootDesk/Resources/Info-Release.plist
           APS_ENVIRONMENT: production
           "ENABLE_HARDENED_RUNTIME[sdk=macosx*]": YES
+          # Automatic signing signs the archive itself with a development
+          # identity and only re-signs for distribution at export, so uploads
+          # succeeded while every archive was still provisioning for
+          # development. A fresh CI runner has no development identity to
+          # reuse, so each run minted one until the account hit Apple's cap and
+          # delivery stopped. Signing the iOS archive manually takes
+          # development provisioning out of the release path entirely;
+          # release_archive.sh installs the named profile from the API.
+          # macOS stays automatic because it is archived on a Mac that already
+          # has a development identity, so it mints nothing.
+          "CODE_SIGN_STYLE[sdk=iphoneos*]": Manual
+          "CODE_SIGN_IDENTITY[sdk=iphoneos*]": "Apple Distribution"
+          "PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]": "WootDesk iOS App Store"
     # WootDesk runs sandboxed. It needs outbound network access to reach the user's
     # Chatwoot server and read-only access to files the user explicitly selects
     # for attachment upload. It requests no broad file access, camera, microphone,

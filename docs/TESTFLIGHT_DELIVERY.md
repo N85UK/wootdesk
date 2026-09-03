@@ -122,14 +122,27 @@ Answering the declaration cleared it immediately, with no change to the
 repository. Run 33544372320 uploaded build 34, which processed to `VALID` and
 is `IN_BETA_TESTING`.
 
-## Signing certificates accumulate, and the cap breaks delivery silently
+## Signing certificates accumulated until the cap broke delivery silently
 
-The archive uses automatic signing. Xcode provisions the target's development
-configuration alongside Release, and an ephemeral runner has no development
-identity, so **it mints a new development certificate on every archive**.
+**Fixed on 3 September 2026.** The iOS archive now signs manually, so the
+release path never provisions for development and no certificate is created.
 
-Ten accumulated over 1 and 2 September 2026. The account then hit Apple's cap
-and every subsequent build failed:
+### What was actually happening
+
+The archive used automatic signing. The misleading part is where the
+development identity came in: it was not the test targets, and not a separate
+development configuration being built alongside Release. Xcode signed **the
+Release archive itself** with `Apple Development` and the `iOS Team
+Provisioning Profile`, then `-exportArchive` re-signed the product for
+distribution. That is ordinary automatic-signing behaviour, and it is why the
+uploads were valid and nobody noticed.
+
+On a developer's Mac this costs nothing, because a development identity already
+exists and gets reused. An ephemeral CI runner has none, so **every archive
+minted a fresh development certificate**.
+
+Ten accumulated over 1 and 2 September 2026. The account hit Apple's cap and
+every subsequent build failed:
 
 ```text
 error: Choose a certificate to revoke. Your account has reached the maximum
@@ -137,36 +150,76 @@ number of certificates.
 error: No profiles for 'dev.n85.wootdesk' were found
 ```
 
-Builds 44 and 45 never reached TestFlight because of this, and nothing said so
-except the build log. Delivery had stopped while the pipeline looked configured
-and healthy.
-
-Cleared on 2 September by revoking the ten certificates whose display name is
-`Created via API`. They are safe to revoke: they carry the API key's identity
-(`UID=JPP4K8LHHQ`), not the maintainer's local development certificate
-(`UID=2T338U4U4A`), which must be kept. Check the serial against
-`security find-certificate -c "Apple Development: ..." -p | openssl x509 -noout -serial`
-before revoking anything.
-
-The workflow now counts them before archiving and warns at five or more, so the
-quota cannot be exhausted silently again. That is a guard, not a cure, **and
-the leak has already resumed**: 7 CI-created development certificates existed
-again within hours of the revocation, across 15 pushes and 11 successful
-TestFlight runs. Local device builds are not the cause; they reuse the
+Builds 44 and 45 never reached TestFlight, and nothing said so except the build
+log. Delivery had stopped while the pipeline looked configured and healthy.
+Seven more accumulated within hours of the first clean-up, across 15 pushes and
+11 successful runs. Local device builds were never the cause; they reuse the
 maintainer's existing identity, verified after both the iPhone and iPad
 acceptance runs.
 
-At roughly one per push this will reach the cap again in a matter of days, and
-the symptom will once more be that delivery stops while the pipeline looks
-healthy. **The cure is now the priority, not the guard.**
+### The cure
 
-**The permanent fix is still open.** Options, roughly in order of preference:
-import a single long-lived development certificate into the CI keychain so
-Xcode reuses it instead of creating one; or switch the archive to manual
-signing with an explicit distribution profile so development provisioning never
-runs. Neither has been tried yet, and each costs a build to verify.
+Pinning `CODE_SIGN_IDENTITY` to `Apple Distribution` while leaving automatic
+signing on does not work. Xcode rejects it outright:
 
-## Where the secrets live## Where the secrets live
+```text
+error: WootDesk has conflicting provisioning settings. WootDesk is
+automatically signed for development, but a conflicting code signing identity
+Apple Distribution has been manually specified.
+```
+
+Automatic signing insists on a development identity for the archive, so the
+only way to stop the minting is to take automatic signing off the release path.
+The iOS Release configuration is therefore manually signed:
+
+```yaml
+"CODE_SIGN_STYLE[sdk=iphoneos*]": Manual
+"CODE_SIGN_IDENTITY[sdk=iphoneos*]": "Apple Distribution"
+"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]": "WootDesk iOS App Store"
+```
+
+macOS stays on automatic signing. It is archived on a Mac that already has a
+development identity, so it mints nothing, and leaving it alone avoids
+destabilising a path that works.
+
+Manual signing needs the profile on disk, and the account had none: Xcode had
+only ever used its own managed profiles, which the App Store Connect API does
+not serve. `WootDesk iOS App Store` (`IOS_APP_STORE`, expires 2027-08-30) was
+created against bundle ID `dev.n85.wootdesk` and the existing distribution
+certificate. `script/install_distribution_profile.py` downloads it before each
+iOS archive, so it lives in neither the repository nor the secret store, and a
+renewed profile is picked up on the next run rather than after a failed
+release. The name is read from the project's own build settings rather than
+hardcoded, so it cannot drift out of step with `project.yml`.
+
+The export options plist switches to manual signing for iOS too. Left on
+automatic, the export would provision for development again and reintroduce the
+leak the archive change exists to close.
+
+Verified by a full local archive and export: the archive signs with
+`Apple Distribution: Paul McCann (Z85CK5CNS3)` using `WootDesk iOS App Store`,
+`verify_exported_signing` passes, and the account's development certificate
+count stayed at one.
+
+### The canary
+
+The workflow still counts development certificates before archiving, but the
+threshold is now **one**, not five. Any certificate named `Created via API` is a
+regression, meaning something has put the Release configuration back on
+automatic signing.
+
+### Revoking safely
+
+Certificates named `Created via API` carry the API key's identity
+(`UID=JPP4K8LHHQ`), not the maintainer's local development certificate
+(`UID=2T338U4U4A`), which must be kept. Match the serial against the local
+keychain before revoking anything:
+
+```bash
+security find-certificate -c "Apple Development: paul.mccann@n85.uk (8V9NP97C4Z)" -p | openssl x509 -noout -serial
+```
+
+## Where the secrets live
 
 The values are held in Infisical on the self-hosted instance at
 `https://id.n85.dev`, in the **WootDesk** project under the **prod**

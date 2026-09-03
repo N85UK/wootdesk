@@ -222,8 +222,46 @@ if [[ -n "${ASC_KEY_PATH:-}" && -n "${ASC_KEY_ID:-}" && -n "${ASC_ISSUER_ID:-}" 
     echo "-> Using an App Store Connect API key for provisioning updates."
 fi
 
+# The iOS archive is signed manually, so the export has to be told the same
+# thing. Left on automatic, export would provision for development again and
+# reintroduce the certificate leak this signing change exists to close.
+# Manual signing needs the profile on disk, and the copy in the API is the only
+# one guaranteed to be current, so read the name the project asks for rather
+# than hardcoding it here where it could drift out of step with project.yml.
+IOS_PROFILE_NAME=""
+resolve_ios_profile_name() {
+    IOS_PROFILE_NAME="$(xcodebuild -project "${PROJECT}" -scheme "${SCHEME}" \
+        -configuration Release -destination 'generic/platform=iOS' \
+        -showBuildSettings 2>/dev/null \
+        | sed -n 's/^ *PROVISIONING_PROFILE_SPECIFIER = //p' | head -1)"
+    [[ -n "${IOS_PROFILE_NAME}" ]] || fail \
+        "The iOS Release configuration names no provisioning profile." \
+        "PROVISIONING_PROFILE_SPECIFIER must be set for manual signing."
+}
+
+install_ios_profile() {
+    resolve_ios_profile_name
+    echo "-> Installing the iOS distribution profile..."
+    python3 script/install_distribution_profile.py "${IOS_PROFILE_NAME}" || fail \
+        "The iOS distribution profile could not be installed." \
+        "Manual signing cannot proceed without it."
+}
+
 export_options() {
-    local destination_plist="$1"
+    local destination_plist="$1" label="$2"
+    local manual_signing=""
+    if [[ "${label}" == "iOS" ]]; then
+        manual_signing="    <key>signingStyle</key>
+    <string>manual</string>
+    <key>signingCertificate</key>
+    <string>Apple Distribution</string>
+    <key>provisioningProfiles</key>
+    <dict>
+        <key>${BUNDLE_ID}</key>
+        <string>${IOS_PROFILE_NAME}</string>
+    </dict>
+"
+    fi
     cat > "${destination_plist}" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -239,7 +277,7 @@ export_options() {
     <false/>
     <key>destination</key>
     <string>export</string>
-</dict>
+${manual_signing}</dict>
 </plist>
 PLIST
 }
@@ -274,7 +312,7 @@ archive_platform() {
     [[ -n "${app}" ]] || fail "The ${label} archive contains no WootDesk.app."
 
     echo "-> Exporting the ${label} App Store package..."
-    export_options "${options_plist}"
+    export_options "${options_plist}" "${label}"
     xcodebuild -exportArchive \
         -archivePath "${archive_path}" \
         -exportOptionsPlist "${options_plist}" \
@@ -359,9 +397,13 @@ verify_exported_signing() {
 }
 
 case "${PLATFORM}" in
-    ios) archive_platform "iOS" "generic/platform=iOS" ;;
+    ios)
+        install_ios_profile
+        archive_platform "iOS" "generic/platform=iOS"
+        ;;
     macos) archive_platform "macOS" "generic/platform=macOS" ;;
     all)
+        install_ios_profile
         archive_platform "iOS" "generic/platform=iOS"
         archive_platform "macOS" "generic/platform=macOS"
         ;;

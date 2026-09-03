@@ -95,12 +95,15 @@ jobs:
             exit 1
           fi
 
-      # Automatic signing provisions the target's development configuration as
-      # well as Release, and an ephemeral runner has no development identity,
-      # so Xcode mints a fresh one on every archive. Ten accumulated in two
-      # days and the account hit Apple's cap, after which every build failed
-      # with "Choose a certificate to revoke" and no build reached TestFlight.
-      # The failure is silent until the quota is gone, so surface it early.
+      # The iOS archive signs manually now, so nothing here should ever create a
+      # development certificate. It used to: automatic signing signed the
+      # archive with a development identity and only re-signed for distribution
+      # at export, so uploads succeeded while each run on an identity-less
+      # runner minted a fresh certificate. Seventeen accumulated before the
+      # account hit Apple's cap, after which every build failed with "Choose a
+      # certificate to revoke" and nothing reached TestFlight. One appearing
+      # again means the signing configuration has regressed, so say so at once
+      # rather than waiting for the quota to run out silently.
       - name: Warn when development certificates are accumulating
         if: steps.secrets.outputs.configured == 'true'
         continue-on-error: true
@@ -130,11 +133,12 @@ jobs:
                  if c["attributes"].get("certificateType") == "DEVELOPMENT"]
           api = [c for c in dev if c["attributes"].get("displayName") == "Created via API"]
           print(f"Development certificates: {len(dev)}, of which CI-created: {len(api)}")
-          if len(api) >= 5:
-              print(f"::warning::{len(api)} CI-created development certificates exist. "
-                    "Apple caps these, and once the cap is reached every archive fails with "
-                    "'Choose a certificate to revoke'. Revoke the surplus in the developer "
-                    "portal or via the App Store Connect API.")
+          if api:
+              print(f"::warning::{len(api)} CI-created development certificate(s) exist. "
+                    "The iOS archive signs manually, so this should be zero. Something has "
+                    "reverted the release configuration to automatic signing, which will "
+                    "mint one per run until Apple's cap stops delivery entirely. Revoke the "
+                    "surplus and check CODE_SIGN_STYLE for the Release configuration.")
           PY
 
       - name: Install XcodeGen
@@ -193,6 +197,14 @@ jobs:
           echo "$ASC_KEY_P8" | base64 --decode > "$KEY_PATH"
           chmod 600 "$KEY_PATH"
           echo "ASC_KEY_PATH=$KEY_PATH" >> "$GITHUB_ENV"
+
+      # release_archive.sh installs the distribution profile from the App Store
+      # Connect API, which needs this. The certificate canary above installs it
+      # too, but that step is best-effort and may be skipped, so the archive
+      # cannot depend on it having run.
+      - name: Install the App Store Connect client dependency
+        if: steps.secrets.outputs.configured == 'true'
+        run: python3 -m pip install --quiet --disable-pip-version-check --break-system-packages cryptography
 
       - name: Archive, export and upload to TestFlight
         if: steps.secrets.outputs.configured == 'true'
