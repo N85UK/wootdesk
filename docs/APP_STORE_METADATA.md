@@ -48,9 +48,19 @@ believed.
 | Review notes | **Set**, 2044 characters, on both platforms |
 | Demo account name and password | **Still empty. These are the remaining fields.** |
 
-The review environment now exists at `https://review.n85.app`, described in
-`review/README.md`, so `GO-008` is satisfied and the notes reference a server
-that is actually reachable.
+The review environment exists at `https://review.n85.app`, described in
+`review/README.md`, so `GO-008` is satisfied.
+
+**Its containers are currently stopped and the address returns 502.** DNS, the
+certificate and the data volumes are kept, so one command restores it with the
+same access token and no App Store Connect changes:
+
+```bash
+ssh n85 'cd /opt/wootdesk-review && docker compose start'
+```
+
+**Start it before submitting.** The review notes name this address, and a
+reviewer who cannot reach it will reject the app as non-functional.
 
 Two fields remain, and both hold credentials, so they are entered by hand
 rather than through tooling:

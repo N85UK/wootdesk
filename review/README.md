@@ -67,6 +67,29 @@ ssh n85 'cd /opt/wootdesk-review && docker compose exec -T \
   rails bundle exec rails runner /app/seed_review_data.rb'
 ```
 
+## Current state: stopped
+
+The containers are **stopped**, so `https://review.n85.app` returns 502. DNS,
+the nginx site, the Let's Encrypt certificate and all three data volumes are
+kept, so restarting restores the same account, the same seeded conversations
+and, importantly, the **same access token**. Nothing in App Store Connect needs
+re-entering.
+
+```bash
+ssh n85 'cd /opt/wootdesk-review && docker compose start'
+```
+
+Allow about forty seconds for Chatwoot to answer, then confirm:
+
+```bash
+curl -s -o /dev/null -w "%{http_code}\n" https://review.n85.app/
+```
+
+**Start it before submitting for App Review.** The review notes in App Store
+Connect name this address, and a reviewer who cannot reach it will reject the
+app as non-functional under Guideline 2.1, which is the outcome this
+environment exists to prevent.
+
 ## Before the review window closes
 
 This environment is public. Once the review is finished and the app is
