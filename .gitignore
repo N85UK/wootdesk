@@ -55,6 +55,8 @@ compat/.token
 docs-site/node_modules/
 docs-site/dist/
 docs-site/.astro/
+docs-site/test-results/
+docs-site/playwright-report/
 
 # The release scripts import a shared module, which byte-compiles beside them.
 __pycache__/

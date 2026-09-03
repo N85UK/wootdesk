@@ -15,7 +15,8 @@
     "check": "astro check",
     "verify:boundary": "node scripts/check-content-boundary.mjs",
     "verify:links": "node scripts/check-internal-links.mjs",
-    "verify": "npm run verify:boundary && npm run verify:links"
+    "verify": "npm run verify:boundary && npm run verify:links && npm run verify:a11y",
+    "verify:a11y": "playwright test"
   },
   "dependencies": {
     "@astrojs/starlight": "0.42.0",
@@ -23,6 +24,8 @@
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.62.1",
     "typescript": "6.0.3"
   }
 }

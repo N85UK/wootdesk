@@ -89,7 +89,10 @@ const Heading = headingLevel;
     font-size: var(--sl-text-xs);
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: var(--sl-color-gray-3);
+    /* gray-3 fails WCAG AA contrast against the nav background in dark mode,
+       which the accessibility check caught on the release pages. gray-2 is the
+       lightest muted tone Starlight defines and clears the threshold in both. */
+    color: var(--sl-color-gray-2);
     margin: 0 0 0.15rem;
   }
 

@@ -63,6 +63,25 @@ jobs:
       - name: Verify internal links
         run: npm run verify:links
 
+      # N85-50 AC4. axe plus a keyboard smoke test against the built output, in
+      # light and dark at mobile and desktop. A browser is required: contrast is
+      # the rule that actually catches things here, and it cannot be evaluated
+      # without layout. This found a real WCAG AA contrast failure on the
+      # release pages in dark mode the first time it ran.
+      - name: Install the browser for accessibility checks
+        run: npx playwright install chromium --with-deps
+
+      - name: Check accessibility and keyboard operation
+        run: npm run verify:a11y
+
+      - name: Upload the accessibility report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: accessibility-report
+          path: docs-site/test-results/
+          retention-days: 7
+
       # A draft release note must never become a route, a sitemap entry or a
       # search record. This asserts the property directly rather than trusting
       # the filter that produces it.
