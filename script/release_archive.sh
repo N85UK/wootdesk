@@ -301,13 +301,45 @@ verify_exported_signing() {
         (cd "${inspect_dir}" && unzip -qq "${ipa}")
         payload_app="$(find "${inspect_dir}/Payload" -maxdepth 1 -name "*.app" | head -1)"
     else
-        # macOS exports a .pkg, whose payload is not inspected the same way.
-        echo "   No .ipa to inspect for ${label}; relying on the export method."
-        rm -rf "${inspect_dir}"
-        return 0
+        # macOS exports a .pkg. Expanding it is the only way to see how the app
+        # inside was signed. Trusting the export method here would defeat the
+        # purpose of this check, because the archive step reports success while
+        # signing the intermediate product with a development identity.
+        local pkg
+        pkg="$(find "${export_path}" -maxdepth 1 -name "*.pkg" | head -1)"
+        if [[ -z "${pkg}" ]]; then
+            rm -rf "${inspect_dir}"
+            fail "The exported ${label} package contains neither an .ipa nor a .pkg."
+        fi
+
+        local installer_authority
+        installer_authority="$(pkgutil --check-signature "${pkg}" 2>/dev/null | grep -m1 "3rd Party Mac Developer Installer" || true)"
+        if [[ -z "${installer_authority}" ]]; then
+            rm -rf "${inspect_dir}"
+            fail "The exported ${label} package is not signed by a Mac installer identity." \
+                "App Store Connect requires 3rd Party Mac Developer Installer."
+        fi
+        echo "   Installer signature present."
+
+        pkgutil --expand-full "${pkg}" "${inspect_dir}/expanded" >/dev/null 2>&1 || {
+            rm -rf "${inspect_dir}"
+            fail "The exported ${label} package could not be expanded for inspection."
+        }
+        payload_app="$(find "${inspect_dir}/expanded" -maxdepth 4 -name "*.app" -type d | head -1)"
     fi
 
     [[ -n "${payload_app}" ]] || { rm -rf "${inspect_dir}"; fail "The exported ${label} package contains no app."; }
+
+    local authority
+    authority="$(codesign -dvvv "${payload_app}" 2>&1 | grep -m1 "^Authority=" || true)"
+    case "${authority}" in
+        *"Apple Distribution"*) ;;
+        *)
+            rm -rf "${inspect_dir}"
+            fail "The exported ${label} app is not signed by Apple Distribution." \
+                "Found: ${authority:-no authority}."
+            ;;
+    esac
 
     local entitlements
     entitlements="$(codesign -d --entitlements :- "${payload_app}" 2>/dev/null | plutil -p - 2>/dev/null || true)"
