@@ -42,6 +42,46 @@ for (const page of PAGES) {
         );
         expect(summary, summary.join('\n')).toEqual([]);
       });
+
+      // N85-44 AC7. Note what this does NOT do: assert that the document
+      // scrolls sideways. Starlight clips horizontal overflow in its layout, so
+      // a 3000px element still leaves scrollWidth equal to clientWidth and that
+      // assertion can never fail here. It was ported from the n85.app suite,
+      // measured against a deliberate 3000px probe, and found to be vacuous.
+      //
+      // Clipping is the worse outcome anyway: the content is unreachable rather
+      // than merely awkward. So this looks for anything extending past the
+      // viewport with no scrollable ancestor to reach it by.
+      test(`${page.name} keeps content reachable, ${viewport.name} ${scheme}`, async ({
+        page: browserPage,
+      }) => {
+        await browserPage.setViewportSize({ width: viewport.width, height: viewport.height });
+        await browserPage.emulateMedia({ colorScheme: scheme });
+        await browserPage.goto(page.path);
+
+        const clipped = await browserPage.evaluate((viewportWidth) => {
+          const reachable = (element) => {
+            for (let node = element; node; node = node.parentElement) {
+              const overflow = getComputedStyle(node).overflowX;
+              if (overflow === 'auto' || overflow === 'scroll') return true;
+            }
+            return false;
+          };
+          const findings = [];
+          for (const element of document.body.querySelectorAll('*')) {
+            const rect = element.getBoundingClientRect();
+            if (rect.width === 0 || rect.height === 0) continue;
+            if (rect.right <= viewportWidth + 1) continue;
+            if (reachable(element)) continue;
+            const name = element.tagName.toLowerCase();
+            const cls = String(element.className || '').split(' ')[0];
+            findings.push(`${name}${cls ? '.' + cls : ''} reaches ${Math.round(rect.right)}px, no scroller`);
+          }
+          return [...new Set(findings)].slice(0, 6);
+        }, viewport.width);
+
+        expect(clipped, clipped.join('\n')).toEqual([]);
+      });
     }
   }
 }
