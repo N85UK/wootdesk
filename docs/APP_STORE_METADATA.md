@@ -135,23 +135,100 @@ approved.
 
 ## App Review information
 
+WootDesk cannot be assessed without a Chatwoot server. A reviewer given no
+environment sees a setup screen and nothing else, and the likely outcome is
+rejection under Guideline 2.1 as incomplete. The demo environment and these
+notes are therefore not optional polish; they are the difference between a
+review that can proceed and one that cannot.
+
 Create a dedicated review-only Chatwoot environment containing invented data.
-Enter its address, review account details, and token only in App Store Connect's
-private App Review fields. Credentials must remain valid for the review period
-and must not belong to a customer or production environment.
+Enter its address, account details and token only in App Store Connect's
+private App Review fields. Credentials must stay valid for the whole review
+period, including any re-review after a rejection, and must never belong to a
+customer or production environment.
 
-Suggested review notes:
+### Sign-in required
 
-> WootDesk is an independent native client for an existing Chatwoot server. It
-> does not create a Chatwoot account. Use the dedicated review server and token
-> supplied in the private sign-in fields. Launch WootDesk, choose Add Chatwoot
-> Server, enter the supplied HTTPS address and token, select the supplied account
-> if prompted, and choose Connect. The app validates `/api/v1/profile`, saves the
-> token in Apple Keychain, and loads the account's conversation list. The demo
-> contains invented messages only. No customer data is present.
+Set **Sign-in required** to yes and supply the demo agent's email and password
+for the Chatwoot server. WootDesk itself does not have accounts, but the
+reviewer needs working Chatwoot credentials to obtain the access token, so
+answering no here invites a "cannot sign in" rejection.
 
-Add any server-specific test setting to the private Notes field. Never include
-a token in the public description, screenshots, attachments, or support URL.
+### Review notes draft
+
+Paste into the private Notes field. Replace the bracketed values.
+
+> WootDesk is an independent, native client for Chatwoot, an open-source
+> customer support platform. It is not affiliated with, maintained by, or
+> endorsed by Chatwoot, and it does not create Chatwoot accounts. It connects
+> to a Chatwoot server that the user already has.
+>
+> A server is required to use the app at all, so a demo environment is provided.
+>
+> To review:
+>
+> 1. Launch WootDesk. The first screen offers Add Chatwoot Server.
+> 2. Enter the server address `[REVIEW_SERVER_HTTPS_URL]` and the access token
+>    `[REVIEW_ACCESS_TOKEN]`, both supplied in the private fields above.
+> 3. Choose Connect. The app validates the token against `GET /api/v1/profile`,
+>    stores it in the Apple Keychain, and loads the account's conversations.
+>    If prompted to choose an account, select `[REVIEW_ACCOUNT_NAME]`.
+> 4. Select a conversation to read its message history, then send a reply or a
+>    private note. Both appear only after the server confirms them.
+> 5. Conversation actions above the timeline set status, priority, assignee and
+>    labels. Every change is read back from the server before it is displayed.
+>
+> The demo environment contains invented records only. There is no customer
+> data, and the conversations and contacts are fictional.
+>
+> Notifications are optional and off by default. The app requests notification
+> permission only when the user enables alerts, and remote alerts additionally
+> require the user to enter a separate push gateway address and token. No
+> gateway address ships with the app. Reviewing notifications is not necessary
+> to assess the app, and remote alerts carry no message content: they read
+> "A new message was received."
+>
+> The app contains no advertising, no analytics, no tracking, and no in-app
+> purchases. All network traffic uses HTTPS to the server the user chooses.
+>
+> The macOS and iOS versions share one codebase and behave the same way. On Mac
+> the layout is a three-column split view; on iPhone it is a tab layout.
+
+### Points a reviewer is likely to raise
+
+| Likely question | Answer to have ready |
+|---|---|
+| "The app requires an account you did not provide" | Sign-in required is set to yes with working demo credentials, and the token is in the notes |
+| "The app appears non-functional" | Without a server it shows only the setup screen. The demo server must be reachable for the whole review window |
+| "Is this affiliated with Chatwoot?" | No. The listing and notes both say so, and no Chatwoot branding is used |
+| "Why does it need notifications?" | Optional, off by default, and never carries message content |
+
+Never include a token in the public description, screenshots, attachments, or
+support URL. The private App Review fields are the only place for them.
+
+## What's New
+
+**Not required for the initial 1.0 release.** App Store Connect only requires
+this field for subsequent versions, and the API confirms it is currently empty
+on the 1.0 record for both platforms. Leaving it empty is correct now.
+
+Draft to adapt for the first update after 1.0:
+
+> This release adds conversation triage, so you can set status, priority,
+> assignee and labels without leaving the app. Every change is confirmed by the
+> server before it appears.
+>
+> iPad now uses the same three-column layout as the Mac, and the conversation
+> list adapts when the window is narrow.
+>
+> Notifications open the conversation they belong to, even when it is outside
+> the loaded page or hidden by a filter.
+>
+> Text now stays readable at accessibility sizes throughout the conversation
+> list.
+
+Keep it factual and specific. Avoid unverifiable performance claims, and do not
+describe a feature before the build carrying it has been uploaded.
 
 ## Screenshot plan
 
