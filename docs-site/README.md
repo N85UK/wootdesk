@@ -118,10 +118,18 @@ Deployment is automatic. A push to `main` that touches `docs-site/` runs the
 checks, and the `deploy` job publishes the artefact those checks passed
 against, rather than rebuilding. Nothing is deployed from a pull request.
 
-### One-time setup
+### One-time setup, completed 3 September 2026
 
-Two repository secrets are required. Until both exist the deploy job emits a
-warning and publishes nothing:
+Both repository secrets are set, so deployment is automatic. The token is
+scoped to exactly the three permissions below and nothing else; the account's
+global key was used once to mint it and is not stored in CI.
+
+| Secret | Value |
+| --- | --- |
+| `CLOUDFLARE_API_TOKEN` | Token named "wootdesk-docs deploy (docs.n85.app)" |
+| `CLOUDFLARE_ACCOUNT_ID` | The account that owns the `n85.app` zone |
+
+To re-create the token if it is ever revoked:
 
 | Secret | Value |
 | --- | --- |
@@ -134,8 +142,14 @@ The token needs three permissions, and no more:
 * **Zone**, Workers Routes, Edit, on `n85.app`. Attaches the custom domain.
 * **Zone**, DNS, Edit, on `n85.app`. Creates the `docs.n85.app` record.
 
-Cloudflare provisions and renews the certificate for a custom domain and
-redirects HTTP to HTTPS, so no certificate handling is needed here.
+Cloudflare provisions and renews the certificate for a custom domain.
+
+It does **not** redirect HTTP to HTTPS by itself. `always_use_https` is off on
+the `n85.app` zone, and a Worker has no origin to issue the redirect, so plain
+HTTP served the site with a 200 on first deployment. A single redirect rule
+scoped to `docs.n85.app` now returns 301 to HTTPS, preserving the path and
+query. It is scoped to this hostname rather than enabling the zone-wide
+setting, so the behaviour of other `n85.app` hosts is unchanged.
 
 ### What the deployment proves
 
