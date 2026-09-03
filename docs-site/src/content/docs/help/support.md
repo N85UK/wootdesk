@@ -11,10 +11,17 @@ Check [Troubleshooting](/help/troubleshooting) and
 [Known issues](/help/known-issues). Many reports are an already-known
 limitation, particularly around notifications and macOS distribution.
 
+## Contacting support
+
+Email <app.support@n85.dev>. This reaches the maintainers directly and is the
+right route if you would rather not post in public, or if your report would
+otherwise contain details of your Chatwoot server.
+
 ## Reporting a defect
 
-Open an issue at
+For anything that can be discussed openly, open an issue at
 [github.com/N85UK/wootdesk/issues](https://github.com/N85UK/wootdesk/issues).
+An issue is usually faster, because other people can see it and answer.
 
 Useful reports include:
 

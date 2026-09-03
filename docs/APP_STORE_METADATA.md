@@ -28,6 +28,25 @@ customer data, or a real server address to this repository.
 The privacy-policy URL becomes a valid release URL only after `PRIVACY.md` is
 confirmed accessible from the public default branch without authentication.
 
+## Support and marketing addresses, set 3 September 2026
+
+| Field | Value |
+| --- | --- |
+| Support URL, both platforms | `https://docs.n85.app/help/support/` |
+| Marketing URL, both platforms | `https://n85.app` |
+| App Review contact email | `app.support@n85.dev` |
+
+The support URL was previously the GitHub repository on iOS and empty on macOS.
+Empty would have failed submission, because a support URL is required.
+
+**`https://n85.app` does not serve yet.** It returns HTTP 525: the apex is
+proxied to the deployment host, which has no TLS certificate for that hostname,
+so Cloudflare cannot complete the origin handshake. The marketing URL is
+recorded because that is the intended home, but **the site has to be serving
+before submission**, or App Review will follow the link and find an error page.
+Building it is N85-63.
+
+
 ## Live App Store Connect state, read 3 September 2026
 
 Read from the API rather than assumed, so this can be checked rather than
