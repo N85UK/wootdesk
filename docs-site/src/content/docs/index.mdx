@@ -1,0 +1,108 @@
+---
+title: WootDesk
+description: An independent native Apple client for Chatwoot, for iPhone, iPad and Mac.
+template: splash
+hero:
+  tagline: Handle your Chatwoot conversations from a native app on iPhone, iPad and Mac.
+  image:
+    file: ../../assets/wootdesk-mark.svg
+  actions:
+    - text: Check the requirements
+      link: /start/requirements
+      icon: right-arrow
+    - text: View the source
+      link: https://github.com/N85UK/wootdesk
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid, Aside } from '@astrojs/starlight/components';
+
+<Aside type="caution" title="WootDesk is not yet publicly released">
+There is no public App Store release. The current build is distributed to a
+closed internal TestFlight group on iPhone and iPad only. No macOS build has
+been published. These pages describe what the app does today so you can decide
+whether it will suit you, not how to install a shipping product.
+
+The [releases](/releases) section records exactly what has been made available,
+and to whom.
+</Aside>
+
+## What it is
+
+WootDesk is a native SwiftUI application that connects to a Chatwoot server you
+already have. It uses the Chatwoot Application API with a personal access
+token, which stays in the Apple Keychain on your device. WootDesk does not host
+a Chatwoot service, and it does not proxy your conversations through anyone
+else's server: the app talks to your server directly.
+
+It is built for support agents who want their queue on Apple hardware without a
+browser tab, and for teams self-hosting Chatwoot who want a client they can
+read the source of.
+
+<CardGrid>
+  <Card title="Your server, your data" icon="approve-check">
+    WootDesk connects to the Chatwoot installation you nominate. Messages are
+    read from and written to that server over HTTPS. Nothing is sent to N85.
+  </Card>
+  <Card title="Multiple servers" icon="setting">
+    Save several server profiles and switch between them. Each keeps its own
+    credential, and each credential lives in the Keychain.
+  </Card>
+  <Card title="Native on each platform" icon="laptop">
+    A tab layout on iPhone, an adaptive split view on iPad and Mac, full
+    keyboard and VoiceOver support, and British English throughout.
+  </Card>
+  <Card title="Readable source" icon="github">
+    The application, its push gateway and this documentation are in one public
+    repository.
+  </Card>
+</CardGrid>
+
+## Relationship to Chatwoot
+
+WootDesk is an independent project by N85. It is **not** affiliated with,
+endorsed by, or sponsored by Chatwoot, and it is not an official Chatwoot
+product. It talks to Chatwoot's documented Application API in the same way any
+third-party client would. Compatibility is verified against the versions listed
+in [Requirements](/start/requirements), and a Chatwoot upgrade can change
+behaviour without notice from us.
+
+## What works today
+
+| Area | State |
+| --- | --- |
+| Connect to a server and pick an account | Available |
+| Browse, filter, page and search conversations | Available |
+| Read message history, including older pages | Available |
+| Send replies and private notes | Available |
+| Send and receive attachments | Available |
+| Triage: status, snooze, priority, assignment, labels | Available |
+| Set your availability | Available |
+| Drafts and recent messages kept through a lost connection | Available |
+| Push notifications that open the right conversation | App side complete, delivery not yet switched on |
+| Live updates without refreshing | Planned, not built |
+| AI summaries and drafting | Planned, not built |
+
+See [What's new](/releases) for what each build actually contained.
+
+## Where to go next
+
+<CardGrid>
+  <Card title="Requirements" icon="list-format">
+    [What you need](/start/requirements) before WootDesk is any use to you:
+    device versions, a Chatwoot server, HTTPS and an access token.
+  </Card>
+  <Card title="Install and connect" icon="rocket">
+    [Add your first server profile](/start/getting-started) and understand
+    where your token is kept.
+  </Card>
+  <Card title="Security and privacy" icon="seti:lock">
+    [What leaves your device](/trust/privacy) and
+    [how the app protects it](/trust/security).
+  </Card>
+  <Card title="Something is wrong" icon="warning">
+    [Troubleshooting](/help/troubleshooting) by symptom, and
+    [how to report a problem](/help/support) safely.
+  </Card>
+</CardGrid>

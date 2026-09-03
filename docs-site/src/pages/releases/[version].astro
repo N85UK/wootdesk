@@ -1,0 +1,38 @@
+---
+/**
+ * A stable page per release at `/releases/{version}`.
+ *
+ * Routes come from `publishedReleases()`, so a draft has no route at all. Once
+ * a version is published its route keeps existing as later releases are added,
+ * which is what N85-46 AC2 asks for.
+ */
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import ReleaseBody from '../../components/ReleaseBody.astro';
+import { publishedReleases, statusLabel, formatDate, releaseHeadings } from '../../lib/releases';
+
+export async function getStaticPaths() {
+  const releases = await publishedReleases();
+  return releases.map((release) => ({
+    params: { version: release.data.version },
+    props: { release },
+  }));
+}
+
+const { release } = Astro.props;
+const { data } = release;
+const description = `WootDesk ${data.version}, ${statusLabel(data.status).toLowerCase()}, ${formatDate(data.date)}. ${data.summary}`;
+---
+
+<StarlightPage
+  frontmatter={{
+    title: `WootDesk ${data.version}`,
+    description,
+  }}
+  headings={releaseHeadings(release)}
+>
+  <ReleaseBody release={release} />
+
+  <p>
+    <a href="/releases">All releases</a>
+  </p>
+</StarlightPage>

@@ -1,0 +1,28 @@
+{
+  "name": "wootdesk-docs",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Public WootDesk documentation published at https://docs.n85.app",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "verify:boundary": "node scripts/check-content-boundary.mjs",
+    "verify:links": "node scripts/check-internal-links.mjs",
+    "verify": "npm run verify:boundary && npm run verify:links"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "0.42.0",
+    "astro": "7.2.10"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.10",
+    "typescript": "6.0.3"
+  }
+}

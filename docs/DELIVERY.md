@@ -75,6 +75,8 @@ Store release. No macOS build has been uploaded.
 | App Store screenshots | `docs/screenshots/README.md` |
 | TestFlight delivery pipeline | `docs/TESTFLIGHT_DELIVERY.md` |
 | Push gateway deployment and API contract | `Gateway/README.md` |
+| Public user documentation source | `docs-site/README.md` |
+| Documentation publication boundary | `docs/decisions/0007-documentation-publication-boundary.md` |
 
 ## Delivery gates
 

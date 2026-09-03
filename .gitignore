@@ -51,5 +51,10 @@ Gateway/data/
 compat/.env
 compat/.token
 
+# Documentation site build output and caches. The site is rebuilt from source.
+docs-site/node_modules/
+docs-site/dist/
+docs-site/.astro/
+
 # The release scripts import a shared module, which byte-compiles beside them.
 __pycache__/

@@ -1,0 +1,101 @@
+---
+/**
+ * Renders one release note's structured fields plus its prose body.
+ *
+ * The section list is fixed, so every release note reads the same way and a
+ * missing section is visibly missing rather than quietly dropped.
+ */
+import { render } from 'astro:content';
+import type { Release } from '../lib/releases';
+import { statusLabel, formatDate, slugify, RELEASE_SECTIONS } from '../lib/releases';
+
+interface Props {
+  release: Release;
+  headingLevel?: 'h2' | 'h3';
+}
+
+const { release, headingLevel = 'h2' } = Astro.props;
+const { data } = release;
+const { Content } = await render(release);
+
+// Ids are slugged the same way the table of contents slugs them, so the
+// anchors Starlight lists actually resolve.
+const sections = RELEASE_SECTIONS.map((section) => ({
+  title: section.title,
+  items: data[section.key],
+})).filter((section) => section.items.length > 0);
+
+const Heading = headingLevel;
+---
+
+<dl class="release-meta">
+  <div>
+    <dt>Version</dt>
+    <dd>{data.version}</dd>
+  </div>
+  <div>
+    <dt>Date</dt>
+    <dd><time datetime={data.date.toISOString()}>{formatDate(data.date)}</time></dd>
+  </div>
+  <div>
+    <dt>Status</dt>
+    <dd>{statusLabel(data.status)}</dd>
+  </div>
+  <div>
+    <dt>Availability</dt>
+    <dd>{data.availability}</dd>
+  </div>
+</dl>
+
+<Content />
+
+{
+  sections.map((section) => (
+    <>
+      <Heading id={slugify(section.title)}>{section.title}</Heading>
+      <ul>
+        {section.items.map((item) => (
+          <li>{item}</li>
+        ))}
+      </ul>
+    </>
+  ))
+}
+
+<Heading id={slugify("Action required")}>Action required</Heading>
+<p>{data.upgradeAction}</p>
+
+{
+  data.sourceURL && (
+    <p>
+      Source: <a href={data.sourceURL}>{data.sourceTag ?? data.sourceURL}</a>
+    </p>
+  )
+}
+
+<style>
+  .release-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    gap: 0.75rem 1.5rem;
+    margin: 0 0 1.5rem;
+    padding: 1rem;
+    border: 1px solid var(--sl-color-hairline);
+    border-radius: 0.5rem;
+    background: var(--sl-color-bg-nav);
+  }
+
+  .release-meta dt {
+    font-size: var(--sl-text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--sl-color-gray-3);
+    margin: 0 0 0.15rem;
+  }
+
+  .release-meta dd {
+    margin: 0;
+    font-size: var(--sl-text-sm);
+    color: var(--sl-color-white);
+  }
+</style>

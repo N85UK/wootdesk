@@ -63,6 +63,60 @@ Thank you for your interest in contributing to WootDesk! We welcome pull request
 
 ---
 
+## Documentation Changes
+
+The public WootDesk documentation lives in `docs-site/` and is published at
+<https://docs.n85.app>. See [`docs-site/README.md`](docs-site/README.md) for
+the local commands.
+
+### Publication checklist
+
+Work through this before opening a pull request that adds or changes a
+documentation page. Every question must be answered before the page is written,
+not after.
+
+1. **Ownership.** Does this page concern WootDesk? If it concerns any other N85
+   project, it belongs in the private documentation repository, not here.
+
+2. **Audience.** Is it suitable for a reader with no relationship to N85? The
+   public site has no authentication, so assume a stranger, a competitor and a
+   search engine all read it.
+
+3. **Sensitivity.** Does it contain any of the following? If so, remove it or
+   move the page to the private repository.
+   - A credential, token, key or password, whole or partial.
+   - Customer names, addresses, phone numbers or message content.
+   - A production hostname that is not already public.
+   - Internal IP ranges, proxy configuration or other infrastructure detail.
+
+4. **Synthetic examples.** Does every command, address, identity and
+   conversation in the page use invented data or a reserved domain such as
+   `example.com`? Screenshots count: redact the contact column, the message
+   bodies and the server address before attaching one.
+
+5. **Accuracy.** Does every claim match the current source and recorded release
+   evidence? Do not describe planned work as available, and do not describe a
+   TestFlight build as a public release.
+
+6. **Target.** Is the change going to the right place?
+   - Public WootDesk documentation → `docs-site/` in this repository.
+   - Internal or other-project documentation → the private repository.
+   - Repository policy and governance → the Markdown files in this repository
+     root and in `docs/`, which are read by contributors rather than published
+     to `docs.n85.app`.
+
+7. **Checks.** Have you run `npm run build && npm run verify` in `docs-site/`?
+   The boundary and link checks also run in CI and block deployment, but
+   finding a problem locally is faster.
+
+### Keeping documentation and behaviour together
+
+When a change alters user-visible behaviour or a supported requirement, update
+the affected documentation page in the same pull request. If no documentation
+change is needed, say so in the pull request and why.
+
+---
+
 ## Code of Conduct
 
 Please note that this project is governed by the [Code of Conduct](CODE_OF_CONDUCT.md). By participating, you agree to uphold its standards.

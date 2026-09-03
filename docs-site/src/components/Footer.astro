@@ -1,0 +1,54 @@
+---
+/**
+ * Public documentation footer.
+ *
+ * It carries the two things every public WootDesk page must state: the route
+ * back to the N85 app home, and the independence notice. The private
+ * documentation site is deliberately absent; no public page links to it.
+ */
+import Default from '@astrojs/starlight/components/Footer.astro';
+---
+
+<Default><slot /></Default>
+
+<div class="n85-footer">
+  <p class="n85-links">
+    <a href="https://n85.app">N85 apps</a>
+    <span aria-hidden="true">·</span>
+    <a href="https://github.com/N85UK/wootdesk">Source code</a>
+    <span aria-hidden="true">·</span>
+    <a href="/help/support">Support</a>
+  </p>
+  <p class="n85-independence">
+    WootDesk is an independent project by N85. It is not affiliated with,
+    endorsed by, or sponsored by Chatwoot. "Chatwoot" is the trademark of its
+    respective owner and is used here only to describe compatibility.
+  </p>
+</div>
+
+<style>
+  .n85-footer {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--sl-color-hairline);
+  }
+
+  .n85-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0 0 0.5rem;
+    font-size: var(--sl-text-sm);
+  }
+
+  .n85-links span {
+    color: var(--sl-color-gray-4);
+  }
+
+  .n85-independence {
+    margin: 0;
+    font-size: var(--sl-text-xs);
+    color: var(--sl-color-gray-3);
+    max-width: 60ch;
+  }
+</style>

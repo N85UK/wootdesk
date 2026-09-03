@@ -1,0 +1,120 @@
+name: Documentation
+
+# The public WootDesk documentation published at https://docs.n85.app.
+#
+# This workflow is deliberately independent of the app CI: a documentation
+# change must not need a macOS runner, and an app change must not be able to
+# publish documentation without these checks passing.
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'docs-site/**'
+      - '.github/workflows/docs.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'docs-site/**'
+      - '.github/workflows/docs.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: docs-site
+
+jobs:
+  build-and-verify:
+    name: Build and verify the public site
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: docs-site/package-lock.json
+
+      # `npm ci` fails rather than resolving if the lock file and manifest
+      # disagree, which is what makes the build repeatable.
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Type-check the site
+        run: npm run check
+
+      - name: Build
+        run: npm run build
+
+      # Proves no private hostname, internal marker, private address or
+      # credential reached the source or the generated output.
+      - name: Verify the public content boundary
+        run: npm run verify:boundary
+
+      - name: Verify internal links
+        run: npm run verify:links
+
+      # A draft release note must never become a route, a sitemap entry or a
+      # search record. This asserts the property directly rather than trusting
+      # the filter that produces it.
+      - name: Assert draft releases are not published
+        run: |
+          set -euo pipefail
+          drafts=$(grep -rl '^status: draft' src/content/releases || true)
+          if [ -z "$drafts" ]; then
+            echo "No draft release notes present."
+            exit 0
+          fi
+          echo "Draft release notes present:"
+          echo "$drafts"
+          for file in $drafts; do
+            version=$(grep -m1 '^version:' "$file" | sed 's/^version: *"\{0,1\}//; s/"\{0,1\}$//')
+            echo "Checking that $version is absent from the build..."
+            if [ -e "dist/releases/$version" ]; then
+              echo "FAIL: draft $version produced a route at dist/releases/$version"
+              exit 1
+            fi
+            if grep -q "releases/$version" dist/sitemap-0.xml 2>/dev/null; then
+              echo "FAIL: draft $version appears in the sitemap"
+              exit 1
+            fi
+            if grep -rq "$version" dist/pagefind 2>/dev/null; then
+              echo "FAIL: draft $version appears in the search index"
+              exit 1
+            fi
+          done
+          echo "All draft release notes are excluded from routes, sitemap and search."
+
+      # Recorded so a deployment can name exactly what it published, and so a
+      # rollback has a verified target to return to.
+      - name: Record build evidence
+        run: |
+          {
+            echo "### Documentation build evidence"
+            echo ""
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| Commit | \`${{ github.sha }}\` |"
+            echo "| Node | \`$(node --version)\` |"
+            echo "| Lock file | \`$(sha256sum package-lock.json | cut -d' ' -f1)\` |"
+            echo "| Pages built | $(find dist -name '*.html' | wc -l | tr -d ' ') |"
+            echo "| Boundary check | passed |"
+            echo "| Link check | passed |"
+            echo "| Draft exclusion | passed |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the verified build
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-site-dist
+          path: docs-site/dist
+          retention-days: 14

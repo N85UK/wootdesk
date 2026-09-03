@@ -1,0 +1,58 @@
+---
+/**
+ * Every published release on one page, for readers who would rather scan than
+ * click through. It draws on the same filtered set as the individual pages, so
+ * it cannot disagree with them or surface a draft.
+ */
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import ReleaseBody from '../../components/ReleaseBody.astro';
+import { publishedReleases, statusLabel, formatDate } from '../../lib/releases';
+import { slugify } from '../../lib/releases';
+
+const releases = await publishedReleases();
+
+// One entry per release, so the changelog's table of contents is a version
+// list rather than five repetitions of "Highlights".
+const headings = releases.map((release) => ({
+  depth: 2,
+  slug: `v${slugify(release.data.version)}`,
+  text: `${release.data.version}`,
+}));
+---
+
+<StarlightPage
+  frontmatter={{
+    title: 'Changelog',
+    description:
+      'Every published WootDesk release on one page, newest first, with highlights, fixes, security changes, compatibility and known issues.',
+  }}
+  headings={headings}
+>
+  <p>
+    Every published WootDesk release, newest first. Individual pages are linked
+    from <a href="/releases">What's new</a>.
+  </p>
+
+  {
+    releases.map((release) => (
+      <section>
+        <h2 id={`v${slugify(release.data.version)}`}>
+          <a href={`/releases/${release.data.version}`}>{release.data.version}</a>
+          {' '}
+          <span class="status">
+            {statusLabel(release.data.status)}, {formatDate(release.data.date)}
+          </span>
+        </h2>
+        <ReleaseBody release={release} headingLevel="h3" />
+      </section>
+    ))
+  }
+</StarlightPage>
+
+<style>
+  .status {
+    font-size: var(--sl-text-sm);
+    font-weight: 400;
+    color: var(--sl-color-gray-3);
+  }
+</style>

@@ -1,0 +1,94 @@
+---
+/**
+ * What's new: the release index.
+ *
+ * Built from `publishedReleases()`, so a draft release is not listed, not
+ * routed, and not indexed.
+ */
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import { publishedReleases, statusLabel, formatDate } from '../../lib/releases';
+
+const releases = await publishedReleases();
+const latest = releases[0];
+---
+
+<StarlightPage
+  frontmatter={{
+    title: "What's new",
+    description:
+      'WootDesk releases in reverse chronological order, with what each build contained and who received it.',
+    tableOfContents: false,
+  }}
+>
+  <p>
+    Every WootDesk build that has been distributed, newest first. Each entry
+    states who actually received it, because a build reaching a closed
+    TestFlight group is not a public release.
+  </p>
+
+  {
+    latest && (
+      <p>
+        The most recent is <a href={`/releases/${latest.data.version}`}>{latest.data.version}</a>,
+        {' '}{statusLabel(latest.data.status).toLowerCase()}, {formatDate(latest.data.date)}.
+      </p>
+    )
+  }
+
+  {
+    releases.length === 0 && (
+      <p>No release has been published yet.</p>
+    )
+  }
+
+  <ul class="release-index">
+    {
+      releases.map((release) => (
+        <li>
+          <h2>
+            <a href={`/releases/${release.data.version}`}>{release.data.version}</a>
+          </h2>
+          <p class="meta">
+            <time datetime={release.data.date.toISOString()}>
+              {formatDate(release.data.date)}
+            </time>
+            <span aria-hidden="true">·</span>
+            <span>{statusLabel(release.data.status)}</span>
+          </p>
+          <p>{release.data.summary}</p>
+        </li>
+      ))
+    }
+  </ul>
+
+  <p>
+    A full list of every change in one page is on the
+    <a href="/releases/changelog">changelog</a>.
+  </p>
+</StarlightPage>
+
+<style>
+  .release-index {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0;
+  }
+
+  .release-index li {
+    padding: 1rem 0;
+    border-top: 1px solid var(--sl-color-hairline);
+  }
+
+  .release-index h2 {
+    margin: 0;
+    font-size: var(--sl-text-h4);
+  }
+
+  .meta {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0.25rem 0 0.5rem;
+    font-size: var(--sl-text-sm);
+    color: var(--sl-color-gray-3);
+  }
+</style>
