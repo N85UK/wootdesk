@@ -66,11 +66,18 @@ public actor PushGatewayRegistrationManager: PushGatewayRegistrationManaging {
             throw PushGatewayRegistrationError.missingDeviceToken
         }
 
+        // Enrolling without this succeeds and then silently receives nothing,
+        // so refuse here rather than let the gateway reject the request.
+        guard let agentID = profile.agentID else {
+            throw PushGatewayRegistrationError.missingAgentIdentity
+        }
+
         let previousConfiguration = try await store.loadConfiguration(for: profile.id)
         let deviceID = previousConfiguration?.deviceID ?? makeDeviceID()
         let request = registrationRequest(
             deviceID: deviceID,
             profile: profile,
+            agentID: agentID,
             deviceToken: deviceToken,
             environment: environment
         )
@@ -151,10 +158,14 @@ public actor PushGatewayRegistrationManager: PushGatewayRegistrationManaging {
         guard !deviceToken.isEmpty else {
             throw PushGatewayRegistrationError.missingDeviceToken
         }
+        guard let agentID = profile.agentID else {
+            throw PushGatewayRegistrationError.missingAgentIdentity
+        }
 
         let request = registrationRequest(
             deviceID: configuration.deviceID,
             profile: profile,
+            agentID: agentID,
             deviceToken: deviceToken,
             environment: environment
         )
@@ -195,6 +206,7 @@ public actor PushGatewayRegistrationManager: PushGatewayRegistrationManaging {
     private func registrationRequest(
         deviceID: UUID,
         profile: ServerProfile,
+        agentID: Int,
         deviceToken: Data,
         environment: PushGatewayEnvironment
     ) -> PushGatewayDeviceRegistrationRequest {
@@ -202,7 +214,7 @@ public actor PushGatewayRegistrationManager: PushGatewayRegistrationManaging {
             deviceId: deviceID,
             profileId: profile.id,
             accountId: profile.selectedAccountID,
-            agentId: profile.agentID,
+            agentId: agentID,
             environment: environment,
             topic: Self.appTopic,
             token: deviceToken.hexadecimalString
@@ -213,6 +225,7 @@ public actor PushGatewayRegistrationManager: PushGatewayRegistrationManaging {
 public enum PushGatewayRegistrationError: LocalizedError, Sendable, Equatable {
     case missingCredential
     case missingDeviceToken
+    case missingAgentIdentity
     case noActiveProfile
     case recoveryRequired
 
@@ -222,6 +235,8 @@ public enum PushGatewayRegistrationError: LocalizedError, Sendable, Equatable {
             return "Enter the device API token issued by your WootDesk Push Gateway."
         case .missingDeviceToken:
             return "WootDesk must register this device with Apple before it can enable remote notifications."
+        case .missingAgentIdentity:
+            return "WootDesk could not confirm which agent this profile signs in as, so notifications would not reach you. Reconnect the server profile and try again."
         case .noActiveProfile:
             return "Select a Chatwoot server profile before configuring remote notifications."
         case .recoveryRequired:

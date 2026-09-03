@@ -16,6 +16,7 @@ export function registration(overrides = {}) {
     deviceId: deviceID,
     profileId: profileID,
     accountId: 42,
+    agentId: 7,
     environment: "development",
     topic: "dev.n85.wootdesk",
     token: "ab".repeat(32),

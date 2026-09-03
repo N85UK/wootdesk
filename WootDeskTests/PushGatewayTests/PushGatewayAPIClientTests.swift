@@ -230,6 +230,7 @@ struct PushGatewayAPIClientTests {
             deviceId: deviceID,
             profileId: profileID,
             accountId: 42,
+            agentId: 7,
             environment: .development,
             topic: "dev.n85.wootdesk",
             token: "ab" + String(repeating: "01", count: 31)

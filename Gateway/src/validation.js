@@ -18,18 +18,24 @@ function exactKeys(value, requiredKeys, optionalKeys = []) {
   )
 }
 
-// The Chatwoot user this device belongs to. Optional so a client built before
-// per-agent routing can still enrol rather than being rejected outright. A
-// registration without it can never match an assigned conversation, which the
-// gateway logs, because guessing would defeat the isolation it provides.
-function optionalAgentID(value) {
+// The Chatwoot user this device belongs to. Required, because a registration
+// without one can never match an assigned conversation: the gateway accepted
+// it, answered 200, and the app reported delivery enabled while the device was
+// excluded from every conversation assigned to its own agent. The only symptom
+// was a warn line in a server log. Refusing the enrolment turns a silent
+// partial failure into an error the client must handle.
+function agentID(value) {
   if (value === undefined || value === null) {
-    return undefined
+    throw badRequest(
+      "invalid_registration",
+      "agentId is required. A registration without an agent identity would be " +
+        "excluded from every assigned conversation.",
+    )
   }
   if (!Number.isSafeInteger(value) || value < 1) {
     throw badRequest(
       "invalid_registration",
-      "agentId must be a positive integer when present.",
+      "agentId must be a positive integer.",
     )
   }
   return value
@@ -107,7 +113,7 @@ export function validateCreateRegistration(value, expectedTopic) {
     deviceId: uuid(value.deviceId, "deviceId"),
     profileId: uuid(value.profileId, "profileId"),
     accountId: accountID(value.accountId),
-    agentId: optionalAgentID(value.agentId),
+    agentId: agentID(value.agentId),
     environment: environment(value.environment),
     topic: topic(value.topic, expectedTopic),
     token: token(value.token),
@@ -133,7 +139,7 @@ export function validateUpdateRegistration(value, expectedTopic, deviceID) {
     deviceId: uuid(deviceID, "deviceId"),
     profileId: uuid(value.profileId, "profileId"),
     accountId: accountID(value.accountId),
-    agentId: optionalAgentID(value.agentId),
+    agentId: agentID(value.agentId),
     environment: environment(value.environment),
     topic: topic(value.topic, expectedTopic),
     token: token(value.token),

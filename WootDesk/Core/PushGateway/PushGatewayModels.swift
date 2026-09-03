@@ -17,10 +17,11 @@ public struct PushGatewayDeviceRegistrationRequest: Codable, Equatable, Sendable
     public let deviceId: UUID
     public let profileId: UUID
     public let accountId: Int
-    /// Omitted from the encoded body when absent, which the gateway accepts.
-    /// A registration without it cannot be matched to an assigned
-    /// conversation, so the gateway excludes and reports it.
-    public let agentId: Int?
+    /// The Chatwoot user this device belongs to. Not optional: a registration
+    /// without one is excluded from every assigned conversation, and when that
+    /// was expressible the app reported delivery enabled while receiving
+    /// nothing. The type no longer allows the state to be constructed.
+    public let agentId: Int
     public let environment: PushGatewayEnvironment
     public let topic: String
     public let token: String
@@ -29,7 +30,7 @@ public struct PushGatewayDeviceRegistrationRequest: Codable, Equatable, Sendable
         deviceId: UUID,
         profileId: UUID,
         accountId: Int,
-        agentId: Int? = nil,
+        agentId: Int,
         environment: PushGatewayEnvironment,
         topic: String,
         token: String

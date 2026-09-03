@@ -185,31 +185,56 @@ struct PushGatewayRegistrationManagerTests {
         #expect(registration.agentId == 7)
     }
 
-    @Test("A profile saved before per-agent routing enrols without an agent identity")
-    func enrolsWithoutAgentIdentity() async throws {
-        // Such a profile must still enrol rather than failing setup. The
-        // gateway excludes it from assigned conversations and reports it,
-        // which is visible, rather than silently routing to the wrong agent.
+    @Test("Enrolment without an agent identity fails instead of enrolling")
+    func refusesEnrolmentWithoutAgentIdentity() async throws {
+        // This used to enrol. The gateway accepted it, the app reported remote
+        // delivery as enabled, and the device was then excluded from every
+        // conversation assigned to its own agent, with only a server log line
+        // to say so. Failing here makes the problem visible at the only moment
+        // the user can act on it.
         let api = RecordingPushGatewayAPI()
         let manager = makeManager(api: api, store: InMemoryPushGatewayConfigurationStore())
+
+        await #expect(throws: PushGatewayRegistrationError.missingAgentIdentity) {
+            _ = try await manager.configure(
+                baseURL: "https://push.example.com/wootdesk",
+                apiToken: validAPIToken("a"),
+                profile: sampleProfile(agentID: nil),
+                deviceToken: Data([0x01, 0x02, 0x03, 0x04]),
+                environment: .development
+            )
+        }
+
+        let events = await api.events()
+        #expect(events.isEmpty)
+    }
+
+    @Test("Refreshing an enrolment without an agent identity fails too")
+    func refusesRefreshWithoutAgentIdentity() async throws {
+        // The refresh path builds the same request, so it needs the same guard.
+        let api = RecordingPushGatewayAPI()
+        let store = InMemoryPushGatewayConfigurationStore()
+        let manager = makeManager(api: api, store: store)
+        let profile = sampleProfile(agentID: 7)
 
         _ = try await manager.configure(
             baseURL: "https://push.example.com/wootdesk",
             apiToken: validAPIToken("a"),
-            profile: sampleProfile(),
+            profile: profile,
             deviceToken: Data([0x01, 0x02, 0x03, 0x04]),
             environment: .development
         )
 
-        let events = await api.events()
-        guard case .create(let registration, _) = events[0] else {
-            Issue.record("Expected a create event")
-            return
+        await #expect(throws: PushGatewayRegistrationError.missingAgentIdentity) {
+            _ = try await manager.refreshRegistration(
+                profile: sampleProfile(agentID: nil),
+                deviceToken: Data([0x05, 0x06, 0x07, 0x08]),
+                environment: .development
+            )
         }
-        #expect(registration.agentId == nil)
     }
 
-    private func sampleProfile(agentID: Int? = nil) -> ServerProfile {
+    private func sampleProfile(agentID: Int? = 7) -> ServerProfile {
         ServerProfile(
             id: UUID(uuidString: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa")!,
             displayName: "Invented Support",

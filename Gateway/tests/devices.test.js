@@ -105,3 +105,37 @@ test("device endpoints enforce body and source rate limits", async (t) => {
   )
   assert.equal(second.status, 429)
 })
+
+test("enrolment without an agent identity is refused", async (t) => {
+  // Accepting it returned 201 and left the device excluded from every
+  // conversation assigned to its own agent, with only a warn line to say so.
+  // The app then reported remote delivery as enabled while receiving nothing.
+  // Refusing makes the failure immediate and visible instead.
+  const harness = await createHarness()
+  t.after(() => harness.close())
+
+  const body = registration()
+  delete body.agentId
+  const response = await createDevice(harness, body, "no-agent-identity-0001")
+
+  assert.equal(response.status, 400)
+  const payload = await response.json()
+  assert.equal(payload.error.code, "invalid_registration")
+  assert.match(payload.error.message, /agentId is required/)
+  assert.equal((await harness.store.registrationsForAccount(42, 90)).length, 0)
+})
+
+test("enrolment with a non-positive agent identity is refused", async (t) => {
+  const harness = await createHarness()
+  t.after(() => harness.close())
+
+  const response = await createDevice(
+    harness,
+    registration({ agentId: 0 }),
+    "bad-agent-identity-0001",
+  )
+
+  assert.equal(response.status, 400)
+  assert.equal((await response.json()).error.code, "invalid_registration")
+  assert.equal((await harness.store.registrationsForAccount(42, 90)).length, 0)
+})

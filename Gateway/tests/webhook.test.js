@@ -235,19 +235,22 @@ test("an unassigned conversation reaches every agent on the account", async (t) 
   )
 })
 
-test("a registration without an agent identity is excluded and reported", async (t) => {
-  // A client built before per-agent routing still enrols, because rejecting it
-  // would break setup outright. It cannot be matched to an assignee, so it is
-  // excluded rather than notified about a colleague's conversation, and the
-  // gateway says so instead of dropping it silently.
+test("a stored registration without an agent identity is excluded and reported", async (t) => {
+  // Enrolment now refuses a registration with no agent identity, but records
+  // written before that still exist, so the exclusion has to keep working for
+  // them. Seeded through the store rather than the API, because the API is
+  // exactly what can no longer produce this shape.
   const harness = await createHarness()
   t.after(() => harness.close())
 
-  await createDevice(
-    harness,
-    registration({ environment: "production" }),
-    "legacy-device-00001",
-  )
+  const legacy = registration({ environment: "production" })
+  delete legacy.agentId
+  await harness.store.createRegistration(legacy, {
+    key: "legacy-device-00001",
+    scope: "POST:/v1/devices",
+    requestHash: "legacy",
+    ttlSeconds: 86_400,
+  })
 
   const response = await sendWebhook(
     harness,
