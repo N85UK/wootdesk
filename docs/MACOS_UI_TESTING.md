@@ -73,3 +73,67 @@ After reverting, macOS UI test runs may require interactive authorisation again.
 - Do not modify the TCC database, disable System Integrity Protection, or grant
   broad Accessibility access as a workaround.
 - Re-run `automationmodetool` and the UI suite after macOS or Xcode upgrades.
+
+## Physical iOS device preparation
+
+The same class of one-time setup applies to a real iPhone or iPad, and the
+project could not build for one at all until 2 September 2026.
+
+### Project settings, fixed in `project.yml`
+
+Two settings blocked every device run, and neither surfaces until you try:
+
+| Setting | Problem |
+|---|---|
+| `TEST_HOST` | Defined for `macosx*` and `iphonesimulator*` only. A device build fell back to the macOS path and failed with `Could not find test host` |
+| `CODE_SIGN_IDENTITY` | Empty, with signing disabled. Correct for macOS and the simulator, where CI runs unsigned on purpose, but a device rejects an unsigned test bundle |
+
+Both are now scoped to `sdk=iphoneos*` so the unsigned macOS and simulator
+paths CI depends on are unchanged.
+
+### Device settings, one time per handset
+
+1. **Developer Mode.** Settings, Privacy and Security, Developer Mode. The
+   device restarts.
+2. **Enable UI Automation.** Settings, Developer, Enable UI Automation. Without
+   it the runner fails with
+
+   ```text
+   The test runner failed to initialize for UI testing.
+   (Underlying Error: Timed out while enabling automation mode.)
+   ```
+
+   Developer Mode alone is not sufficient, and the error does not name the
+   setting it needs.
+3. **Auto-Lock set to Never.** Settings, Display and Brightness, Auto-Lock. The
+   suite launches the app several times and every launch requires the device to
+   be unlocked at that instant, so a 30 second auto-lock defeats the run part
+   way through with
+
+   ```text
+   Xcode cannot launch WootDesk on G75 because the device is locked.
+   ```
+
+   This cost three separate attempts before the cause was identified. Restore
+   the previous value afterwards.
+
+### Running it
+
+```bash
+xcodebuild test -project WootDesk.xcodeproj -scheme WootDesk \
+  -destination 'platform=iOS,id=<UDID>' \
+  -only-testing:WootDeskUITests -configuration Debug \
+  -allowProvisioningUpdates DEVELOPMENT_TEAM=<TEAM_ID>
+```
+
+`xcrun devicectl list devices` gives the UDID and should report the handset as
+`connected`. A device shown as `unavailable` with `transport: None` is paired
+but not attached, and the run fails with an unhelpful
+`Unable to find a destination matching the provided destination specifier`.
+
+### A note on certificates
+
+`-allowProvisioningUpdates` creates a development certificate when the machine
+has none. That is fine on a developer Mac, which already has one and reuses it,
+and destructive on an ephemeral CI runner, which creates a fresh one every
+build until the account hits Apple's cap. See `docs/TESTFLIGHT_DELIVERY.md`.
