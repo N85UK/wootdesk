@@ -41,7 +41,12 @@ public struct ConversationDetailView: View {
                     Button {
                         Task { await loadMessages(for: conversation) }
                     } label: {
-                        Label("Refresh Messages", systemImage: "arrow.clockwise")
+                        // A distinct symbol from the conversation list's
+                        // refresh. On iOS the two live in separate navigation
+                        // bars, but macOS unifies the split view's toolbar, so
+                        // an identical icon appears twice with nothing to tell
+                        // the two apart.
+                        Label("Refresh Messages", systemImage: "arrow.clockwise.circle")
                     }
                     .disabled(state.isLoading || state.isSending)
                     .help("Reload this conversation's messages")
