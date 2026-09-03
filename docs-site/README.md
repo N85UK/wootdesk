@@ -171,6 +171,38 @@ npm run verify
 CLOUDFLARE_API_TOKEN=... CLOUDFLARE_ACCOUNT_ID=... npx wrangler deploy
 ```
 
+### Rolling back
+
+Every deployment records the version it replaced, and the run summary prints
+the command with that version already in it. To roll back:
+
+```bash
+cd docs-site
+npx wrangler rollback <version id> --message "why"
+```
+
+Assets belong to a Worker version, so a rollback restores the pages as well as
+the code. Confirm it took effect by reading the commit back from the live site
+rather than trusting the command:
+
+```bash
+curl -s https://docs.n85.app/build-info.json
+```
+
+Roll forward the same way, naming the version you came from.
+
+**Exercised on 3 September 2026** for N85-47 AC10, not merely written down.
+Rolled `docs.n85.app` from version `20860954` back to `2534e22f`, confirmed the
+live site served the earlier commit with the home page, a guide page, the HTTP
+to HTTPS redirect and all security headers intact, then rolled forward and
+confirmed the current commit was serving again. `n85.app` was unaffected
+throughout, which is the independence the criterion asks for: the two sites are
+separate Workers with separate deployments.
+
+The drill used a temporary Cloudflare token scoped to Workers Scripts alone,
+revoked immediately afterwards, so it did not depend on or expose the token CI
+uses.
+
 ### The workers.dev hostname is disabled
 
 `workers_dev` and `preview_urls` are both off. A workers.dev address would be
