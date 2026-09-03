@@ -1,0 +1,24 @@
+# Security headers for docs.n85.app (N85-47 AC7).
+#
+# HSTS carries no includeSubDomains: it would bind every subdomain under this
+# host, and that is a year-long browser commitment rather than a setting that
+# can be undone by changing a file.
+#
+# The content security policy is deliberately weaker than the one on n85.app,
+# because Starlight ships inline scripts and Pagefind runs WebAssembly. Naming
+# that here is the point: script-src carries 'unsafe-inline', so this policy
+# buys framing, base-uri, form-action and object-src protection rather than
+# meaningful XSS protection. Tightening it means build-time hashes or nonces.
+/*
+  Strict-Transport-Security: max-age=31536000
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'none'; object-src 'none'; upgrade-insecure-requests
+
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/pagefind/*
+  Cache-Control: public, max-age=604800
