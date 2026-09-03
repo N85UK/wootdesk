@@ -71,11 +71,39 @@ and only the list one carries the Command R shortcut.
 The detail action now uses `arrow.clockwise.circle`, so the two are
 distinguishable.
 
-### Still outstanding
+### Still outstanding: dead space in the macOS conversation list
 
-The conversation list column has a noticeable band of empty space between the
-status filter and the first row on macOS. It is cosmetic, it is visible in the
-current capture, and it has not been diagnosed.
+The conversation list column has a band of empty space above and below the
+status filter on macOS. It is cosmetic, visible in the current capture, and not
+yet diagnosed. What is known, measured through the accessibility API with the
+window at 1440 x 900 points:
+
+| Element | Position |
+|---|---|
+| Column content begins | y = 112, below the toolbar |
+| Status filter | y = 204, height 24 |
+| List scroll area | y = 321, extending to the window bottom |
+
+That leaves **92 points above the filter and 93 points below it**, almost
+perfectly symmetric, as though the 24 point control is centred in a 208 point
+band.
+
+Ruled out so far:
+
+- **`.searchable`.** Moving it from the `VStack` onto the list changed nothing,
+  and removing it entirely changed nothing. The measurements were identical in
+  all three builds.
+- **Flexible layout.** The gaps stay at exactly 92 and 93 points with the
+  window at 700 and at 1200 points tall, so this is fixed spacing rather than
+  a stack distributing free space.
+- **The `safeAreaInset` in `profileRecoveryState`.** That inset omits
+  `spacing: 0` and would contribute default spacing, but it wraps a different
+  view that the conversation list never goes through.
+
+The `VStack(spacing: 0)` in `ConversationListView.body` applies only
+`.padding(.vertical, 8)` around the filter, so the space is being introduced by
+something outside that view, most likely the surrounding `NavigationSplitView`
+column or a modifier applied to it in `WootDeskApp`.
 
 ## Uploaded to App Store Connect
 
