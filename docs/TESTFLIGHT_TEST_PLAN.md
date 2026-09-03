@@ -109,7 +109,8 @@ this project has already made several times.
 |---|---|---|---|---|---|---|
 | Automated | iPhone 17 Pro Max, physical | iOS 27.0 (24A5430a) | 1.0.0 (46 source) | 4 of 4 UI journeys pass; real APNs notification delivered | | 3 Sep 2026 |
 | To confirm | iPhone 17 Pro Max, physical | iOS 27.0 | | Manual cases pending | | |
-| To confirm | Physical iPad | | | Pending, no iPad available | | |
+| Automated | iPad Pro 13-inch (M4), physical | iPadOS 27.0 (24A5424a) | 1.0.0 (57 source) | 4 of 4 UI journeys pass | | 3 Sep 2026 |
+| To confirm | iPad Pro 13-inch (M4), physical | iPadOS 27.0 | | Manual cases pending | | |
 | Automated | MacBook Pro Mac16,8, Apple M4 Pro | macOS 27.0 (26A5421a) | 1.0.0 (46 source) | 4 of 4 UI journeys pass | | 3 Sep 2026 |
 | To confirm | Apple silicon Mac | macOS 27.0 | | Manual cases pending | | |
 | Not available | Intel Mac | | | No Intel hardware. The shipped binary is universal, `lipo -archs` reports `x86_64 arm64`, so Intel is supported but unverified | | 3 Sep 2026 |

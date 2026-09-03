@@ -149,7 +149,16 @@ Cleared on 2 September by revoking the ten certificates whose display name is
 before revoking anything.
 
 The workflow now counts them before archiving and warns at five or more, so the
-quota cannot be exhausted silently again. That is a guard, not a cure.
+quota cannot be exhausted silently again. That is a guard, not a cure, **and
+the leak has already resumed**: 7 CI-created development certificates existed
+again within hours of the revocation, across 15 pushes and 11 successful
+TestFlight runs. Local device builds are not the cause; they reuse the
+maintainer's existing identity, verified after both the iPhone and iPad
+acceptance runs.
+
+At roughly one per push this will reach the cap again in a matter of days, and
+the symptom will once more be that delivery stops while the pipeline looks
+healthy. **The cure is now the priority, not the guard.**
 
 **The permanent fix is still open.** Options, roughly in order of preference:
 import a single long-lived development certificate into the CI keychain so

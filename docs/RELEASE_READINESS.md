@@ -96,7 +96,7 @@ No platform version has been submitted for App Review.
 | GO-002 | Live self-hosted connection works | Maintainer confirmed connection on 30 August 2026, no credential retained | Pass |
 | GO-003 | Message history, replies, private notes, and attachments meet Milestone 2 acceptance | **Verified against a live Chatwoot v4.9.0 server** on 2 September 2026. All three opt-in compatibility cases passed, covering history, public replies, private notes, attachments, availability and triage, with both write gates set. TestFlight device acceptance remains | Pass against the dedicated server |
 | GO-004 | iOS and macOS archives validate locally | Signed build 3 iOS archive and App Store export passed; signed universal build 3 macOS archive and installer export passed with the expected sandbox, runtime, icon, privacy, metadata, installer identity, and embedded profile | Pass |
-| GO-005 | Physical-device TestFlight checks pass | iPhone 17 Pro Max, iOS 27.0: 4 of 4 UI journeys passed on hardware and a real push notification was delivered. iPad and Mac acceptance outstanding | Pass on iPhone |
+| GO-005 | Physical-device TestFlight checks pass | **iPhone and iPad both passed on hardware**, 4 of 4 UI journeys each: iPhone 17 Pro Max on iOS 27.0 with a real push notification delivered, and iPad Pro 13-inch (M4) on iPadOS 27.0. Apple silicon Mac passed the same suite. Manual acceptance cases and Intel Mac outstanding | Pass on iPhone, iPad and Apple silicon Mac |
 | GO-006 | App Store metadata and screenshots are approved | Final platform metadata | Not started |
 | GO-007 | Privacy and export-compliance answers are approved | Builds 2 and 3 declare `ITSAppUsesNonExemptEncryption = false`; App Store privacy answers remain pending | In progress |
 | GO-008 | Dedicated App Review server and account are ready | Private review runbook | Not started |
@@ -128,7 +128,7 @@ No platform version has been submitted for App Review.
 | Platform | Minimum | Additional coverage | Status |
 |---|---|---|---|
 | iPhone | iOS 18 | Current supported iOS, small and large Dynamic Type | **Passed on hardware, 3 September 2026.** iPhone 17 Pro Max, iOS 27.0 build 24A5430a, 4 of 4 UI journeys including the conversation history and reply flow and the cold-launch metric. Dynamic Type on hardware still outstanding |
-| iPad | iPadOS 18 | Compact and regular layouts, keyboard navigation | Build 24 available via TestFlight; run not recorded |
+| iPad | iPadOS 18 | Compact and regular layouts, keyboard navigation | **Passed on hardware, 3 September 2026.** iPad Pro 13-inch (M4), iPadOS 27.0 build 24A5424a, 4 of 4 UI journeys. Manual cases outstanding |
 | Mac | macOS 15 | Apple silicon, keyboard shortcuts, window restoration | Native build, unit tests, and 3 macOS UI tests pass on this Apple silicon host |
 | Mac | macOS 15 | Intel where available | Not started |
 
