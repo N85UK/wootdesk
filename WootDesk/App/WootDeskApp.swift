@@ -59,7 +59,8 @@ struct WootDeskApp: App {
             MainAppView(
                 appModel: appModel,
                 notificationState: notificationState,
-                availabilityState: availabilityState
+                availabilityState: availabilityState,
+                offlineStore: environment.offlineStore
             )
                 .environment(\.appEnvironment, environment)
                 .task {
@@ -108,9 +109,26 @@ struct MainAppView: View {
     /// Owned here so that both the conversation list and the detail column read
     /// the same selection on macOS.
     @State private var conversationState = ConversationListState()
-    @State private var conversationDetailState = ConversationDetailState()
+    @State private var conversationDetailState: ConversationDetailState
     @State private var conversationTriageState = ConversationTriageState()
     @State private var routeCoordinator = ConversationRouteCoordinator()
+
+    /// The offline store is passed in rather than read from the SwiftUI
+    /// environment, because the detail state must be built before the view's
+    /// environment is available.
+    init(
+        appModel: AppModel,
+        notificationState: PushNotificationState,
+        availabilityState: AgentAvailabilityState,
+        offlineStore: any OfflineStore
+    ) {
+        self.appModel = appModel
+        self.notificationState = notificationState
+        self.availabilityState = availabilityState
+        self._conversationDetailState = State(
+            initialValue: ConversationDetailState(offlineStore: offlineStore)
+        )
+    }
 
     var body: some View {
         Group {

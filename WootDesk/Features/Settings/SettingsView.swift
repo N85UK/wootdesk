@@ -5,6 +5,7 @@ public struct SettingsView: View {
     @Bindable var appModel: AppModel
     let notificationState: PushNotificationState
     let availabilityState: AgentAvailabilityState
+    @Environment(\.appEnvironment) private var environment
 
     public init(
         appModel: AppModel,
@@ -35,6 +36,11 @@ public struct SettingsView: View {
                 state: availabilityState,
                 profile: appModel.activeProfile,
                 token: appModel.activeToken
+            )
+
+            OfflineStorageSettingsSection(
+                store: environment.offlineStore,
+                knownProfileIDs: appModel.profiles.map(\.id)
             )
 
             Section("Security & Privacy") {

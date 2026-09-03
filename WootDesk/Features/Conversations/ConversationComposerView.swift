@@ -9,10 +9,33 @@ public struct ConversationComposerView: View {
     @State private var isSelectingAttachments = false
     @State private var isImportingAttachments = false
     @State private var attachmentImportTask: Task<Void, Never>?
+    @State private var isConfirmingUncertainRetry = false
 
     public init(state: ConversationDetailState, onSend: @escaping () -> Void) {
         self.state = state
         self.onSend = onSend
+    }
+
+    /// Warns before a retry that could duplicate an unconfirmed send, and sends
+    /// straight away otherwise.
+    private func sendOrConfirm() {
+        if state.requiresRetryConfirmation {
+            isConfirmingUncertainRetry = true
+        } else {
+            onSend()
+        }
+    }
+
+    private var draftRetentionText: String {
+        state.isOfflineStorageEnabled
+            ? String(
+                localized: "Drafts are saved on this device for the current server profile only, protected at rest, and removed when the message sends or the profile is deleted. Selected attachments stay in memory only.",
+                comment: "Composer footnote shown when protected offline storage is enabled"
+            )
+            : String(
+                localized: "Drafts and selected attachments stay in memory only and are discarded when you switch conversations or server profiles.",
+                comment: "Composer footnote shown when protected offline storage is disabled"
+            )
     }
 
     public var body: some View {
@@ -85,7 +108,7 @@ public struct ConversationComposerView: View {
                     }
                 }
 
-                Button(action: onSend) {
+                Button(action: sendOrConfirm) {
                     if state.isSending {
                         ProgressView()
                             .controlSize(.small)
@@ -102,13 +125,28 @@ public struct ConversationComposerView: View {
                 .accessibilityIdentifier("send-message")
             }
 
-            Text("Drafts and selected attachments stay in memory only and are discarded when you switch conversations or server profiles.")
+            Text(draftRetentionText)
                 .font(.caption2)
                 .foregroundStyle(.secondary)
         }
         .padding(.horizontal)
         .padding(.vertical, 12)
         .background(.bar)
+        .confirmationDialog(
+            "This message may already have been sent",
+            isPresented: $isConfirmingUncertainRetry,
+            titleVisibility: .visible
+        ) {
+            Button("Send Again", role: .destructive) {
+                Task {
+                    await state.acknowledgeUncertainSends()
+                    onSend()
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("WootDesk could not confirm whether an earlier attempt reached the server. Check the conversation first, because sending again may post the message twice.")
+        }
         .fileImporter(
             isPresented: $isSelectingAttachments,
             allowedContentTypes: [.data],

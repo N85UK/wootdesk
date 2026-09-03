@@ -120,6 +120,21 @@ public enum ConversationAttachmentType: Hashable, Sendable {
         }
     }
 
+    /// The Chatwoot wire value this type was derived from, so a cached
+    /// attachment can be restored through `init(chatwootValue:)`.
+    public var chatwootValue: String? {
+        switch self {
+        case .image: "image"
+        case .audio: "audio"
+        case .video: "video"
+        case .file: "file"
+        case .location: "location"
+        case .contact: "contact"
+        case .fallback: "fallback"
+        case .unknown(let value): value
+        }
+    }
+
     public var displayName: String {
         switch self {
         case .image: String(localized: "Image", comment: "Attachment type")
@@ -139,6 +154,18 @@ public struct OutgoingMessageAttachment: Identifiable, Hashable, Sendable {
     public static let maximumCount = 15
     public static let maximumTotalBytes = 25 * 1_024 * 1_024
 
+    /// File extensions WootDesk refuses to upload.
+    ///
+    /// These are directly executable or are script formats that a recipient's
+    /// system may run on open. A helpdesk reply is not a software distribution
+    /// channel, and refusing them at selection keeps the app from being used to
+    /// hand executable content to a customer.
+    public static let disallowedFileExtensions: Set<String> = [
+        "app", "bat", "cmd", "com", "command", "cpl", "dmg", "exe", "hta",
+        "jar", "js", "jse", "lnk", "msi", "msc", "pkg", "ps1", "reg", "scpt",
+        "scr", "sh", "vb", "vbe", "vbs", "wsf", "wsh"
+    ]
+
     public let id: UUID
     public let fileName: String
     public let mimeType: String
@@ -153,6 +180,10 @@ public struct OutgoingMessageAttachment: Identifiable, Hashable, Sendable {
         let trimmedName = fileName.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedName.isEmpty else {
             throw AttachmentSelectionError.invalidFile
+        }
+        let fileExtension = (trimmedName as NSString).pathExtension.lowercased()
+        guard !Self.disallowedFileExtensions.contains(fileExtension) else {
+            throw AttachmentSelectionError.disallowedType(fileExtension)
         }
         guard !data.isEmpty else {
             throw AttachmentSelectionError.emptyFile
@@ -175,6 +206,13 @@ public struct OutgoingMessageAttachment: Identifiable, Hashable, Sendable {
                 if accessed {
                     url.stopAccessingSecurityScopedResource()
                 }
+            }
+
+            // Checked before the file is opened so a disallowed type is never
+            // read into memory.
+            let fileExtension = url.pathExtension.lowercased()
+            guard !Self.disallowedFileExtensions.contains(fileExtension) else {
+                throw AttachmentSelectionError.disallowedType(fileExtension)
             }
 
             let resourceValues = try url.resourceValues(forKeys: [.isRegularFileKey, .fileSizeKey])
@@ -231,6 +269,8 @@ public enum AttachmentSelectionError: LocalizedError, Equatable, Sendable {
     case tooLarge
     case tooManyFiles
     case totalSizeExceeded
+    case disallowedType(String)
+    case cancelled
 
     public var errorDescription: String? {
         switch self {
@@ -258,6 +298,21 @@ public enum AttachmentSelectionError: LocalizedError, Equatable, Sendable {
             String(
                 localized: "The selected attachments exceed WootDesk's 25 MB per-message limit.",
                 comment: "Shown when the chosen attachments exceed the per-message size limit"
+            )
+        case .disallowedType(let fileExtension):
+            fileExtension.isEmpty
+                ? String(
+                    localized: "WootDesk does not send executable files.",
+                    comment: "Shown when a chosen attachment is an executable with no file extension"
+                )
+                : String(
+                    localized: "WootDesk does not send .\(fileExtension) files, because they can run on the recipient's device.",
+                    comment: "Shown when a chosen attachment has a disallowed executable file type"
+                )
+        case .cancelled:
+            String(
+                localized: "The attachment was not added, because choosing it was cancelled.",
+                comment: "Shown when the agent cancels the file picker or the import is abandoned"
             )
         }
     }

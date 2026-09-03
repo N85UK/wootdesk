@@ -376,10 +376,23 @@ public final class AppModel {
                 return
             }
 
+            // The credential is gone, so the profile can no longer be used.
+            // Its protected drafts and cached content are removed next. A
+            // failure here leaves recoverable local content behind rather than
+            // a usable profile, so it is reported without rolling the removal
+            // back.
+            var offlineRemovalError: String?
+            do {
+                try await environment.offlineStore.removeAllData(forProfile: id)
+            } catch {
+                AppLogger.persistence.error("The offline data for a removed profile could not be deleted.")
+                offlineRemovalError = Self.userMessage(for: error)
+            }
+
             profiles = remainingProfiles
             activeProfile = nextState.profile
             activeToken = nextState.token
-            lastError = nil
+            lastError = offlineRemovalError
         } catch {
             AppLogger.persistence.error("Failed to remove a saved server profile.")
             lastError = Self.userMessage(for: error)

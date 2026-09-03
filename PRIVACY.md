@@ -58,11 +58,28 @@ request in the current release.
   server profile's UUID.
 - Non-secret profile metadata is stored in Application Support as JSON. This
   includes the display name, server address, selected account, and timestamps.
-- Conversation-list data is held in memory for the active app session. The
-  foundation release does not create an offline conversation database.
-- Loaded messages, draft text, and selected attachment bytes are held in memory
-  only. They are discarded when their conversation or server context changes
-  and are not added to WootDesk application storage.
+- Conversation-list data is held in memory for the active app session.
+- Selected attachment bytes are held in memory only. They are discarded when
+  their conversation or server context changes and are never written to
+  WootDesk application storage.
+- When offline storage is enabled, unsent draft text and the messages already
+  loaded for a conversation are written to Application Support under
+  `WootDesk/Offline/<profile UUID>/`. Records are filed per server profile and
+  per conversation, so one profile's drafts and messages are never read while
+  another profile is selected. On iOS they are written with the
+  "complete until first user authentication" protection class, matching the
+  Keychain class used for the access token; on macOS they rely on FileVault.
+  The directory is excluded from device backups.
+- Offline storage can be switched off in Settings. While it is off, nothing is
+  written to the device and anything previously stored is deleted. Connecting,
+  browsing conversations and replying continue to work normally.
+- A draft is deleted when its message sends. Every draft, cached message and
+  unconfirmed-send record for a profile is deleted when that profile is
+  removed.
+- A record of a send whose result could not be confirmed may be stored
+  alongside the draft, so the app can warn before a retry that might post the
+  same message twice. It holds the submitted text, whether it was a private
+  note, and the attempt time.
 - A corrupt profile metadata file may be retained locally as a recovery copy.
   Recovery copies do not contain the access token.
 - An APNs device token may be held in process memory after the user enables
@@ -73,7 +90,8 @@ request in the current release.
   the server-profile JSON.
 
 WootDesk does not place access tokens in `UserDefaults`, property lists, source
-code, logs, screenshots, or the profile JSON file.
+code, logs, screenshots, the profile JSON file, or the offline records.
+`UserDefaults` holds only the offline-storage on or off preference.
 
 ## Network communication
 

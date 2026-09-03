@@ -113,6 +113,26 @@ public struct ConversationDetailView: View {
         .padding(.vertical, 12)
     }
 
+    /// Marks a timeline that is showing content restored from the device, so
+    /// the agent never mistakes a stored copy for the live conversation.
+    private var savedCopyNotice: some View {
+        Label {
+            if let cachedAt = state.cachedAt {
+                Text("Saved copy from \(cachedAt.formatted(date: .abbreviated, time: .shortened)). Newer messages may not appear.")
+            } else {
+                Text("Saved copy. Newer messages may not appear.")
+            }
+        } icon: {
+            Image(systemName: "arrow.down.circle.dotted")
+        }
+        .font(.caption)
+        .foregroundStyle(.secondary)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(10)
+        .background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
+        .accessibilityIdentifier("cached-content-notice")
+    }
+
     @ViewBuilder
     private func messageContent(_ conversation: Conversation) -> some View {
         if state.isLoading && state.messages.isEmpty {
@@ -130,6 +150,10 @@ public struct ConversationDetailView: View {
         ScrollView {
             LazyVStack(spacing: 14) {
                 olderMessagesControl(conversation)
+
+                if state.isShowingCachedContent {
+                    savedCopyNotice
+                }
 
                 if let error = state.errorMessage {
                     inlineError(error, conversation: conversation)

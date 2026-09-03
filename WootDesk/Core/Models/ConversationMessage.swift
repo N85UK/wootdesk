@@ -102,6 +102,18 @@ public enum ConversationMessageKind: Hashable, Sendable {
         default: self = .unknown(chatwootValue)
         }
     }
+
+    /// The Chatwoot wire value this kind was derived from, so a cached message
+    /// can be restored through `init(chatwootValue:)` without a second mapping.
+    public var chatwootValue: Int? {
+        switch self {
+        case .incoming: 0
+        case .outgoing: 1
+        case .activity: 2
+        case .template: 3
+        case .unknown(let value): value
+        }
+    }
 }
 
 /// One page from Chatwoot's message history endpoint.

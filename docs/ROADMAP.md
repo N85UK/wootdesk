@@ -91,7 +91,26 @@ implemented as part of Milestone 2:
 ---
 
 ## Milestone 5: Offline-First Synchronisation & Enterprise
+
+Bounded offline resilience is delivered under N85-16. It deliberately stops
+short of a synchronising cache: WootDesk stores only what the agent has already
+been shown, and represents an unconfirmed send rather than replaying it.
+
+- [x] Protected per-profile storage for unsent drafts, surviving app close (N85-16 AC1).
+- [x] Per-profile cached message pages, shown and labelled as a saved copy when a refresh fails (N85-16 AC2).
+- [x] Unconfirmed sends recorded and warned about, instead of being reported as sent or simply failed (N85-16 AC3).
+- [x] Executable attachment types refused before the file is read, and cancelled selections explained (N85-16 AC4).
+- [x] Draft, cache and unconfirmed-send deletion when a server profile is removed (N85-16 AC5).
+- [x] Offline storage optional, with an off switch that also purges what was stored (N85-16 AC6).
 - [ ] SwiftData persistent caching for conversations and messages.
 - [ ] Outgoing mutation queue with background sync.
 - [ ] Organisation-wide configuration profiles via MDM (`.mobileconfig`).
 - [ ] Optional Developer ID packaging and notarisation for distribution outside the Mac App Store.
+
+### Deliberately not implemented for N85-16
+
+An automatic retry queue was not built. Chatwoot's message endpoint has no
+idempotency key, so a replayed request can post the same reply twice. Recording
+the uncertainty and asking the agent is the only behaviour that cannot
+duplicate a customer-visible message. This is the reason AC3 is phrased as
+representation rather than recovery.

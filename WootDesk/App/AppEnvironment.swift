@@ -6,6 +6,7 @@ public struct AppEnvironment: Sendable {
     public let apiClient: ChatwootAPIProtocol
     public let profileRepository: ServerProfileRepository
     public let credentialStore: CredentialStore
+    public let offlineStore: ToggleableOfflineStore
     public let pushGatewayManager: PushGatewayRegistrationManaging
     public let aiProvider: AIProvider
     public let isDebug: Bool
@@ -14,6 +15,12 @@ public struct AppEnvironment: Sendable {
         apiClient: ChatwootAPIProtocol,
         profileRepository: ServerProfileRepository,
         credentialStore: CredentialStore,
+        // Inert by default: a caller that has not asked for offline storage
+        // gets none, so no device copy is created by accident.
+        offlineStore: ToggleableOfflineStore = ToggleableOfflineStore(
+            backing: InMemoryOfflineStore(),
+            preference: InMemoryOfflineStoragePreference(enabled: false)
+        ),
         pushGatewayManager: PushGatewayRegistrationManaging = DisabledPushGatewayRegistrationManager(),
         aiProvider: AIProvider = MockAIProvider(),
         isDebug: Bool = false
@@ -21,6 +28,7 @@ public struct AppEnvironment: Sendable {
         self.apiClient = apiClient
         self.profileRepository = profileRepository
         self.credentialStore = credentialStore
+        self.offlineStore = offlineStore
         self.pushGatewayManager = pushGatewayManager
         self.aiProvider = aiProvider
         self.isDebug = isDebug
@@ -44,6 +52,10 @@ public struct AppEnvironment: Sendable {
             apiClient: ChatwootAPIClient(isDebug: isDebug),
             profileRepository: FileServerProfileRepository(),
             credentialStore: KeychainCredentialStore(),
+            offlineStore: ToggleableOfflineStore(
+                backing: FileOfflineStore(),
+                preference: UserDefaultsOfflineStoragePreference()
+            ),
             pushGatewayManager: pushGatewayManager,
             aiProvider: MockAIProvider(),
             isDebug: isDebug
@@ -57,7 +69,11 @@ public struct AppEnvironment: Sendable {
         profiles: [ServerProfile] = [],
         activeProfileID: UUID? = nil,
         tokens: [UUID: String] = [:],
-        apiClient: ChatwootAPIProtocol = StubChatwootAPI()
+        apiClient: ChatwootAPIProtocol = StubChatwootAPI(),
+        offlineStore: ToggleableOfflineStore = ToggleableOfflineStore(
+            backing: InMemoryOfflineStore(),
+            preference: InMemoryOfflineStoragePreference()
+        )
     ) -> AppEnvironment {
         AppEnvironment(
             apiClient: apiClient,
@@ -66,6 +82,7 @@ public struct AppEnvironment: Sendable {
                 initialActiveProfileID: activeProfileID
             ),
             credentialStore: InMemoryCredentialStore(initialTokens: tokens),
+            offlineStore: offlineStore,
             pushGatewayManager: DisabledPushGatewayRegistrationManager(),
             aiProvider: MockAIProvider(),
             isDebug: true

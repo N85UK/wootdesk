@@ -35,18 +35,68 @@ public final class ConversationDetailState {
     public private(set) var errorMessage: String?
     public private(set) var sendErrorMessage: String?
     public private(set) var pendingAttachments: [OutgoingMessageAttachment] = []
-    public var draft = ""
-    public var composerMode: ConversationComposerMode = .reply
 
+    /// True while the timeline shows content restored from the device rather
+    /// than content just read from the server.
+    public private(set) var isShowingCachedContent = false
+
+    /// When the shown cached content was captured, so the agent can judge how
+    /// stale it is. Nil whenever the timeline is live.
+    public private(set) var cachedAt: Date?
+
+    /// Submitted messages whose server outcome could not be confirmed.
+    public private(set) var uncertainSends: [UncertainSend] = []
+
+    /// The agent's editable draft. Assigning to it schedules a protected save,
+    /// so the text survives the app being closed.
+    public var draft: String {
+        get { draftText }
+        set {
+            draftText = newValue
+            scheduleDraftPersistence()
+        }
+    }
+
+    /// The reply or private-note choice. It is stored with the draft so the
+    /// restored text returns in the mode it was written in.
+    public var composerMode: ConversationComposerMode {
+        get { composerModeValue }
+        set {
+            composerModeValue = newValue
+            scheduleDraftPersistence()
+        }
+    }
+
+    private var draftText = ""
+    private var composerModeValue: ConversationComposerMode = .reply
     private var loadedContext: LoadContext?
     private var contentRevision = UUID()
+    private var draftPersistenceTask: Task<Void, Never>?
 
-    public init() {}
+    private let offlineStore: any OfflineStore
+
+    /// - Parameter offlineStore: Protected local storage. The default keeps
+    ///   nothing, so a caller that has not opted in creates no device copy.
+    public init(offlineStore: any OfflineStore = DisabledOfflineStore()) {
+        self.offlineStore = offlineStore
+    }
 
     public var canSend: Bool {
         let hasContent = !draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
             || !pendingAttachments.isEmpty
         return hasContent && !isLoading && !isSending
+    }
+
+    /// Whether the agent must be warned before sending again, because an
+    /// earlier attempt may already have reached the server.
+    public var requiresRetryConfirmation: Bool {
+        !uncertainSends.isEmpty
+    }
+
+    /// Whether drafts and previously loaded content are being kept on the
+    /// device. Views use it to describe accurately what is retained.
+    public var isOfflineStorageEnabled: Bool {
+        offlineStore.isPersisting
     }
 
     /// Identifies the server and conversation context that owns an asynchronous
@@ -103,7 +153,8 @@ public final class ConversationDetailState {
             conversationID: conversation.id
         )
 
-        if loadedContext != requestedContext {
+        let isNewContext = loadedContext != requestedContext
+        if isNewContext {
             reset(for: requestedContext)
         } else if isLoading || isLoadingOlder || isSending {
             return
@@ -114,6 +165,14 @@ public final class ConversationDetailState {
         isLoading = true
         isLoadingOlder = false
         errorMessage = nil
+
+        // Restoring first means the agent sees their unsent draft and the last
+        // known messages straight away, rather than an empty view while the
+        // network request runs, or nothing at all if it fails.
+        if isNewContext {
+            await restoreOfflineRecord(for: requestedContext, revision: requestRevision)
+            guard contentRevision == requestRevision else { return }
+        }
 
         defer {
             if contentRevision == requestRevision {
@@ -133,9 +192,21 @@ public final class ConversationDetailState {
             messages = Self.normalised(page.messages)
             hasOlderMessages = page.hasOlderMessages
             errorMessage = nil
+            isShowingCachedContent = false
+            cachedAt = nil
+            await cacheCurrentMessages(for: requestedContext)
         } catch {
             guard contentRevision == requestRevision else { return }
             if Self.isCancellation(error) { return }
+
+            // Cached content stays on screen rather than being replaced by an
+            // empty timeline, and is labelled so the agent knows it may be out
+            // of date.
+            if isShowingCachedContent, !messages.isEmpty {
+                errorMessage = Self.cachedContentMessage(for: error, cachedAt: cachedAt)
+                return
+            }
+
             messages = []
             hasOlderMessages = false
             errorMessage = Self.message(for: error)
@@ -238,20 +309,64 @@ public final class ConversationDetailState {
 
             messages = Self.normalised(messages.filter { $0.id != created.id } + [created])
             if draft.trimmingCharacters(in: .whitespacesAndNewlines) == submittedDraft {
-                draft = ""
+                draftText = ""
+                await deleteStoredDraft(for: expectedContext)
             }
             let submittedAttachmentIDs = Set(submittedAttachments.map(\.id))
             pendingAttachments.removeAll { submittedAttachmentIDs.contains($0.id) }
             sendErrorMessage = nil
+
+            // The send has been confirmed, so any earlier ambiguity about this
+            // conversation is settled and the warning is withdrawn.
+            await clearUncertainSends(for: expectedContext)
+            await cacheCurrentMessages(for: expectedContext)
         } catch {
             guard contentRevision == requestRevision else { return }
             if Self.isCancellation(error) { return }
+
+            if let apiError = error as? APIError, apiError.isOutcomeUncertain {
+                await recordUncertainSend(
+                    for: expectedContext,
+                    text: submittedDraft,
+                    isPrivateNote: submittedMode == .privateNote,
+                    attachmentCount: submittedAttachments.count
+                )
+                sendErrorMessage = Self.uncertainSendMessage(for: apiError)
+                return
+            }
+
             sendErrorMessage = Self.message(for: error)
         }
     }
 
-    /// Removes all server-specific content and the in-memory draft.
+    /// Dismisses the uncertain-send warning once the agent has decided how to
+    /// proceed, so a confirmed retry is not blocked by it a second time.
+    public func acknowledgeUncertainSends() async {
+        guard let loadedContext else {
+            uncertainSends = []
+            return
+        }
+        await clearUncertainSends(for: loadedContext)
+    }
+
+    /// Writes any pending draft immediately, without waiting for the debounce.
+    /// Views call this when the conversation is dismissed or the app is about
+    /// to be backgrounded.
+    public func persistDraftNow() async {
+        draftPersistenceTask?.cancel()
+        draftPersistenceTask = nil
+        guard let loadedContext else { return }
+        await writeDraft(for: loadedContext)
+    }
+
+    /// Removes all server-specific content from memory.
+    ///
+    /// Anything already written to protected storage is deliberately left in
+    /// place: clearing the view is not the agent discarding their work. Only
+    /// sending the draft or removing the profile deletes it.
     public func clear() {
+        draftPersistenceTask?.cancel()
+        draftPersistenceTask = nil
         contentRevision = UUID()
         loadedContext = nil
         messages = []
@@ -262,13 +377,127 @@ public final class ConversationDetailState {
         errorMessage = nil
         sendErrorMessage = nil
         pendingAttachments = []
-        draft = ""
-        composerMode = .reply
+        isShowingCachedContent = false
+        cachedAt = nil
+        uncertainSends = []
+        draftText = ""
+        composerModeValue = .reply
     }
 
     private func reset(for context: LoadContext) {
         clear()
         loadedContext = context
+    }
+
+    // MARK: - Protected Offline Storage
+
+    /// Restores the draft, the last cached page and any unresolved uncertain
+    /// sends for a newly selected conversation.
+    private func restoreOfflineRecord(for context: LoadContext, revision: UUID) async {
+        let scope = context.scope
+        let record: ConversationOfflineRecord
+        do {
+            record = try await offlineStore.loadRecord(for: scope)
+        } catch {
+            AppLogger.persistence.error("The offline record for a conversation could not be read.")
+            return
+        }
+        guard contentRevision == revision, loadedContext == context else { return }
+
+        if let draft = record.draft, !draft.isEmpty {
+            draftText = draft.text
+            composerModeValue = draft.isPrivateNote ? .privateNote : .reply
+        }
+
+        if let cached = record.cachedMessages, !cached.messages.isEmpty {
+            messages = Self.normalised(cached.messages)
+            hasOlderMessages = cached.hasOlderMessages
+            isShowingCachedContent = true
+            cachedAt = cached.cachedAt
+        }
+
+        uncertainSends = record.uncertainSends
+        if let latest = record.uncertainSends.last {
+            sendErrorMessage = Self.unresolvedUncertainSendMessage(attemptedAt: latest.attemptedAt)
+        }
+    }
+
+    private func cacheCurrentMessages(for context: LoadContext) async {
+        guard offlineStore.isPersisting, !messages.isEmpty else { return }
+        let cached = CachedConversationMessages(
+            scope: context.scope,
+            messages: messages,
+            hasOlderMessages: hasOlderMessages
+        )
+        do {
+            try await offlineStore.saveCachedMessages(cached)
+        } catch {
+            AppLogger.persistence.error("A conversation page could not be cached.")
+        }
+    }
+
+    private func recordUncertainSend(
+        for context: LoadContext,
+        text: String,
+        isPrivateNote: Bool,
+        attachmentCount: Int
+    ) async {
+        let send = UncertainSend(
+            scope: context.scope,
+            text: text,
+            isPrivateNote: isPrivateNote,
+            attachmentCount: attachmentCount
+        )
+        uncertainSends.append(send)
+        do {
+            try await offlineStore.recordUncertainSend(send)
+        } catch {
+            AppLogger.persistence.error("An uncertain send could not be recorded.")
+        }
+    }
+
+    private func clearUncertainSends(for context: LoadContext) async {
+        uncertainSends = []
+        do {
+            try await offlineStore.clearUncertainSends(for: context.scope)
+        } catch {
+            AppLogger.persistence.error("The uncertain-send records could not be cleared.")
+        }
+    }
+
+    /// Coalesces keystrokes into one write shortly after typing stops.
+    private func scheduleDraftPersistence() {
+        guard offlineStore.isPersisting, let context = loadedContext else { return }
+        draftPersistenceTask?.cancel()
+        draftPersistenceTask = Task { [weak self] in
+            try? await Task.sleep(for: .seconds(1))
+            guard !Task.isCancelled else { return }
+            await self?.writeDraft(for: context)
+        }
+    }
+
+    private func writeDraft(for context: LoadContext) async {
+        guard loadedContext == context else { return }
+        let draft = ConversationDraft(
+            scope: context.scope,
+            text: draftText,
+            isPrivateNote: composerModeValue == .privateNote
+        )
+        do {
+            // An emptied draft deletes its record rather than storing blank
+            // text, so nothing is left on the device once the agent clears it.
+            try await offlineStore.saveDraft(draft)
+        } catch {
+            AppLogger.persistence.error("A conversation draft could not be saved.")
+        }
+    }
+
+    private func deleteStoredDraft(for context: LoadContext) async {
+        do {
+            try await offlineStore.deleteDraft(for: context.scope)
+        } catch {
+            AppLogger.persistence.error("A sent conversation draft could not be removed.")
+        }
     }
 
     private static func normalised(_ messages: [ConversationMessage]) -> [ConversationMessage] {
@@ -296,10 +525,54 @@ public final class ConversationDetailState {
         if let apiError = error as? APIError, apiError == .cancelled { return true }
         return false
     }
+
+    /// Explains that the timeline is showing stored content and how old it is.
+    private static func cachedContentMessage(for error: Error, cachedAt: Date?) -> String {
+        let reason = message(for: error)
+        guard let cachedAt else {
+            return String(
+                localized: "\(reason) Showing saved messages, which may be out of date.",
+                comment: "Shown when a refresh fails and stored messages of unknown age remain on screen"
+            )
+        }
+        let captured = cachedAt.formatted(date: .abbreviated, time: .shortened)
+        return String(
+            localized: "\(reason) Showing messages saved on \(captured), which may be out of date.",
+            comment: "Shown when a refresh fails and stored messages remain on screen"
+        )
+    }
+
+    /// Reports a send whose result is unknown, and warns that repeating it may
+    /// post the message twice.
+    private static func uncertainSendMessage(for error: APIError) -> String {
+        let reason = error.errorDescription ?? error.localizedDescription
+        return String(
+            localized: "\(reason) WootDesk could not confirm whether the message was posted. Check the conversation before sending it again, because retrying may post it twice.",
+            comment: "Shown when a send fails in a way that may still have reached the server"
+        )
+    }
+
+    /// Repeats the warning when the agent returns to a conversation that still
+    /// has an unresolved uncertain send.
+    private static func unresolvedUncertainSendMessage(attemptedAt: Date) -> String {
+        let attempted = attemptedAt.formatted(date: .abbreviated, time: .shortened)
+        return String(
+            localized: "A message sent on \(attempted) could not be confirmed. Check the conversation before sending it again, because retrying may post it twice.",
+            comment: "Shown when reopening a conversation that has an unconfirmed send"
+        )
+    }
 }
 
 private struct LoadContext: Equatable {
     let profileID: UUID
     let accountID: Int
     let conversationID: Int
+
+    var scope: ConversationScope {
+        ConversationScope(
+            profileID: profileID,
+            accountID: accountID,
+            conversationID: conversationID
+        )
+    }
 }

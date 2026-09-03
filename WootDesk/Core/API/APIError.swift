@@ -121,4 +121,33 @@ public enum APIError: LocalizedError, Sendable, Equatable {
             )
         }
     }
+
+    /// Whether a failed mutating request may still have been applied by the
+    /// server.
+    ///
+    /// This separates "the change definitely did not happen" from "we do not
+    /// know". Only the second case may have created a message, so only it
+    /// warrants warning the agent that retrying could duplicate the send.
+    ///
+    /// - `timedOut` and `networkError`: the request left the device and no
+    ///   answer came back, so the server may have processed it.
+    /// - `decodingError`: the server answered, which means it accepted the
+    ///   request; only the response body was unreadable.
+    /// - `serverError` 502, 503 and 504: emitted by a proxy in front of
+    ///   Chatwoot, which cannot show whether the application handled the
+    ///   request. Other 5xx codes come from Chatwoot itself having failed.
+    /// - `offline`: the system rejected the request before sending it, so
+    ///   nothing reached the server.
+    public var isOutcomeUncertain: Bool {
+        switch self {
+        case .timedOut, .networkError, .decodingError:
+            true
+        case .serverError(let statusCode, _):
+            [502, 503, 504].contains(statusCode)
+        case .invalidURL, .insecureScheme, .unauthorized, .forbidden, .notFound,
+             .rateLimited, .offline, .tlsFailure, .invalidMessageContent,
+             .invalidSnoozeTime, .noAccountsAvailable, .cancelled:
+            false
+        }
+    }
 }
