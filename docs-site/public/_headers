@@ -1,8 +1,9 @@
 # Security headers for docs.n85.app (N85-47 AC7).
 #
-# HSTS carries no includeSubDomains: it would bind every subdomain under this
-# host, and that is a year-long browser commitment rather than a setting that
-# can be undone by changing a file.
+# HSTS includes subdomains. Nothing sits under docs.n85.app today, so the
+# directive costs nothing here and keeps the two public sites consistent.
+# It stops short of preload, which is a submission to browser preload lists
+# and is genuinely hard to undo.
 #
 # The content security policy is deliberately weaker than the one on n85.app,
 # because Starlight ships inline scripts and Pagefind runs WebAssembly. Naming
@@ -10,7 +11,7 @@
 # buys framing, base-uri, form-action and object-src protection rather than
 # meaningful XSS protection. Tightening it means build-time hashes or nonces.
 /*
-  Strict-Transport-Security: max-age=31536000
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
