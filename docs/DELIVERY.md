@@ -173,9 +173,10 @@ Xcode requirement in AC2.
 
 ## Immediate priorities
 
-1. Record the documented acceptance runs against build 34 on physical iPhone
-   and iPad. This is the evidence N85-18 AC3 needs, it requires no further
-   Apple setup, and it is now the largest single gap.
+1. Record iPad and Mac acceptance. iPhone is done: 4 of 4 UI journeys passed on
+   an iPhone 17 Pro Max running iOS 27.0 on 3 September 2026, and a real push
+   notification reached the same handset. `docs/MACOS_UI_TESTING.md` records
+   the one-time device setup each handset needs first.
 2. Trust the compatibility CA with `script/compat_env.sh trust`, then run the
    live matrix. The server is verified and seeded; this is the only remaining
    step. Unblocks N85-17 AC3 to AC5 and the live acceptance on N85-11.

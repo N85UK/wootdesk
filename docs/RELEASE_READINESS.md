@@ -96,7 +96,7 @@ No platform version has been submitted for App Review.
 | GO-002 | Live self-hosted connection works | Maintainer confirmed connection on 30 August 2026, no credential retained | Pass |
 | GO-003 | Message history, replies, private notes, and attachments meet Milestone 2 acceptance | **Verified against a live Chatwoot v4.9.0 server** on 2 September 2026. All three opt-in compatibility cases passed, covering history, public replies, private notes, attachments, availability and triage, with both write gates set. TestFlight device acceptance remains | Pass against the dedicated server |
 | GO-004 | iOS and macOS archives validate locally | Signed build 3 iOS archive and App Store export passed; signed universal build 3 macOS archive and installer export passed with the expected sandbox, runtime, icon, privacy, metadata, installer identity, and embedded profile | Pass |
-| GO-005 | Physical-device TestFlight checks pass | Build 24 is `INSTALLED` on one internal tester's device, so the matrix can now be run. No documented acceptance run has been recorded yet | In progress; unblocked, evidence outstanding |
+| GO-005 | Physical-device TestFlight checks pass | iPhone 17 Pro Max, iOS 27.0: 4 of 4 UI journeys passed on hardware and a real push notification was delivered. iPad and Mac acceptance outstanding | Pass on iPhone |
 | GO-006 | App Store metadata and screenshots are approved | Final platform metadata | Not started |
 | GO-007 | Privacy and export-compliance answers are approved | Builds 2 and 3 declare `ITSAppUsesNonExemptEncryption = false`; App Store privacy answers remain pending | In progress |
 | GO-008 | Dedicated App Review server and account are ready | Private review runbook | Not started |
@@ -121,13 +121,13 @@ No platform version has been submitted for App Review.
 | App icons | Asset catalogue validates on both platforms | Debug and Release platform builds passed | Pass |
 | iOS distribution | App Store package signs and exports | Build 24 archived, exported, uploaded, and processed to `VALID` on 1 September 2026, which proves distribution signing end to end | Pass |
 | macOS distribution | Sandboxed universal archive validates and exports | Build 3 archive and signed App Store installer export pass; upload has not started | Pass locally, upload pending |
-| Real devices | Supported-device behaviour | Push delivery to a physical iPhone 17 Pro Max proven on 2 September. The UI suite now **builds, signs and installs** on that handset after `TEST_HOST` and signing were fixed for `sdk=iphoneos`; the run itself has not completed because each app launch requires the device to be unlocked at that moment | Partly evidenced; UI journeys outstanding |
+| Real devices | Supported-device behaviour | **iPhone acceptance passed on 3 September 2026**: 4 of 4 UI journeys on an iPhone 17 Pro Max running iOS 27.0, plus a real APNs notification delivered to the same handset on 2 September. iPad and Mac hardware outstanding | Passed on iPhone; iPad and Mac outstanding |
 
 ## Required release test matrix
 
 | Platform | Minimum | Additional coverage | Status |
 |---|---|---|---|
-| iPhone | iOS 18 | Current supported iOS, small and large Dynamic Type | Build 24 available via TestFlight; run not recorded |
+| iPhone | iOS 18 | Current supported iOS, small and large Dynamic Type | **Passed on hardware, 3 September 2026.** iPhone 17 Pro Max, iOS 27.0 build 24A5430a, 4 of 4 UI journeys including the conversation history and reply flow and the cold-launch metric. Dynamic Type on hardware still outstanding |
 | iPad | iPadOS 18 | Compact and regular layouts, keyboard navigation | Build 24 available via TestFlight; run not recorded |
 | Mac | macOS 15 | Apple silicon, keyboard shortcuts, window restoration | Native build, unit tests, and 3 macOS UI tests pass on this Apple silicon host |
 | Mac | macOS 15 | Intel where available | Not started |
