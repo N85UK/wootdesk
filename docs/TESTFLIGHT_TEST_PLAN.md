@@ -100,12 +100,38 @@ Do not attach screenshots containing a token, server address, personal data, or
 message copied from a real system. Record only invented-data screenshots and
 non-secret derived facts.
 
+Automated coverage is recorded separately from the manual cases, because the
+automated suite exercises only a handful of the thirty cases above. A green
+suite is not an acceptance pass, and recording it as one would repeat a mistake
+this project has already made several times.
+
 | Tester | Platform and device | OS | Build | Result | Defect links | Date |
 |---|---|---|---|---|---|---|
-| To confirm | Physical iPhone | | 1.0.0 (4) | Pending | | |
-| To confirm | Physical iPad | | 1.0.0 (4) | Pending | | |
-| To confirm | Apple silicon Mac | | 1.0.0 (4) | Pending | | |
-| To confirm | Intel Mac | | 1.0.0 (4) | Pending | | |
+| Automated | iPhone 17 Pro Max, physical | iOS 27.0 (24A5430a) | 1.0.0 (46 source) | 4 of 4 UI journeys pass; real APNs notification delivered | | 3 Sep 2026 |
+| To confirm | iPhone 17 Pro Max, physical | iOS 27.0 | | Manual cases pending | | |
+| To confirm | Physical iPad | | | Pending, no iPad available | | |
+| Automated | MacBook Pro Mac16,8, Apple M4 Pro | macOS 27.0 (26A5421a) | 1.0.0 (46 source) | 4 of 4 UI journeys pass | | 3 Sep 2026 |
+| To confirm | Apple silicon Mac | macOS 27.0 | | Manual cases pending | | |
+| Not available | Intel Mac | | | No Intel hardware. The shipped binary is universal, `lipo -archs` reports `x86_64 arm64`, so Intel is supported but unverified | | 3 Sep 2026 |
+
+### What the automated runs actually cover
+
+Four journeys on each platform: first-run launch reaches setup, add-server
+opens connection setup, conversation history and reply without network, and the
+cold-launch metric.
+
+That leaves the majority of the plan outstanding, and every case that needs a
+live server or gateway is among them. In particular none of the notification
+cases 19 to 24, the profile-isolation cases 14 and 15, the failure-state cases
+11 and 16, or the accessibility case 17 are covered by automation.
+
+### macOS signing observation
+
+The archive's app is signed `Apple Development` and Gatekeeper rejects it. That
+is expected and not a defect: re-signing happens during export, and the
+exported package carries `Apple Distribution` with a production
+`aps-environment`. Judge the export, never the archive.
+`script/release_archive.sh` now checks this for macOS as well as iOS.
 
 ## Exit criteria
 
