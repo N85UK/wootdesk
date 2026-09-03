@@ -15,8 +15,9 @@
     "check": "astro check",
     "verify:boundary": "node scripts/check-content-boundary.mjs",
     "verify:links": "node scripts/check-internal-links.mjs",
-    "verify": "npm run verify:boundary && npm run verify:links && npm run verify:a11y",
-    "verify:a11y": "playwright test"
+    "verify": "npm run verify:boundary && npm run verify:links && npm run verify:external && npm run verify:a11y",
+    "verify:a11y": "playwright test",
+    "verify:external": "node scripts/check-external-links.mjs"
   },
   "dependencies": {
     "@astrojs/starlight": "0.42.0",

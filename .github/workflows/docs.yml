@@ -78,6 +78,12 @@ jobs:
       # the rule that actually catches things here, and it cannot be evaluated
       # without layout. This found a real WCAG AA contrast failure on the
       # release pages in dark mode the first time it ran.
+      # External failures are reported rather than fatal, except a 404 or 410.
+      # A build must not break because somebody else's server is busy, which is
+      # why 429 and 5xx are warnings; link-exceptions.json covers the rest.
+      - name: Verify external links
+        run: npm run verify:external
+
       - name: Install the browser for accessibility checks
         run: npx playwright install chromium --with-deps
 

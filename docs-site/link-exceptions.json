@@ -1,0 +1,4 @@
+{
+  "comment": "External links that are allowed to fail the check. Each needs a reason and the date it was approved, so an exception cannot sit here unexamined. Remove an entry as soon as its reason expires.",
+  "exceptions": []
+}
