@@ -20,8 +20,19 @@ organisation. The server operator's privacy policy applies to its processing.
 If the user enables notifications, the operating system registers WootDesk
 with Apple Push Notification service. The resulting device token remains in
 app memory unless the user deliberately enrols the active profile with a
-WootDesk Push Gateway they or their organisation selected. No public N85 Dev
-gateway is documented as deployed by this repository.
+WootDesk Push Gateway they or their organisation selected.
+
+N85 Dev now operates one such gateway at `https://push.n85.app`, deployed on
+2 September 2026. It is **not a default**: the app ships with no gateway
+address, and remote delivery stays off until a user enters an address and a
+device API token themselves. A user who self-hosts the gateway, or who never
+enables remote delivery, sends nothing to N85 Dev.
+
+For a user who does enrol with the N85 Dev gateway, that gateway receives and
+stores the APNs device token encrypted at rest, together with opaque device and
+profile UUIDs, the selected Chatwoot account ID, the agent's Chatwoot user ID,
+the bundle topic and the APNs environment. The agent user ID is held so that a
+conversation assigned to one agent alerts only that agent's devices.
 
 ## Information processed by the app
 
@@ -79,8 +90,9 @@ notification-permission state under Apple's platform terms. WootDesk can
 schedule an invented local test alert that contains no Chatwoot information.
 
 If the user configures remote delivery, the app sends the APNs device token,
-opaque device and profile UUIDs, selected Chatwoot account ID, bundle topic, and
-development or production environment to the selected gateway over HTTPS. It
+opaque device and profile UUIDs, selected Chatwoot account ID, the agent's
+Chatwoot user ID, bundle topic, and development or production environment to
+the selected gateway over HTTPS. It
 sends no Chatwoot personal access token, customer name, message body, email
 address, phone number, attachment, or custom attribute.
 
