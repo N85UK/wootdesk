@@ -2,7 +2,7 @@
 
 Document ID: `WOOT-DEC-INDEX-001`
 
-Last reviewed: 2 September 2026
+Last reviewed: 3 September 2026
 
 | ID | Decision | Status | Evidence |
 |---|---|---|---|
@@ -14,6 +14,8 @@ Last reviewed: 2 September 2026
 | DEC-006 | TestFlight precedes public distribution, and public release remains blocked until Milestone 2 | Accepted | `docs/RELEASE_READINESS.md` |
 | DEC-007 | Use native APNs registration and a separate authenticated push provider instead of sending APNs tokens to Chatwoot's FCM endpoint | Client and provider source accepted, deployment pending | `docs/decisions/0004-native-apns-and-push-provider-boundary.md` |
 | DEC-008 | Route a push notification to the conversation's assignee, falling back to every agent on the account when it is unassigned | Accepted and implemented | `docs/decisions/0005-push-recipient-routing.md` |
+| DEC-009 | Store bounded per-profile offline records, and represent an unconfirmed send rather than replaying it | Accepted and implemented | `docs/decisions/0006-protected-offline-storage.md` |
+| DEC-010 | Publish WootDesk documentation from three independently built sites, with the public site in this repository and no shared build, index or route with the private site | Accepted, public site implemented, deployment pending | `docs/decisions/0007-documentation-publication-boundary.md` |
 
 Account-level actions such as agreement acceptance, upload, TestFlight release,
 and App Review submission require a separate explicit owner decision. This log
