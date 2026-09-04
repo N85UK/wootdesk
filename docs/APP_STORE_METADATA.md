@@ -123,17 +123,25 @@ what makes the reviewer's flow work. The Chatwoot password in
 `REVIEW_AGENT_PASSWORD` is only needed if a reviewer wants to sign in to
 Chatwoot's own web interface, which the notes do not ask them to do.
 
-macOS now carries one `APP_DESKTOP` screenshot,
-`docs/screenshots/mac-2880/01-conversation-and-triage.png` at 2880 x 1800,
-uploaded on 4 September 2026 along with the macOS description, keywords and
-promotional text.
+macOS carries two `APP_DESKTOP` screenshots at 2880 x 1800, recaptured on
+4 September 2026 from the current build so the badge chips match what ships:
 
-That image was captured on 3 September and predates the badge restyle of
-4 September, so the priority badge in it is drawn as tinted text rather than as
-the chip the app now renders. Everything else it shows is current. Recapture it
-before release, following the procedure in `docs/screenshots/README.md`, and
-clear the screen first: `screencapture -R` takes the region rather than the
-window, so anything overlapping the app is captured with it.
+| File | Shows |
+|---|---|
+| `mac-2880/01-conversation-and-triage.png` | The All filter with every status and priority colour on screen, a selected conversation, the triage row, a private note, attachment metadata and the composer |
+| `mac-2880/02-private-note-composer.png` | The composer in private note mode, with "Visible only to Chatwoot agents" and the Add Note action |
+
+**Capture windows by id, never by region.** `screencapture -R` takes whatever
+occupies that rectangle, so an overlapping window is captured instead of the
+app. During this recapture it took an unrelated application window, which was
+deleted unused. `screencapture -l <windowid>` takes the window's own buffer and
+cannot capture anything else. Find the id from `CGWindowListCopyWindowInfo`
+filtered to owner `WootDesk`, layer 0.
+
+Selecting a row needs a real mouse event posted with `CGEvent`. System Events
+`click at` resolves through the accessibility hierarchy and lands in whichever
+application owns that point, which during this recapture was a different
+application twice.
 
 ## Current submission snapshot
 
