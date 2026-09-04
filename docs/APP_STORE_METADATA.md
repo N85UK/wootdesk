@@ -143,6 +143,27 @@ Selecting a row needs a real mouse event posted with `CGEvent`. System Events
 application owns that point, which during this recapture was a different
 application twice.
 
+## Submission record
+
+Both platforms were submitted for review on 4 September 2026 and sit at
+`WAITING_FOR_REVIEW`.
+
+| Platform | Build | Submitted |
+|---|---|---|
+| iOS | 98 | 18:39 UTC |
+| macOS | 100 | 19:40 UTC |
+
+macOS needed one attribute iOS does not: `copyright`. The submission was
+refused with `ENTITY_ERROR.ATTRIBUTE.REQUIRED` until the version carried
+`2026 N85 Dev`, matching iOS. The refusal names the missing attribute only in
+the `associatedErrors` of the response body, so a client using curl's `--fail`
+sees a bare 409 and no reason.
+
+Submitting through the API is three calls, not one: create a `reviewSubmission`
+for the platform, add the version as a `reviewSubmissionItem`, then patch the
+submission with `submitted: true`. The second call is where version validation
+runs, so that is where missing metadata surfaces.
+
 ## Current submission snapshot
 
 | Item | Verified state |
