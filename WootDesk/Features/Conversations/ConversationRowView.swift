@@ -17,6 +17,7 @@ public enum ConversationRowMetadataLayout: Sendable {
 
 /// Renders a single conversation row with contact information, status, and message preview.
 public struct ConversationRowView: View {
+    @Environment(\.colorSchemeContrast) private var colorSchemeContrast
     @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     public let conversation: Conversation
 
@@ -138,14 +139,9 @@ public struct ConversationRowView: View {
     }
 
     private func statusBadge(_ status: ConversationStatus) -> some View {
-        let (bg, fg): (Color, Color) = {
-            switch status {
-            case .open: return (.blue.opacity(0.15), .blue)
-            case .resolved: return (.green.opacity(0.15), .green)
-            case .pending: return (.orange.opacity(0.15), .orange)
-            case .snoozed: return (.purple.opacity(0.15), .purple)
-            }
-        }()
+        let swatch = ConversationBadgePalette.swatch(for: status)
+        let bg = swatch.background.color
+        let fg = swatch.foreground(for: colorSchemeContrast).color
 
         return Text(status.displayName)
             .font(.caption2.weight(.medium))
@@ -159,20 +155,21 @@ public struct ConversationRowView: View {
     }
 
     private func priorityBadge(_ priority: ConversationPriority) -> some View {
-        let fg: Color = {
-            switch priority {
-            case .urgent: return .red
-            case .high: return .orange
-            case .medium: return .yellow
-            case .low: return .gray
-            }
-        }()
+        let swatch = ConversationBadgePalette.swatch(for: priority)
+        let fg = swatch.foreground(for: colorSchemeContrast).color
 
+        // A chip rather than tinted text, for the reason given on the palette:
+        // tinted text has to sit on whatever the window background happens to
+        // be, and no one colour clears 4.5:1 against both light and dark.
         return Label(priority.displayName, systemImage: "flag.fill")
             .font(.caption2)
             .lineLimit(1)
             .fixedSize(horizontal: true, vertical: false)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(swatch.background.color)
             .foregroundStyle(fg)
+            .clipShape(Capsule())
             .labelStyle(.titleAndIcon)
     }
 
