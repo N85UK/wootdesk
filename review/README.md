@@ -10,6 +10,36 @@ environment sees a setup screen and nothing else, which invites a Guideline 2.1
 rejection for incompleteness. This stack must stay up for the whole review
 window, including any re-review after a rejection.
 
+## When to stop it
+
+This environment is publicly reachable and runs an older Chatwoot than
+production, so it should not be left up indefinitely after a release.
+
+It should also not be stopped too early, and **"review completed" is the wrong
+trigger**. A rejection means the environment is needed again for the
+resubmission, so the condition is review *passed*, on every platform.
+
+Rather than remember the rule, ask:
+
+```bash
+python3 script/review_env_status.py
+```
+
+It reads the live App Store state for both platforms and answers KEEP RUNNING
+or SAFE TO STOP, printing the stop command when it is safe. It exits non-zero
+whenever the answer is anything other than "safe", including when it cannot
+reach App Store Connect or meets a state it does not recognise, so an
+automated caller errs towards leaving the environment alone.
+
+When it does say safe:
+
+```bash
+ssh <vps> 'cd <deploy-root>/wootdesk-review && docker compose stop'
+```
+
+Keep the DNS record and the certificate. Stopping the containers is enough,
+and it can be restarted without re-issuing anything.
+
 ## The access-token header and nginx
 
 Chatwoot authenticates with the header `api_access_token`. nginx drops header
