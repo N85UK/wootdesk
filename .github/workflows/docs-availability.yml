@@ -1,0 +1,76 @@
+name: Documentation availability
+
+# N85-47 AC11. Checks that docs.n85.app is actually serving.
+#
+# Three probes rather than one. A documentation site fails in parts: the home
+# page can serve while the search index 404s, and search can work while a
+# content route breaks after a routing change. The support route is included
+# because the App Store listing points at it, so its absence is visible to
+# Apple's reviewers and to anyone looking for help.
+#
+# This notifies rather than acting, matching the review-environment workflow.
+# There is nothing safe for an unattended job to do about an outage except say
+# so clearly.
+
+on:
+  schedule:
+    # Every six hours. Often enough that an outage is not discovered by a user
+    # first, rare enough that a flapping check does not bury the issue list.
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: docs-availability
+  cancel-in-progress: false
+
+jobs:
+  check:
+    name: Probe docs.n85.app
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # The exit status is read separately rather than through a pipe, because
+      # piping into tee reports tee's status and the check always looks green.
+      # That exact mistake produced a false issue on this repository before.
+      - name: Probe the public documentation site
+        id: probe
+        run: |
+          set +e
+          python3 script/check_docs_availability.py > result.txt 2>&1
+          code=$?
+          set -e
+          cat result.txt
+          echo "failed=$([ "$code" -eq 0 ] && echo false || echo true)" >> "$GITHUB_OUTPUT"
+
+      - name: Open an issue when the site is not serving
+        if: steps.probe.outputs.failed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          # One issue, not one every six hours. Reopening a closed one would be
+          # worse than silence, so only an absent issue triggers a new one.
+          existing="$(gh issue list --repo "$GITHUB_REPOSITORY" \
+            --search 'in:title "docs.n85.app is not serving"' \
+            --state open --json number --jq '.[0].number // empty')"
+          if [ -n "$existing" ]; then
+            echo "Issue #${existing} is already open. Nothing to do."
+            exit 0
+          fi
+          body="$(printf '%s\n\n```\n%s\n```\n\n%s\n' \
+            "A scheduled probe of docs.n85.app failed." \
+            "$(cat result.txt)" \
+            "Run \`python3 script/check_docs_availability.py\` locally to reproduce.")"
+          gh issue create --repo "$GITHUB_REPOSITORY" \
+            --title "docs.n85.app is not serving" \
+            --body "$body"
+
+      - name: Fail the run when the site is not serving
+        if: steps.probe.outputs.failed == 'true'
+        run: exit 1
