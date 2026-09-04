@@ -3,6 +3,10 @@ import SwiftUI
 /// Loads and displays the selected conversation's real Chatwoot message history.
 public struct ConversationDetailView: View {
     @Environment(\.appEnvironment) private var environment
+    #if os(iOS)
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    #endif
+    @State private var isComposing = false
     @Bindable var appModel: AppModel
     @Bindable var state: ConversationDetailState
     @Bindable var triageState: ConversationTriageState
@@ -25,7 +29,10 @@ public struct ConversationDetailView: View {
             if let conversation {
                 selectedConversation(conversation)
                     .safeAreaInset(edge: .bottom, spacing: 0) {
-                        ConversationComposerView(state: state) {
+                        ConversationComposerView(
+                            state: state,
+                            isComposing: $isComposing
+                        ) {
                             Task { await sendMessage(for: conversation) }
                         }
                     }
@@ -70,16 +77,38 @@ public struct ConversationDetailView: View {
         }
     }
 
+    /// Whether the header should yield its space to the timeline.
+    ///
+    /// On a phone the header, the triage controls and the composer together
+    /// leave the timeline about twelve points once the keyboard is up, so the
+    /// agent cannot see the conversation they are replying to, nor the reply
+    /// after they send it. Nothing is lost by standing the header down while
+    /// they type: the navigation bar already carries the contact's name, and
+    /// the controls come back the moment the keyboard does.
+    ///
+    /// Only where space is actually short. A Mac window or a full-width iPad
+    /// has room for both, and there is no software keyboard taking half the
+    /// screen.
+    private var shouldYieldHeaderToTimeline: Bool {
+        #if os(iOS)
+        return isComposing && horizontalSizeClass == .compact
+        #else
+        return false
+        #endif
+    }
+
     private func selectedConversation(_ conversation: Conversation) -> some View {
         VStack(spacing: 0) {
-            conversationHeader(conversation)
-            ConversationActionsView(
-                state: triageState,
-                profile: appModel.activeProfile,
-                token: appModel.activeToken
-            )
-            .padding(.bottom, 8)
-            Divider()
+            if !shouldYieldHeaderToTimeline {
+                conversationHeader(conversation)
+                ConversationActionsView(
+                    state: triageState,
+                    profile: appModel.activeProfile,
+                    token: appModel.activeToken
+                )
+                .padding(.bottom, 8)
+                Divider()
+            }
             messageContent(conversation)
         }
     }

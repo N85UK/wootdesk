@@ -11,8 +11,20 @@ public struct ConversationComposerView: View {
     @State private var attachmentImportTask: Task<Void, Never>?
     @State private var isConfirmingUncertainRetry = false
 
-    public init(state: ConversationDetailState, onSend: @escaping () -> Void) {
+    /// Whether the agent is currently typing.
+    ///
+    /// The surrounding view uses this to give the timeline room on a phone,
+    /// where the keyboard leaves almost none. Focus stays owned here; only the
+    /// fact of it travels outward.
+    @Binding var isComposing: Bool
+
+    public init(
+        state: ConversationDetailState,
+        isComposing: Binding<Bool>,
+        onSend: @escaping () -> Void
+    ) {
         self.state = state
+        self._isComposing = isComposing
         self.onSend = onSend
     }
 
@@ -84,6 +96,9 @@ public struct ConversationComposerView: View {
                 ZStack(alignment: .topLeading) {
                     TextEditor(text: $state.draft)
                         .focused($isDraftFocused)
+                        .onChange(of: isDraftFocused) { _, focused in
+                            isComposing = focused
+                        }
                         .font(.body)
                         .scrollContentBackground(.hidden)
                         .padding(6)
@@ -258,7 +273,11 @@ public struct ConversationComposerView: View {
 }
 
 #Preview("Composer: Reply") {
-    ConversationComposerView(state: ConversationDetailState(), onSend: {})
+    ConversationComposerView(
+        state: ConversationDetailState(),
+        isComposing: .constant(false),
+        onSend: {}
+    )
         .frame(width: 620)
 }
 
@@ -266,6 +285,6 @@ public struct ConversationComposerView: View {
     let state = ConversationDetailState()
     state.composerMode = .privateNote
     state.draft = "An invented internal note"
-    return ConversationComposerView(state: state, onSend: {})
+    return ConversationComposerView(state: state, isComposing: .constant(false), onSend: {})
         .frame(width: 620)
 }

@@ -550,5 +550,15 @@ final class WootDeskLaunchUITests: XCTestCase {
             createdMessage.waitForExistence(timeout: 15),
             "The reply should be appended only after the stub returns a created message."
         )
+
+        // Present is not the same as seen. The timeline lays out every message
+        // of the loaded page rather than only the visible ones, so an assertion
+        // on existence alone passes while the reply sits off screen behind the
+        // keyboard. That is the state that makes an agent send the same reply
+        // twice, because nothing on screen tells them the first one landed.
+        XCTAssertTrue(
+            createdMessage.isHittable,
+            "The reply must be visible to the agent after sending, not merely present in the view."
+        )
     }
 }
