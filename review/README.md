@@ -10,6 +10,27 @@ environment sees a setup screen and nothing else, which invites a Guideline 2.1
 rejection for incompleteness. This stack must stay up for the whole review
 window, including any re-review after a rejection.
 
+## The access-token header and nginx
+
+Chatwoot authenticates with the header `api_access_token`. nginx drops header
+names containing underscores unless `underscores_in_headers on` is set, so a
+client sending only the documented header receives 401 and looks as though its
+token has been revoked.
+
+WootDesk sends both `api_access_token` and `api-access-token`, so the app was
+never affected, which is exactly why this went unnoticed: everything that
+mattered worked, and only a direct `curl` failed.
+
+The directive is now set on the `review.n85.app` HTTPS server block, scoped to
+that vhost rather than globally. Both forms return 200. If this environment is
+ever rebuilt on a new host, the vhost needs it again.
+
+```bash
+# Both of these should return 200.
+curl -o /dev/null -w '%{http_code}\n' -H "api_access_token: $TOKEN" https://review.n85.app/api/v1/profile
+curl -o /dev/null -w '%{http_code}\n' -H "api-access-token: $TOKEN" https://review.n85.app/api/v1/profile
+```
+
 ## What a reviewer sees
 
 | Item | Value |
