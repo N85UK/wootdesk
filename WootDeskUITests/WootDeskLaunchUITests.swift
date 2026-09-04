@@ -103,6 +103,91 @@ final class WootDeskLaunchUITests: XCTestCase {
         )
     }
 
+    /// N85-14 AC4, second half: information stays distinguishable without
+    /// relying on colour alone.
+    ///
+    /// Status and priority are the two places the list encodes meaning in a
+    /// colour: the status capsule tints blue, green, orange or purple, and the
+    /// priority flag tints red, orange, yellow or grey. Both currently carry
+    /// their word as well, so an agent who cannot separate those hues still
+    /// reads the state. The regression this guards against is the tidy-looking
+    /// refactor that drops the word and keeps the dot.
+    ///
+    /// The assertion reads each row rather than the whole screen on purpose.
+    /// The status filter control also displays "Open", so a screen-wide search
+    /// for that word would keep passing after the badge stopped saying it.
+    @MainActor
+    func testStatusAndPriorityReadWithoutRelyingOnColour() throws {
+        let app = launchWithInventedConversations()
+
+        // The list opens filtered to Open, which shows only two of the four
+        // status colours. Switching to All is what puts every badge on screen,
+        // so the resolved and pending tints are covered too rather than assumed.
+        //
+        // The filter is a segmented control at normal text sizes, where every
+        // option is already on screen, and a menu at accessibility sizes, where
+        // it has to be opened first. Reaching for the option before reaching for
+        // the control keeps this correct in both layouts, and avoids a blind tap
+        // on the segmented control that would select whichever segment sits
+        // under its centre.
+        func allOption() -> XCUIElement {
+            app.descendants(matching: .any).matching(
+                NSPredicate(format: "label ==[c] %@ OR identifier ==[c] %@", "All", "All")
+            ).firstMatch
+        }
+
+        if !allOption().waitForExistence(timeout: 5) {
+            let filter = app.descendants(matching: .any).matching(
+                NSPredicate(format: "label CONTAINS %@", "Filter conversations by status")
+            ).firstMatch
+            XCTAssertTrue(filter.waitForExistence(timeout: 15), "The status filter must be present.")
+            #if os(macOS)
+            filter.click()
+            #else
+            filter.tap()
+            #endif
+            XCTAssertTrue(
+                allOption().waitForExistence(timeout: 5),
+                "The opened filter must offer an All option."
+            )
+        }
+        #if os(macOS)
+        allOption().click()
+        #else
+        allOption().tap()
+        #endif
+
+        // Each row combines its children into one element, so the row's label is
+        // the concatenation of every piece of text drawn inside it. A badge
+        // reduced to a bare colour contributes nothing to that label.
+        let expected: [(id: Int, words: [String])] = [
+            (1041, ["Open", "Urgent"]),
+            (1038, ["Open", "Medium"]),
+            (1024, ["Pending"]),
+            (1011, ["Resolved", "Low"]),
+        ]
+
+        var missing: [String] = []
+        for row in expected {
+            let element = app.descendants(matching: .any)
+                .matching(identifier: "conversation-row-\(row.id)")
+                .firstMatch
+            XCTAssertTrue(
+                element.waitForExistence(timeout: 15),
+                "Conversation \(row.id) must be present before its badges can be read."
+            )
+            let label = element.label
+            for word in row.words where !label.localizedCaseInsensitiveContains(word) {
+                missing.append("conversation \(row.id) never states \"\(word)\", it reads: \(label)")
+            }
+        }
+
+        XCTAssertTrue(
+            missing.isEmpty,
+            "State conveyed by colour with no word to read: \(missing.joined(separator: "; "))"
+        )
+    }
+
     /// Test plan, iPhone and iPad cases: "Rotate between portrait and landscape
     /// without losing the draft."
     ///

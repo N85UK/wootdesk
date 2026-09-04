@@ -26,6 +26,11 @@ jobs:
       - name: Check nothing private is published
         run: python3 script/check_public_repo.py
 
+      # N85-14 AC4: an animation that ignores Reduce Motion is invisible to a UI
+      # test, which passes whether or not the motion was suppressed.
+      - name: Check animations honour Reduce Motion
+        run: python3 script/check_reduce_motion.py
+
       - name: Install XcodeGen
         run: brew install xcodegen
 
