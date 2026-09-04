@@ -148,7 +148,17 @@ public struct ConversationDetailView: View {
 
     private func timeline(_ conversation: Conversation) -> some View {
         ScrollView {
-            LazyVStack(spacing: 14) {
+            // Deliberately not lazy. With LazyVStack the timeline intermittently
+            // rendered nothing at all after a reply was sent: the stack reported
+            // a content height of 729 points while instantiating a single
+            // zero-sized child, so the agent saw an empty conversation with
+            // their draft cleared and no way to tell whether the message had
+            // gone. It reproduces when content grows while the keyboard is
+            // changing the viewport, which is exactly the moment a reply is
+            // sent. One page of messages is bounded, older ones are fetched
+            // only on request, so laying the page out eagerly is affordable and
+            // it cannot half-materialise.
+            VStack(spacing: 14) {
                 olderMessagesControl(conversation)
 
                 if state.isShowingCachedContent {
