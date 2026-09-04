@@ -45,9 +45,15 @@ jobs:
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
           ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
         run: |
+          # Not piped into tee: after a pipeline $? is the exit status of the
+          # last command in it, so piping made this read tee's success every
+          # time and report "safe to stop" regardless of the answer.
           set +e
-          python3 script/review_env_status.py | tee status.txt
-          echo "code=$?" >> "$GITHUB_OUTPUT"
+          python3 script/review_env_status.py > status.txt 2>&1
+          code=$?
+          set -e
+          cat status.txt
+          echo "code=${code}" >> "$GITHUB_OUTPUT"
 
       # 0 means every platform has passed review. 1 means keep running. Anything
       # else means the script would not commit to an answer, which is treated as
