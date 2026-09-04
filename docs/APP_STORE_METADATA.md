@@ -35,11 +35,11 @@ localisation did not exist at all, and every beta review field was empty.
 
 | Field | Value |
 | --- | --- |
-| Feedback email | `app.support@n85.dev` |
+| Feedback email | `help@n85.app` |
 | Beta app description | Set, 1305 characters |
 | Privacy policy URL | `https://docs.n85.app/trust/privacy/` |
 | Marketing URL | **Left empty, deliberately.** See below |
-| Review contact | Paul McCann, `app.support@n85.dev`, phone set |
+| Review contact | Paul McCann, `help@n85.app`, phone set |
 | Sign-in required | Yes |
 | Review notes | Set, 1509 characters |
 | Demo account name and password | **Outstanding.** Credentials, entered by hand |
@@ -62,7 +62,7 @@ connecting to it, so a stopped server means a failed review.
 | --- | --- |
 | Support URL, both platforms | `https://docs.n85.app/help/support/` |
 | Marketing URL, both platforms | `https://n85.app` |
-| App Review contact email | `app.support@n85.dev` |
+| App Review contact email | `help@n85.app` |
 
 The support URL was previously the GitHub repository on iOS and empty on macOS.
 Empty would have failed submission, because a support URL is required.

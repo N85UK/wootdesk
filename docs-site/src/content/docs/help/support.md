@@ -13,7 +13,7 @@ limitation, particularly around notifications and macOS distribution.
 
 ## Contacting support
 
-Email <app.support@n85.dev>. This reaches the maintainers directly and is the
+Email <help@n85.app>. This reaches the maintainers directly and is the
 right route if you would rather not post in public, or if your report would
 otherwise contain details of your Chatwoot server.
 
