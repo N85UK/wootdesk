@@ -123,7 +123,17 @@ what makes the reviewer's flow work. The Chatwoot password in
 `REVIEW_AGENT_PASSWORD` is only needed if a reviewer wants to sign in to
 Chatwoot's own web interface, which the notes do not ask them to do.
 
-macOS has no screenshot set of its own recorded here.
+macOS now carries one `APP_DESKTOP` screenshot,
+`docs/screenshots/mac-2880/01-conversation-and-triage.png` at 2880 x 1800,
+uploaded on 4 September 2026 along with the macOS description, keywords and
+promotional text.
+
+That image was captured on 3 September and predates the badge restyle of
+4 September, so the priority badge in it is drawn as tinted text rather than as
+the chip the app now renders. Everything else it shows is current. Recapture it
+before release, following the procedure in `docs/screenshots/README.md`, and
+clear the screen first: `screencapture -R` takes the region rather than the
+window, so anything overlapping the app is captured with it.
 
 ## Current submission snapshot
 

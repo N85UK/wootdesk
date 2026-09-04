@@ -68,10 +68,40 @@ def token() -> str:
 
 def get(path: str) -> dict:
     """GETs an API path such as /v1/certificates?limit=200."""
-    result = subprocess.run(
-        ["curl", "--silent", "--show-error", "--fail", "--max-time", "30",
-         "--header", f"Authorization: Bearer {token()}", f"{BASE}{path}"],
-        capture_output=True, text=True)
+    return _request("GET", path)
+
+
+def post(path: str, body: dict) -> dict:
+    """Creates a resource, such as a provisioning profile."""
+    return _request("POST", path, body)
+
+
+def patch(path: str, body: dict) -> dict:
+    """Updates a resource, such as a version's localisation."""
+    return _request("PATCH", path, body)
+
+
+def _request(method: str, path: str, body: dict | None = None) -> dict:
+    """Runs one API call through curl, for the reason given at the top.
+
+    `--fail` hides the response body, and the API puts the reason a write was
+    rejected in that body, so writes ask for the body and read the status
+    separately. A refusal that says only "400" costs more time than it saves.
+    """
+    command = ["curl", "--silent", "--show-error", "--max-time", "60",
+               "--request", method,
+               "--header", f"Authorization: Bearer {token()}",
+               "--write-out", "\n%{http_code}"]
+    if body is not None:
+        command += ["--header", "Content-Type: application/json",
+                    "--data", json.dumps(body)]
+    command.append(f"{BASE}{path}")
+
+    result = subprocess.run(command, capture_output=True, text=True)
     if result.returncode != 0:
-        raise APIError(f"GET {path} failed. {result.stderr.strip()}")
-    return json.loads(result.stdout)
+        raise APIError(f"{method} {path} failed. {result.stderr.strip()}")
+
+    payload, _, status = result.stdout.rpartition("\n")
+    if not status.isdigit() or int(status) >= 400:
+        raise APIError(f"{method} {path} returned {status}. {payload.strip()[:600]}")
+    return json.loads(payload) if payload.strip() else {}
