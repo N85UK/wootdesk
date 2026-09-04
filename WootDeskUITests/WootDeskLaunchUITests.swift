@@ -8,6 +8,14 @@ final class WootDeskLaunchUITests: XCTestCase {
 
     override func setUpWithError() throws {
         continueAfterFailure = false
+        #if !os(macOS)
+        // A test that rotates and then fails can leave the device in landscape,
+        // and every later test inherits it. In landscape the conversation list
+        // fits three rows rather than four, so tests fail claiming content is
+        // missing when it is only off screen. Starting from a known orientation
+        // stops one failure from cascading into unrelated ones.
+        XCUIDevice.shared.orientation = .portrait
+        #endif
     }
 
     @MainActor
@@ -167,14 +175,36 @@ final class WootDeskLaunchUITests: XCTestCase {
             (1011, ["Resolved", "Low"]),
         ]
 
+        // The list is lazy, so a row below the fold is never instantiated and
+        // reads as missing rather than as off screen. With the filter on All
+        // there are four conversations and the last of them does not always fit,
+        // so a row is scrolled to before it is judged absent.
+        func row(_ id: Int) -> XCUIElement {
+            app.descendants(matching: .any)
+                .matching(identifier: "conversation-row-\(id)")
+                .firstMatch
+        }
+
+        func rowBringingIntoView(_ id: Int) -> XCUIElement {
+            let element = row(id)
+            if element.waitForExistence(timeout: 15) { return element }
+            for _ in 0..<4 {
+                #if os(macOS)
+                app.scrollViews.firstMatch.scroll(byDeltaX: 0, deltaY: -200)
+                #else
+                app.swipeUp()
+                #endif
+                if element.exists { return element }
+            }
+            return element
+        }
+
         var missing: [String] = []
         for row in expected {
-            let element = app.descendants(matching: .any)
-                .matching(identifier: "conversation-row-\(row.id)")
-                .firstMatch
+            let element = rowBringingIntoView(row.id)
             XCTAssertTrue(
-                element.waitForExistence(timeout: 15),
-                "Conversation \(row.id) must be present before its badges can be read."
+                element.exists,
+                "Conversation \(row.id) must be reachable, by scrolling if needed, before its badges can be read."
             )
             let label = element.label
             for word in row.words where !label.localizedCaseInsensitiveContains(word) {
@@ -199,6 +229,11 @@ final class WootDeskLaunchUITests: XCTestCase {
         #if os(macOS)
         throw XCTSkip("Rotation is an iOS behaviour; this runs on iPhone and iPad.")
         #else
+        // Registered before anything can rotate or fail. Registering it after
+        // the rotation assertion, as this test used to, means a failure there
+        // throws first and the device is never put back.
+        addTeardownBlock { XCUIDevice.shared.orientation = .portrait }
+
         let app = launchWithInventedConversations()
 
         let conversationRow = app.descendants(matching: .any)
@@ -248,7 +283,6 @@ final class WootDeskLaunchUITests: XCTestCase {
             "Rotating back to portrait must not discard the draft."
         )
 
-        addTeardownBlock { XCUIDevice.shared.orientation = .portrait }
         #endif
     }
 

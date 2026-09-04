@@ -28,6 +28,38 @@ struct ConversationListStateTests {
         )
     }
 
+    /// The UI sequence: the list opens filtered to Open, the agent picks All.
+    ///
+    /// A UI test found only three of four conversations on screen with All
+    /// selected, the missing one being the single resolved conversation. This
+    /// checks the state directly, where there is no scrolling, no laziness and
+    /// no timing, so a failure here means the list genuinely drops it.
+    @Test("Switching the status filter to All loads every status, resolved included")
+    @MainActor
+    func testSwitchingFilterToAllIncludesResolved() async {
+        let state = ConversationListState()
+        let client = StubChatwootAPI(
+            conversationsOutcome: .success([
+                conversation(id: 1041, status: .open),
+                conversation(id: 1038, status: .open),
+                conversation(id: 1024, status: .pending),
+                conversation(id: 1011, status: .resolved),
+            ])
+        )
+        let profile = makeProfile()
+
+        state.statusFilter = .open
+        await state.loadConversations(profile: profile, token: "token", using: client)
+        #expect(state.conversations.map(\.id) == [1041, 1038])
+
+        state.statusFilter = nil
+        await state.loadConversations(profile: profile, token: "token", using: client)
+
+        #expect(state.conversations.count == 4)
+        #expect(state.conversations.contains { $0.id == 1011 })
+        #expect(state.conversations.contains { $0.status == .resolved })
+    }
+
     @Test("Loads the first page of conversations into the list")
     @MainActor
     func testLoadsFirstPage() async {
