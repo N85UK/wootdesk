@@ -1,0 +1,87 @@
+name: Review environment
+
+# Tells the maintainer when review.n85.app can be stopped.
+#
+# The environment is publicly reachable and runs an older Chatwoot than
+# production, so it should not stay up after a release. It should also not be
+# stopped early: a rejection needs it again for the resubmission, so the
+# condition is review passed on every platform, not review finished.
+#
+# This notifies rather than acting. An unattended job that stops a production
+# service on a polled API state is a lot of trust for something that saves one
+# command, and stopping a demo server while a reviewer is using it is the
+# expensive mistake.
+
+on:
+  schedule:
+    # Once a day. The state changes over days, not minutes.
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: review-environment
+  cancel-in-progress: false
+
+jobs:
+  check:
+    name: Check whether the review environment is still needed
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Install the App Store Connect client dependency
+        run: python3 -m pip install --quiet --disable-pip-version-check --break-system-packages cryptography
+
+      - name: Read the App Store state
+        id: state
+        continue-on-error: true
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          set +e
+          python3 script/review_env_status.py | tee status.txt
+          echo "code=$?" >> "$GITHUB_OUTPUT"
+
+      # 0 means every platform has passed review. 1 means keep running. Anything
+      # else means the script would not commit to an answer, which is treated as
+      # keep running, because the safe default is leaving the server up.
+      - name: Decide
+        id: decide
+        run: |
+          set -euo pipefail
+          case "${{ steps.state.outputs.code }}" in
+            0) echo "safe=true"  >> "$GITHUB_OUTPUT" ;;
+            1) echo "safe=false" >> "$GITHUB_OUTPUT" ;;
+            *) echo "safe=false" >> "$GITHUB_OUTPUT"
+               echo "::warning::The review environment check could not reach a decision. Leaving it running." ;;
+          esac
+          cat status.txt >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Open an issue when it is safe to stop
+        if: steps.decide.outputs.safe == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          # One issue, not one per day. Reopening a closed one would be worse
+          # than silence, so only an absent issue triggers a new one.
+          existing="$(gh issue list --repo "$GITHUB_REPOSITORY" \
+            --search 'in:title "Review environment can be stopped"' \
+            --state open --json number --jq '.[0].number // empty')"
+          if [ -n "$existing" ]; then
+            echo "Issue #${existing} is already open. Nothing to do."
+            exit 0
+          fi
+          body="$(printf '%s\n\n%s\n' \
+            "Every platform has passed App Review, so the demo environment is no longer needed." \
+            "$(cat status.txt)")"
+          gh issue create --repo "$GITHUB_REPOSITORY" \
+            --title "Review environment can be stopped" \
+            --body "$body"
