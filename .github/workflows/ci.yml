@@ -31,6 +31,11 @@ jobs:
       - name: Check animations honour Reduce Motion
         run: python3 script/check_reduce_motion.py
 
+      # N85-14 AC5. One language ships today, so the fallback is what carries
+      # the criterion: an uncatalogued string shows a raw key on any device.
+      - name: Check the string catalogue and its fallback
+        run: python3 script/check_localisation.py
+
       - name: Install XcodeGen
         run: brew install xcodegen
 

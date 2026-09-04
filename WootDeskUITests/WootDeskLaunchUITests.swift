@@ -218,6 +218,91 @@ final class WootDeskLaunchUITests: XCTestCase {
         )
     }
 
+    /// N85-14 AC3: a Mac agent with no pointing device can work the app.
+    ///
+    /// Deliberately not a tab-order assertion. macOS restricts Tab to text
+    /// boxes and lists unless Full Keyboard Access is switched on, and
+    /// `AppleKeyboardUIMode` is unset on this host, so a tab walk here records
+    /// the system setting rather than anything the app decides. Measuring that
+    /// and calling it an app defect would be wrong, and switching the setting
+    /// to make the test pass would be worse.
+    ///
+    /// What the app does control is checked instead: arrow keys move the
+    /// selection, the composer takes focus by Tab because a text box is always
+    /// reachable, and the documented Command Return sends. Those three carry
+    /// the criterion, because together they complete a reply with no pointer.
+    @MainActor
+    func testMacKeyboardCompletesAReplyWithoutAPointer() throws {
+        #if !os(macOS)
+        throw XCTSkip("AC3 is about using the Mac without a pointing device.")
+        #else
+        let app = launchWithInventedConversations()
+
+        let conversationRow = app.descendants(matching: .any)
+            .matching(identifier: "conversation-row-1041")
+            .firstMatch
+        XCTAssertTrue(
+            conversationRow.waitForExistence(timeout: 20),
+            "The conversation list must load before it can be driven from the keyboard."
+        )
+
+        // Reach the list. Lists are tabbable whatever the system setting is,
+        // so this does not depend on Full Keyboard Access.
+        var reachedList = false
+        for _ in 0..<12 {
+            app.typeKey(XCUIKeyboardKey.downArrow, modifierFlags: [])
+            if app.descendants(matching: .any)["message-8001"].exists {
+                reachedList = true
+                break
+            }
+            app.typeKey(XCUIKeyboardKey.tab, modifierFlags: [])
+        }
+
+        XCTAssertTrue(
+            reachedList,
+            "Arrow keys never opened a conversation, so the list cannot be worked without a pointer."
+        )
+
+        let composer = app.descendants(matching: .any)["conversation-composer"]
+        XCTAssertTrue(
+            composer.waitForExistence(timeout: 10),
+            "Opening a conversation from the keyboard must show the composer."
+        )
+
+        // A text box is reachable by Tab on any macOS configuration.
+        // hasKeyboardFocus is only exposed through a predicate, not as a
+        // property, so the focused element is queried and compared by identity.
+        func focusedIdentifier() -> String {
+            let focused = app.descendants(matching: .any)
+                .matching(NSPredicate(format: "hasKeyboardFocus == true"))
+                .firstMatch
+            return focused.exists ? focused.identifier : ""
+        }
+
+        var reachedComposer = false
+        for _ in 0..<15 {
+            if focusedIdentifier() == "conversation-composer" {
+                reachedComposer = true
+                break
+            }
+            app.typeKey(XCUIKeyboardKey.tab, modifierFlags: [])
+        }
+        XCTAssertTrue(
+            reachedComposer,
+            "Tab never reached the composer, so a reply cannot be typed without a pointer."
+        )
+
+        app.typeText("A reply typed without a pointing device")
+        app.typeKey(XCUIKeyboardKey.return, modifierFlags: .command)
+
+        let sent = app.descendants(matching: .any)["message-9999"]
+        XCTAssertTrue(
+            sent.waitForExistence(timeout: 15),
+            "Command Return must send the reply, so the workflow completes from the keyboard alone."
+        )
+        #endif
+    }
+
     /// Test plan, iPhone and iPad cases: "Rotate between portrait and landscape
     /// without losing the draft."
     ///
