@@ -30,7 +30,26 @@ contacts a network. The invented large conversation is built in
 | Timeline scaling | Compare loading 4,000 against 8,000 invented messages | Doubling the input must multiply the time by less than 3.0 | within the ceiling |
 | List filter | Apply a search term to 5,000 invented conversations, 50 times | 3.0 s | about 1.0 s |
 | Message presentation | Convert 5,000 invented processed message bodies to displayable text | 3.0 s | about 0.13 s |
-| Cold launch | Launch to the first-run setup screen with no saved profile, no Keychain access, and no network call | Recorded by `XCTApplicationLaunchMetric` | recorded per run |
+| Cold launch | Launch to the first-run setup screen with no saved profile, no Keychain access, and no network call | 12.0 s, median of three | about 4.1 s on the iOS Simulator |
+
+### Why cold launch gained a threshold
+
+`XCTApplicationLaunchMetric` records a number. Without a stored baseline it
+never fails, so the cold-launch measurement satisfied "measurements run" but
+not N85-14 AC6's "the check fails if a documented regression threshold is
+exceeded". List and timeline already asserted ceilings; launch did not.
+
+`testLaunchReachesFirstScreenWithinCeiling` now asserts one. It times launch to
+the first-run screen appearing, three times, and compares the median so a single
+slow run on a loaded machine does not decide the result.
+
+The 12.0 s ceiling was measured, not guessed: three runs gave 5.41, 4.11 and
+4.10 seconds. That is roughly the same headroom the list filter carries, 3.0 s
+against about 1.0 s observed. Confirmed to fail by temporarily lowering it,
+which reported the measured 4.12 s against the ceiling.
+
+The original `measure` block is kept alongside it. It cannot fail, but it
+records the trend, which the assertion does not.
 
 ## Reference machine
 

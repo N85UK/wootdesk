@@ -255,6 +255,44 @@ final class WootDeskLaunchUITests: XCTestCase {
         }
     }
 
+    /// N85-14 AC6 requires the performance check to *fail* when a documented
+    /// threshold is exceeded. `measure` with no stored baseline only records a
+    /// number, so the cold-launch measurement could never fail and the criterion
+    /// was met for the list and timeline checks but not for launch.
+    ///
+    /// This asserts a ceiling in the same style as the list and timeline checks:
+    /// a regression ceiling, not a target, sized to catch something structural
+    /// rather than a busy machine.
+    @MainActor
+    func testLaunchReachesFirstScreenWithinCeiling() throws {
+        let ceiling: TimeInterval = 12.0
+
+        var measurements: [TimeInterval] = []
+        for _ in 0..<3 {
+            let app = XCUIApplication()
+            app.launchArguments = ["--uitesting"]
+            let started = Date()
+            app.launch()
+            let welcome = app.staticTexts["Welcome to WootDesk"]
+            XCTAssertTrue(
+                welcome.waitForExistence(timeout: 30),
+                "The first-run screen should appear; without it there is nothing to time."
+            )
+            measurements.append(Date().timeIntervalSince(started))
+            app.terminate()
+        }
+
+        // The median, so one slow run on a loaded machine does not decide it.
+        let median = measurements.sorted()[measurements.count / 2]
+        print("LAUNCH_MEASUREMENTS \(measurements.map { String(format: "%.2f", $0) }.joined(separator: " ")) median \(String(format: "%.2f", median))")
+
+        XCTAssertLessThan(
+            median,
+            ceiling,
+            "Cold launch to the first-run screen took \(String(format: "%.2f", median))s, over the \(ceiling)s ceiling."
+        )
+    }
+
     @MainActor
     func testConversationHistoryAndReplyWithoutNetwork() throws {
         let app = launchWithInventedConversations()
