@@ -26,6 +26,83 @@ final class WootDeskLaunchUITests: XCTestCase {
         return app
     }
 
+    /// N85-14 AC1: every interactive control announces a meaningful name.
+    ///
+    /// A sweep rather than a spot check. Naming one control proves that control
+    /// was labelled; AC1 asks about all of them, across the conversation list,
+    /// the conversation detail, the composer and settings. An unlabelled button
+    /// is announced by VoiceOver as "button", which says nothing about what it
+    /// does.
+    ///
+    /// Every offender on every surface is reported at once rather than stopping
+    /// at the first, so fixing them is one pass rather than run, fix, run.
+    @MainActor
+    func testEveryInteractiveControlAnnouncesAName() throws {
+        let app = launchWithInventedConversations()
+
+        let conversationRow = app.descendants(matching: .any)
+            .matching(identifier: "conversation-row-1041")
+            .firstMatch
+        XCTAssertTrue(conversationRow.waitForExistence(timeout: 20))
+
+        var findings: [String] = []
+        var totalChecked = 0
+
+        func sweep(_ surface: String) {
+            var checked = 0
+            for kind in [XCUIElement.ElementType.button, .textField, .secureTextField, .searchField] {
+                for element in app.descendants(matching: kind).allElementsBoundByIndex {
+                    guard element.exists, element.isHittable else { continue }
+                    checked += 1
+                    if element.label.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        let identifier = element.identifier.isEmpty ? "no identifier" : element.identifier
+                        findings.append("\(surface): \(kind.rawValue) with \(identifier)")
+                    }
+                }
+            }
+            totalChecked += checked
+            print("LABEL_SWEEP \(surface): \(checked) controls")
+        }
+
+        sweep("conversation list")
+
+        #if os(macOS)
+        conversationRow.click()
+        #else
+        conversationRow.tap()
+        #endif
+        let composer = app.descendants(matching: .any)["conversation-composer"]
+        XCTAssertTrue(composer.waitForExistence(timeout: 10), "The conversation detail should open.")
+        sweep("conversation detail and composer")
+
+        // Settings is the surface most likely to accumulate an unlabelled
+        // icon-only control, so it is worth reaching rather than assuming.
+        let settingsTab = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "label == %@", "Settings"))
+            .firstMatch
+        if settingsTab.exists, settingsTab.isHittable {
+            #if os(macOS)
+            settingsTab.click()
+            #else
+            settingsTab.tap()
+            #endif
+            sweep("settings")
+        } else {
+            print("LABEL_SWEEP settings: not reachable from this layout, skipped")
+        }
+
+        // A clean result over an empty set is not a clean result.
+        XCTAssertGreaterThan(
+            totalChecked,
+            10,
+            "Only \(totalChecked) controls were reachable, too few for this sweep to mean anything."
+        )
+        XCTAssertTrue(
+            findings.isEmpty,
+            "Controls with no accessibility name, which VoiceOver announces only by role: \(findings.joined(separator: "; "))"
+        )
+    }
+
     /// Test plan, iPhone and iPad cases: "Rotate between portrait and landscape
     /// without losing the draft."
     ///
