@@ -394,6 +394,28 @@ green on every commit is worth the three minutes. To deliver on demand, or to de
 use the Actions tab, TestFlight, Run workflow, and choose the platform. The
 default is iOS.
 
+## Do not dispatch a run at a commit that already built
+
+The build number is `git rev-list --count HEAD`, so it is fixed by the commit,
+not by the run. Two runs at the same commit therefore claim the same number,
+and the second is refused by Apple:
+
+```
+The bundle version must be higher than the previously uploaded version: 108
+ENTITY_ERROR.ATTRIBUTE.INVALID.DUPLICATE
+```
+
+This happened on 5 September 2026. A push to `main` started a run, and a manual
+`workflow_dispatch` for the same commit started a second. The concurrency group
+queues rather than cancels, so both ran: the first uploaded iOS build 108 and
+the second failed. Nothing was broken and nothing needed fixing, but the second
+run's macOS leg never started, because the iOS leg failed first.
+
+If a dispatch is needed for a platform the push did not build, make a commit
+first so the count advances. Pushing a change that only touches `docs/**` or
+`**/*.md` does not start a TestFlight run, so a documentation commit advances
+the number without consuming a build.
+
 ## What this does not do
 
 It does not submit for App Review. TestFlight distribution and App Store
