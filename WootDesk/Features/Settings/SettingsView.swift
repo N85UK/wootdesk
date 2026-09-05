@@ -69,19 +69,6 @@ public struct SettingsView: View {
 
             NotificationSettingsSection(state: notificationState)
 
-            Section("AI Research & Intelligence") {
-                VStack(alignment: .leading, spacing: 6) {
-                    Label("WootDesk AI Gateway", systemImage: "sparkles")
-                        .font(.headline)
-                        .foregroundStyle(.primary)
-
-                    Text("Advanced AI features (conversation summarisation, smart draft replies, and deep cited research) are designed to route through an authenticated, privacy-preserving server gateway. No raw OpenAI keys or Chatwoot tokens are exposed.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                .padding(.vertical, 4)
-            }
-
             Section("About WootDesk") {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("WootDesk is an independent native client for Chatwoot. It is not affiliated with, maintained by, or endorsed by Chatwoot. The Chatwoot name and marks belong to their respective owners.")
