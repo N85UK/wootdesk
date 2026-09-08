@@ -357,3 +357,35 @@ test("an update carries the agent identity, which the app previously omitted", a
   assert.equal(stored.recipients.length, 1)
   assert.equal(stored.recipients[0].token, "ef".repeat(32))
 })
+
+test("the deployment reaches the log, rather than being dropped by the allowlist", async (t) => {
+  // The logger drops any field not on its allowlist, silently and by design.
+  // `deploymentId` was missing from it, so every routing decision was logged
+  // without saying which Chatwoot it concerned, which is the one fact those
+  // lines exist to record. Found on the production deploy, not in testing,
+  // because the harness logger has no allowlist at all.
+  const { createLogger } = await import("../src/logger.js")
+  const lines = []
+  const logger = createLogger({ log: (line) => lines.push(JSON.parse(line)) })
+
+  logger.info("probe", {
+    deploymentId: "review",
+    deploymentCount: 2,
+    remedy: "enrol again",
+    deliveryOutcome: "other_deployment_registrations",
+    count: 1,
+  })
+
+  assert.equal(lines.length, 1)
+  assert.equal(lines[0].deploymentId, "review")
+  assert.equal(lines[0].deploymentCount, 2)
+  assert.equal(lines[0].remedy, "enrol again")
+  assert.equal(lines[0].deliveryOutcome, "other_deployment_registrations")
+  assert.equal(lines[0].count, 1)
+
+  // The allowlist still does its job.
+  lines.length = 0
+  logger.info("probe", { token: "ab".repeat(32), email: "someone@example.invalid" })
+  assert.equal(lines[0].token, undefined)
+  assert.equal(lines[0].email, undefined)
+})
