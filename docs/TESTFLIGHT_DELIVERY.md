@@ -416,6 +416,36 @@ first so the count advances. Pushing a change that only touches `docs/**` or
 `**/*.md` does not start a TestFlight run, so a documentation commit advances
 the number without consuming a build.
 
+## A successful upload does not appear in App Store Connect immediately
+
+`altool` prints this when the transfer completes:
+
+```
+UPLOAD SUCCEEDED with no errors
+Delivery UUID: dd9c50b0-3a84-4f67-a96a-40534de3a4fb
+```
+
+At that moment the build is **not** yet listed by
+`GET /v1/builds?filter[app]=...`. Apple processes it first, and on 8 September
+2026 build 111 took a little over two minutes to appear. It can take longer.
+
+This matters here more than it would elsewhere. This project has been bitten
+repeatedly by pipelines reporting success while delivering nothing, so the
+instinct to check App Store Connect rather than trust a green run is the right
+one. The trap is that checking too early produces exactly the evidence a real
+failure would: a green run and no build.
+
+So distinguish the two by what the upload step actually said, not by the
+absence of the build:
+
+- **`UPLOAD SUCCEEDED with no errors` and a Delivery UUID** means the bytes
+  reached Apple. If the build is missing, wait and look again.
+- **No such line**, or a 409 naming the bundle version, means it did not.
+
+Waiting a few minutes and re-querying costs nothing. Concluding a delivery
+failed and re-running the pipeline costs a build number, and the re-run is then
+refused for claiming a number the first upload already took.
+
 ## What this does not do
 
 It does not submit for App Review. TestFlight distribution and App Store
