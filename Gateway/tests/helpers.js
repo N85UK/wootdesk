@@ -1,9 +1,10 @@
 import { randomBytes } from "node:crypto"
-import { mkdtemp, rm } from "node:fs/promises"
+import { mkdtemp, rm, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { Readable } from "node:stream"
 import { createGatewayHandler } from "../src/app.js"
+import { encryptToken, hash } from "../src/security.js"
 import { AtomicRegistrationStore } from "../src/store.js"
 
 export const deviceID = "11111111-1111-4111-8111-111111111111"
@@ -30,16 +31,35 @@ export async function createHarness({
   maxBodyBytes = 32_768,
   deviceRateLimit = 100,
   webhookRateLimit = 100,
+  // N85-64. Extra Chatwoot deployments beyond the default one, each
+  // `{ id, baseUrl, signingSecret }`. A route secret is generated per
+  // deployment, because sharing one is the defect under test.
+  extraDeployments = [],
+  seedRegistrations = [],
 } = {}) {
   const directory = await mkdtemp(join(tmpdir(), "wootdesk-gateway-test-"))
   const routeSecret = randomBytes(32).toString("base64url")
   const apiToken = randomBytes(32).toString("base64url")
+  const deployments = [
+    {
+      id: "default",
+      baseUrl: "https://chat.invalid",
+      routeSecret,
+      signingSecret,
+      baseUrlConfigured: true,
+    },
+    ...extraDeployments.map((item) => ({
+      baseUrlConfigured: true,
+      routeSecret: randomBytes(32).toString("base64url"),
+      signingSecret: undefined,
+      ...item,
+    })),
+  ]
   const config = {
     nodeEnvironment: "test",
     allowInsecureLocalTest: true,
     deviceAPIToken: apiToken,
-    webhookRouteSecret: routeSecret,
-    webhookSigningSecret: signingSecret,
+    deployments,
     webhookSignatureToleranceSeconds: 300,
     apnsTopic: "dev.n85.wootdesk",
     maxBodyBytes,
@@ -50,21 +70,6 @@ export async function createHarness({
     idempotencyTTLSeconds: 86_400,
     registrationTTLDays: 90,
     maxRegistrationsPerEvent: 100,
-  }
-  const store = new AtomicRegistrationStore({
-    filePath: join(directory, "registrations.json"),
-    encryptionKey: randomBytes(32),
-  })
-  await store.initialise()
-
-  const calls = []
-  const sender = {
-    isReady: true,
-    async send(item, payload, collapseID) {
-      calls.push({ item, payload, collapseID })
-      return send(item, payload, collapseID)
-    },
-    async close() {},
   }
   const logs = []
   const logger = {
@@ -78,10 +83,79 @@ export async function createHarness({
       logs.push({ level: "error", message, context })
     },
   }
+
+  const encryptionKey = randomBytes(32)
+
+  // Written before the store is opened, so `initialise` sees them exactly as
+  // an upgraded gateway would see registrations left by an older one.
+  //
+  // Sealed here rather than through the store's own method, because the point
+  // is to produce what the PREVIOUS version wrote: the same fields and the
+  // same associated data, with no deploymentId. Reusing the current sealing
+  // would add the field the migration is supposed to be missing, and the test
+  // would prove nothing. The two field lists must therefore stay in step with
+  // `associatedData` in src/store.js.
+  if (seedRegistrations.length > 0) {
+    const sealed = seedRegistrations.map((item) => {
+      const metadata = {
+        deviceId: item.deviceId,
+        profileId: item.profileId,
+        accountId: item.accountId,
+        agentId: item.agentId,
+        environment: item.environment,
+        topic: item.topic,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+      }
+      const associated = [
+        metadata.deviceId,
+        metadata.profileId,
+        metadata.accountId,
+        metadata.environment,
+        metadata.topic,
+        metadata.createdAt,
+        metadata.updatedAt,
+      ].join("|")
+      return {
+        ...metadata,
+        tokenHash: hash(item.token),
+        token: encryptToken(item.token, encryptionKey, associated),
+      }
+    })
+    await writeFile(
+      join(directory, "registrations.json"),
+      JSON.stringify({
+        version: 1,
+        registrations: sealed,
+        idempotency: [],
+        deliveries: [],
+      }),
+      "utf8",
+    )
+  }
+
+  const store = new AtomicRegistrationStore({
+    filePath: join(directory, "registrations.json"),
+    encryptionKey,
+    deployments,
+    logger,
+  })
+  await store.initialise()
+
+  const calls = []
+  const sender = {
+    isReady: true,
+    async send(item, payload, collapseID) {
+      calls.push({ item, payload, collapseID })
+      return send(item, payload, collapseID)
+    },
+    async close() {},
+  }
   const handler = createGatewayHandler({ config, store, sender, logger })
 
   return {
     config,
+    deployments,
     store,
     calls,
     logs,

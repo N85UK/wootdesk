@@ -1,5 +1,6 @@
 import { isIP } from "node:net"
 import { resolve } from "node:path"
+import { normaliseBaseURL } from "./deployments.js"
 
 const environmentValues = new Set(["development", "production", "test"])
 
@@ -80,6 +81,116 @@ function identifier(environment, name) {
   return value
 }
 
+/**
+ * Reads the Chatwoot deployments this gateway serves (N85-64 AC3).
+ *
+ * Each deployment gets its own route secret and its own signing secret,
+ * because the route the request arrived on is the only thing that identifies
+ * which Chatwoot sent it. Sharing either between two deployments would
+ * recreate the shared routing namespace this exists to remove, so both are
+ * rejected here rather than left to be discovered in production.
+ *
+ * Two shapes are accepted:
+ *
+ *   - Named deployments, listed in CHATWOOT_DEPLOYMENTS, each configured
+ *     through CHATWOOT_DEPLOYMENT_<NAME>_BASE_URL, _ROUTE_SECRET and
+ *     optionally _SIGNING_SECRET.
+ *   - No deployment settings at all, which yields a single deployment called
+ *     "default" built from WEBHOOK_ROUTE_SECRET and
+ *     CHATWOOT_WEBHOOK_SIGNING_SECRET.
+ *
+ * The second shape exists so a gateway can be upgraded in place without
+ * changing its configuration, which AC5 depends on: registrations written
+ * before this change can only be attributed automatically when there is
+ * exactly one deployment to attribute them to.
+ */
+function deployments(environment) {
+  const listed = environment.CHATWOOT_DEPLOYMENTS
+
+  if (listed === undefined || listed === "") {
+    return [
+      Object.freeze({
+        id: "default",
+        // No address, so enrolment cannot resolve a deployment by name. With
+        // one deployment it does not need to: the app's registration is
+        // attributed to the only deployment there is.
+        baseUrl: undefined,
+        routeSecret: secret(environment, "WEBHOOK_ROUTE_SECRET"),
+        signingSecret: externalSecret(
+          environment,
+          "CHATWOOT_WEBHOOK_SIGNING_SECRET",
+          { optional: true },
+        ),
+        baseUrlConfigured: false,
+      }),
+    ]
+  }
+
+  const names = listed.split(",").map((item) => item.trim())
+  const parsed = []
+  const seen = new Set()
+
+  for (const name of names) {
+    if (!/^[a-z0-9][a-z0-9-]{0,30}$/.test(name)) {
+      throw new Error(
+        `"${name}" is not a valid deployment identifier. Use lowercase letters, digits and hyphens.`,
+      )
+    }
+    if (seen.has(name)) {
+      throw new Error(`Deployment "${name}" is listed more than once. List each deployment once.`)
+    }
+    seen.add(name)
+
+    const prefix = `CHATWOOT_DEPLOYMENT_${name.toUpperCase().replaceAll("-", "_")}`
+    const rawBaseURL = environment[`${prefix}_BASE_URL`]
+    if (typeof rawBaseURL !== "string" || rawBaseURL.length === 0) {
+      throw new Error(
+        `${prefix}_BASE_URL is required. Enrolment uses it to work out which deployment a server profile belongs to.`,
+      )
+    }
+    const baseUrl = normaliseBaseURL(rawBaseURL)
+    if (baseUrl === undefined) {
+      throw new Error(`${prefix}_BASE_URL is not an http or https address.`)
+    }
+
+    parsed.push(
+      Object.freeze({
+        id: name,
+        baseUrl,
+        routeSecret: secret(environment, `${prefix}_ROUTE_SECRET`),
+        signingSecret: externalSecret(environment, `${prefix}_SIGNING_SECRET`, {
+          optional: true,
+        }),
+        baseUrlConfigured: true,
+      }),
+    )
+  }
+
+  if (parsed.length === 0) {
+    throw new Error("CHATWOOT_DEPLOYMENTS lists no deployment.")
+  }
+
+  const routeSecrets = new Set()
+  const addresses = new Set()
+  for (const deployment of parsed) {
+    if (routeSecrets.has(deployment.routeSecret)) {
+      throw new Error(
+        `Deployment "${deployment.id}" shares a route secret with another deployment. Each needs its own, because the route is what identifies the deployment.`,
+      )
+    }
+    routeSecrets.add(deployment.routeSecret)
+
+    if (addresses.has(deployment.baseUrl)) {
+      throw new Error(
+        `Deployment "${deployment.id}" shares a Chatwoot address with another deployment. Enrolment could not tell them apart.`,
+      )
+    }
+    addresses.add(deployment.baseUrl)
+  }
+
+  return parsed
+}
+
 export function loadConfig(environment = process.env) {
   const nodeEnvironment = environment.NODE_ENV ?? "production"
   if (!environmentValues.has(nodeEnvironment)) {
@@ -101,7 +212,7 @@ export function loadConfig(environment = process.env) {
     throw new Error("HOST must be localhost or an IP address.")
   }
 
-  const routeSecret = secret(environment, "WEBHOOK_ROUTE_SECRET")
+  const configuredDeployments = deployments(environment)
   const deviceAPIToken = secret(environment, "DEVICE_API_TOKEN")
   const dataEncryptionKey = secret(environment, "DATA_ENCRYPTION_KEY", {
     exactBytes: 32,
@@ -120,12 +231,7 @@ export function loadConfig(environment = process.env) {
     dataFile: resolve(required(environment, "DATA_FILE")),
     dataEncryptionKey: Buffer.from(dataEncryptionKey, "base64url"),
     deviceAPIToken,
-    webhookRouteSecret: routeSecret,
-    webhookSigningSecret: externalSecret(
-      environment,
-      "CHATWOOT_WEBHOOK_SIGNING_SECRET",
-      { optional: true },
-    ),
+    deployments: Object.freeze(configuredDeployments),
     webhookSignatureToleranceSeconds: integer(
       environment,
       "CHATWOOT_SIGNATURE_TOLERANCE_SECONDS",

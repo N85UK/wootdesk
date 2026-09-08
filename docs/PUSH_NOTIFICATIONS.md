@@ -164,18 +164,48 @@ rejects is pruned immediately, so B had to be recreated between cases. And the
 identity-less exclusion is reported as a `warn`, not an error, which is why it
 went unnoticed when it was excluding the only enrolled device.
 
-### Recipient scoping is single-tenant
+### Recipients are scoped to the deployment the event came from
 
-Recipients are selected by Chatwoot account id and agent id alone. Nothing
-identifies which Chatwoot server the event came from, and the gateway holds one
-webhook signing secret. Two Chatwoot deployments that both have an account `1`,
-pointed at the same gateway, therefore share a routing namespace: an event from
-one can notify devices enrolled against the other. This is acceptable for a
-single-deployment gateway, which is what is deployed, but it is a real
-constraint on the multi-profile feature the app otherwise supports, and it
-should be closed before the gateway serves more than one Chatwoot.
+Recipients were once selected by Chatwoot account id and agent id alone. An
+account number is unique only within one Chatwoot, so two deployments that both
+had an account `1` shared a routing namespace, and an event from one could
+notify devices enrolled against the other. That was not hypothetical: the
+production Chatwoot and the App Review environment both have an account `1`.
 
-Tracked as N85-64 under the post-1.0 epic N85-37.
+It cannot be fixed from the payload, because Chatwoot does not identify itself
+in a webhook body. The only available discriminator is the endpoint the request
+arrived on, so each deployment now has its own route secret and its own signing
+secret, and the route is the deployment's identity.
+
+- **Selection** filters by deployment first, then account, then assignee.
+- **Signature verification** uses the secret of the deployment whose route the
+  request arrived on, so a payload signed by one is rejected by another.
+- **Enrolment** records the deployment. The app sends the address of the server
+  profile being enrolled, and the gateway resolves it to a configured
+  deployment. An address it has no configuration for is refused rather than
+  attributed to whichever deployment happens to be first.
+- **An unconfigured deployment** is refused with 404, indistinguishable from
+  any other unmatched route, and recorded.
+- **Registrations written before this change** are attributed to the single
+  configured deployment when there is exactly one, and otherwise left
+  unattributed and reported. An unattributed registration matches no
+  deployment, so it stops receiving notifications rather than receiving the
+  wrong ones. That is the safe failure, and the operator is told the count and
+  what to do about it.
+
+Configuration is in [`Gateway/README.md`](../Gateway/README.md). A gateway that
+serves one Chatwoot needs no new settings: the existing `WEBHOOK_ROUTE_SECRET`
+and `CHATWOOT_WEBHOOK_SIGNING_SECRET` become a single deployment called
+`default`, which is what makes an in-place upgrade safe.
+
+Delivered by N85-64.
+
+**What this is proven by.** The gateway's own suite runs the real HTTP handler
+and the real store against a fake APNs sender, so it can assert exactly which
+devices were sent to, including that a device enrolled elsewhere was not. That
+is stronger than a unit test, which cannot show a device was *not* notified.
+It is still not a real APNs delivery to two devices from two Chatwoot servers,
+which would need a second deployment to exist.
 
 The Chatwoot webhook route secret and gateway device API token are secrets.
 They belong in server secret storage and Apple Keychain respectively, never in

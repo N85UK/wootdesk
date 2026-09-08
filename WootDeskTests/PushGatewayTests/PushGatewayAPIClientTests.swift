@@ -101,6 +101,18 @@ struct PushGatewayAPIClientTests {
         let object = try #require(decodedObject as? [String: Any])
         #expect(object["deviceId"] == nil)
         #expect(object["profileId"] as? String == profileID.uuidString.uppercased())
+
+        // The gateway requires an agent identity on update and refuses the
+        // request without one. This body omitted it, so every token refresh
+        // was rejected with 400 and a device could enrol but never rotate its
+        // APNs token. Nothing surfaced it, because push is reported as enabled
+        // from the stored configuration rather than from the last exchange.
+        #expect(object["agentId"] as? Int == 7)
+
+        // N85-64. Names the Chatwoot this device is enrolled against, so a
+        // gateway serving more than one deployment keeps the update on the
+        // right one.
+        #expect(object["baseUrl"] as? String == "https://chat.example.com")
     }
 
     @Test("Deleting a missing registration is treated as idempotent success")
@@ -233,7 +245,8 @@ struct PushGatewayAPIClientTests {
             agentId: 7,
             environment: .development,
             topic: "dev.n85.wootdesk",
-            token: "ab" + String(repeating: "01", count: 31)
+            token: "ab" + String(repeating: "01", count: 31),
+            baseUrl: "https://chat.example.com"
         )
     }
 

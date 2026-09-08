@@ -38,9 +38,11 @@ public actor PushGatewayAPIClient: PushGatewayAPIProtocol {
         let update = PushGatewayDeviceRegistrationUpdate(
             profileId: registration.profileId,
             accountId: registration.accountId,
+            agentId: registration.agentId,
             environment: registration.environment,
             topic: registration.topic,
-            token: registration.token
+            token: registration.token,
+            baseUrl: registration.baseUrl
         )
         let body = try encode(update)
         let request = PushGatewayRequest.makeRequest(
@@ -160,7 +162,17 @@ public actor PushGatewayAPIClient: PushGatewayAPIProtocol {
 private struct PushGatewayDeviceRegistrationUpdate: Encodable, Sendable {
     let profileId: UUID
     let accountId: Int
+    /// Sent on update as well as on create.
+    ///
+    /// It was omitted here while being required by the gateway, so every
+    /// update was refused with 400 and a device could enrol but never refresh
+    /// its APNs token. Nothing surfaced it, because the app reports push as
+    /// enabled from the stored configuration rather than from the last
+    /// exchange with the gateway.
+    let agentId: Int
     let environment: PushGatewayEnvironment
     let topic: String
     let token: String
+    /// See `PushGatewayDeviceRegistrationRequest.baseUrl`.
+    let baseUrl: String
 }

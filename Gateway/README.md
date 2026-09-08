@@ -71,8 +71,12 @@ invalid.
 | `DATA_FILE` | Yes | Atomic encrypted registration store path |
 | `DATA_ENCRYPTION_KEY` | Yes | Unpadded base64url value decoding to exactly 32 bytes |
 | `DEVICE_API_TOKEN` | Yes | Organisation bearer secret of at least 32 random bytes |
-| `WEBHOOK_ROUTE_SECRET` | Yes | URL-safe route secret of at least 32 random bytes |
-| `CHATWOOT_WEBHOOK_SIGNING_SECRET` | No | HMAC key of at least 32 random bytes |
+| `WEBHOOK_ROUTE_SECRET` | Unless `CHATWOOT_DEPLOYMENTS` is set | URL-safe route secret of at least 32 random bytes |
+| `CHATWOOT_WEBHOOK_SIGNING_SECRET` | No | HMAC key issued by Chatwoot, 16 to 256 characters |
+| `CHATWOOT_DEPLOYMENTS` | No | Comma-separated deployment names, for more than one Chatwoot |
+| `CHATWOOT_DEPLOYMENT_<NAME>_BASE_URL` | With `CHATWOOT_DEPLOYMENTS` | That Chatwoot's address, used to resolve enrolments |
+| `CHATWOOT_DEPLOYMENT_<NAME>_ROUTE_SECRET` | With `CHATWOOT_DEPLOYMENTS` | That deployment's own route secret |
+| `CHATWOOT_DEPLOYMENT_<NAME>_SIGNING_SECRET` | No | That deployment's own HMAC key |
 | `CHATWOOT_SIGNATURE_TOLERANCE_SECONDS` | No | Timestamp window, default 300 seconds |
 | `APNS_TEAM_ID` | Yes | Apple Developer team identifier |
 | `APNS_KEY_ID` | Yes | APNs token signing key identifier |
@@ -173,6 +177,45 @@ Errors use this envelope:
 Expected status classes include `400`, `401`, `404`, `409`, `413`, `429`, and
 `503`. A client must not treat an unknown response as success.
 
+## Serving more than one Chatwoot
+
+A gateway serving a single Chatwoot needs nothing here: `WEBHOOK_ROUTE_SECRET`
+and `CHATWOOT_WEBHOOK_SIGNING_SECRET` become a deployment called `default`, and
+an existing gateway upgrades in place without a configuration change.
+
+For more than one, name them and give each its own secrets and address:
+
+```bash
+CHATWOOT_DEPLOYMENTS=production,review
+CHATWOOT_DEPLOYMENT_PRODUCTION_BASE_URL=https://chat.example.invalid
+CHATWOOT_DEPLOYMENT_PRODUCTION_ROUTE_SECRET=...
+CHATWOOT_DEPLOYMENT_PRODUCTION_SIGNING_SECRET=...
+CHATWOOT_DEPLOYMENT_REVIEW_BASE_URL=https://review.example.invalid
+CHATWOOT_DEPLOYMENT_REVIEW_ROUTE_SECRET=...
+CHATWOOT_DEPLOYMENT_REVIEW_SIGNING_SECRET=...
+```
+
+Each deployment's webhook goes to its own route:
+
+```text
+https://push.example.invalid/v1/webhooks/chatwoot/<that deployment's route secret>
+```
+
+**Why the address is required.** Enrolment has to record which deployment a
+device belongs to, and the app knows its Chatwoot's address rather than the
+name you chose here. The gateway matches the two by origin, so scheme, host and
+port must agree; a path or trailing slash does not matter. An address the
+gateway has no configuration for is refused, so a device never enrols against a
+Chatwoot the gateway cannot serve.
+
+**Upgrading a gateway that already has registrations.** With one deployment
+configured, existing registrations are attributed to it on startup and the file
+is rewritten once. With more than one there is no honest answer, so they are
+left unattributed and the count is logged with what to do: those devices must
+enrol again. An unattributed registration matches no deployment and therefore
+receives nothing, which is the safe failure. It is never guessed at, because
+guessing wrong notifies somebody about another organisation's conversations.
+
 ## Chatwoot webhook contract
 
 Configure the Chatwoot account webhook for:
@@ -181,8 +224,13 @@ Configure the Chatwoot account webhook for:
 https://push.example.invalid/v1/webhooks/chatwoot/<WEBHOOK_ROUTE_SECRET>
 ```
 
-The route secret is mandatory even when HMAC verification is enabled. Use a
-different secret for every deployment. Select the Chatwoot `message_created`
+The route secret is mandatory even when HMAC verification is enabled, and each
+deployment must have its own. It is not merely good practice: **the route is
+what identifies the deployment**, because Chatwoot does not say who it is in
+the webhook body. Two deployments sharing a route secret would share a routing
+namespace, and an event from one could notify devices enrolled against the
+other. The gateway refuses to start if two deployments share a route secret or
+an address. Select the Chatwoot `message_created`
 event. The gateway accepts only `message_type: "incoming"` (or the documented
 integer value `0`) with an explicit `private: false`. Outgoing messages, private
 notes, other events, and ambiguous privacy values are acknowledged and ignored.

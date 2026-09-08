@@ -13,6 +13,10 @@ async function main() {
   const store = new AtomicRegistrationStore({
     filePath: config.dataFile,
     encryptionKey: config.dataEncryptionKey,
+    // Needed to attribute registrations written before deployment scoping,
+    // and to say so out loud when they cannot be attributed (N85-64 AC5).
+    deployments: config.deployments,
+    logger,
   })
   await store.initialise()
 

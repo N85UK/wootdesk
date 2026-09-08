@@ -25,6 +25,16 @@ public struct PushGatewayDeviceRegistrationRequest: Codable, Equatable, Sendable
     public let environment: PushGatewayEnvironment
     public let topic: String
     public let token: String
+    /// The Chatwoot server this profile signs in to.
+    ///
+    /// The gateway uses it to work out which configured deployment the device
+    /// is enrolling against. An account number is unique only within one
+    /// Chatwoot, so without this a gateway serving two deployments cannot tell
+    /// an event for account 1 on one server from account 1 on the other, and
+    /// could notify a device about a server it has no relationship with.
+    ///
+    /// Not a secret: it is the address the agent already signs in to.
+    public let baseUrl: String
 
     public init(
         deviceId: UUID,
@@ -33,7 +43,8 @@ public struct PushGatewayDeviceRegistrationRequest: Codable, Equatable, Sendable
         agentId: Int,
         environment: PushGatewayEnvironment,
         topic: String,
-        token: String
+        token: String,
+        baseUrl: String
     ) {
         self.deviceId = deviceId
         self.profileId = profileId
@@ -42,6 +53,7 @@ public struct PushGatewayDeviceRegistrationRequest: Codable, Equatable, Sendable
         self.environment = environment
         self.topic = topic
         self.token = token
+        self.baseUrl = baseUrl
     }
 }
 

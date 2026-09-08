@@ -100,7 +100,9 @@ export function validateCreateRegistration(value, expectedTopic) {
     !exactKeys(
       value,
       ["deviceId", "profileId", "accountId", "environment", "topic", "token"],
-      ["agentId"],
+      // baseUrl is optional so a client built before deployment scoping still
+      // enrols against a gateway serving one Chatwoot (N85-64 AC4, AC5).
+      ["agentId", "baseUrl"],
     )
   ) {
     throw badRequest(
@@ -117,6 +119,7 @@ export function validateCreateRegistration(value, expectedTopic) {
     environment: environment(value.environment),
     topic: topic(value.topic, expectedTopic),
     token: token(value.token),
+    baseUrl: chatwootBaseURL(value.baseUrl),
   }
 }
 
@@ -126,7 +129,7 @@ export function validateUpdateRegistration(value, expectedTopic, deviceID) {
     !exactKeys(
       value,
       ["profileId", "accountId", "environment", "topic", "token"],
-      ["agentId"],
+      ["agentId", "baseUrl"],
     )
   ) {
     throw badRequest(
@@ -143,6 +146,7 @@ export function validateUpdateRegistration(value, expectedTopic, deviceID) {
     environment: environment(value.environment),
     topic: topic(value.topic, expectedTopic),
     token: token(value.token),
+    baseUrl: chatwootBaseURL(value.baseUrl),
   }
 }
 
@@ -238,4 +242,28 @@ export function deliveryIdentifier(header, event) {
     return `header:${header}`
   }
   return `message:${event.accountId}:${event.messageId}`
+}
+
+/**
+ * The address of the Chatwoot server an enrolment is for (N85-64 AC4).
+ *
+ * Optional, and validated only for shape here. Whether the gateway actually
+ * serves that server is decided in `resolveEnrolmentDeployment`, which is
+ * where the configured deployments are known. Splitting it this way keeps
+ * this module free of configuration, as the rest of it already is.
+ *
+ * The length cap is generous but present: this value reaches a URL parser,
+ * and an unbounded string is worth refusing before it gets there.
+ */
+function chatwootBaseURL(value) {
+  if (value === undefined) {
+    return undefined
+  }
+  if (typeof value !== "string" || value.length === 0 || value.length > 2_048) {
+    throw badRequest(
+      "invalid_base_url",
+      "baseUrl must be the address of the Chatwoot server this device is enrolling against.",
+    )
+  }
+  return value
 }

@@ -18,10 +18,18 @@ export class AtomicRegistrationStore {
   #queue = Promise.resolve()
   #ready = false
 
-  constructor({ filePath, encryptionKey, clock = () => Date.now() }) {
+  constructor({
+    filePath,
+    encryptionKey,
+    clock = () => Date.now(),
+    deployments = [],
+    logger = { info() {}, warn() {} },
+  }) {
     this.filePath = filePath
     this.encryptionKey = encryptionKey
     this.clock = clock
+    this.deployments = deployments
+    this.logger = logger
   }
 
   get isReady() {
@@ -44,8 +52,62 @@ export class AtomicRegistrationStore {
         this.#data = emptyData()
         await this.#persist()
       }
+      await this.#attributeLegacyRegistrations()
       this.#ready = true
     })
+  }
+
+  /**
+   * Attributes registrations written before deployment scoping (N85-64 AC5).
+   *
+   * A registration stored by an older gateway has no deployment, and the
+   * routing filter matches on deployment, so such a registration matches
+   * nothing and its device silently stops receiving notifications. That is the
+   * safe failure and the criterion demands it: a registration must never be
+   * routed to a deployment it was not enrolled against. It is not an
+   * acceptable place to leave things, though, so the two cases are handled
+   * differently.
+   *
+   * With exactly one deployment configured there is no ambiguity. The device
+   * enrolled against that Chatwoot because it is the only one this gateway has
+   * ever served, so it is attributed and the file is rewritten once.
+   *
+   * With more than one, there is no honest answer. Picking one would be
+   * guessing, and guessing wrong notifies a device about another company's
+   * conversations. They are left unattributed, and the operator is told how
+   * many and what to do, because a silent gap in delivery is far harder to
+   * diagnose than a noisy one.
+   */
+  async #attributeLegacyRegistrations() {
+    const legacy = this.#data.registrations.filter(
+      (item) => item.deploymentId === undefined,
+    )
+    if (legacy.length === 0) {
+      return
+    }
+
+    if (this.deployments.length !== 1) {
+      this.logger.warn(
+        "Registrations from before deployment scoping were not attributed and will not be notified.",
+        {
+          count: legacy.length,
+          deploymentCount: this.deployments.length,
+          remedy:
+            "This gateway serves more than one Chatwoot, so these cannot be attributed safely. The affected devices must enrol again.",
+        },
+      )
+      return
+    }
+
+    const [only] = this.deployments
+    for (const item of legacy) {
+      item.deploymentId = only.id
+    }
+    await this.#persist()
+    this.logger.info(
+      "Registrations from before deployment scoping were attributed to the only configured deployment.",
+      { count: legacy.length, deploymentId: only.id },
+    )
   }
 
   async createRegistration(registration, idempotency) {
@@ -114,14 +176,32 @@ export class AtomicRegistrationStore {
   /// Chatwoot itself treats an unassigned conversation. Registrations that
   /// carry no agent identity can never match an assignee; the caller reports
   /// them so the condition is visible rather than silent.
-  async registrationsForEvent(accountID, assigneeID, ttlDays) {
+  /**
+   * Selects the devices to notify for one event (N85-64 AC1 and AC2).
+   *
+   * Filtering is by deployment first, then account, then assignee. The
+   * deployment filter is the one this method exists for: an account number is
+   * only unique within a Chatwoot, so two deployments that both have an
+   * account numbered 1 previously selected each other's registrations.
+   *
+   * `otherDeployments` counts registrations that matched the account and
+   * assignee but belong to a different Chatwoot. They are exactly the devices
+   * the old behaviour would have notified and this one does not, so the caller
+   * logs the count. Without it, the fix working and delivery being broken look
+   * identical from the outside.
+   */
+  async registrationsForEvent(deploymentID, accountID, assigneeID, ttlDays) {
     const all = await this.registrationsForAccount(accountID, ttlDays)
+
+    const mine = all.filter((item) => item.deploymentId === deploymentID)
+    const otherDeployments = all.length - mine.length
+
     if (assigneeID === undefined) {
-      return { recipients: all, unroutable: 0 }
+      return { recipients: mine, unroutable: 0, otherDeployments }
     }
-    const recipients = all.filter((item) => item.agentId === assigneeID)
-    const unroutable = all.filter((item) => item.agentId === undefined).length
-    return { recipients, unroutable }
+    const recipients = mine.filter((item) => item.agentId === assigneeID)
+    const unroutable = mine.filter((item) => item.agentId === undefined).length
+    return { recipients, unroutable, otherDeployments }
   }
 
   async registrationsForAccount(accountID, ttlDays) {
@@ -141,6 +221,8 @@ export class AtomicRegistrationStore {
           .filter((item) => item.accountId === accountID)
           .map((item) => ({
             ...registrationResponse(item).registration,
+            // Not part of the response body, but routing needs it.
+            deploymentId: item.deploymentId,
             token: decryptToken(
               item.token,
               this.encryptionKey,
@@ -304,6 +386,11 @@ export class AtomicRegistrationStore {
       profileId: registration.profileId,
       accountId: registration.accountId,
       agentId: registration.agentId,
+      // Which Chatwoot this device enrolled against (N85-64 AC4). Persisted
+      // here because this list is the whole of what is stored: a field absent
+      // from it is silently dropped on write, which is how the first version
+      // of this change routed nothing at all.
+      deploymentId: registration.deploymentId,
       environment: registration.environment,
       topic: registration.topic,
       createdAt: registration.createdAt,
@@ -376,6 +463,17 @@ function validateStore(value) {
   }
 }
 
+/**
+ * The additional data the device token is sealed against.
+ *
+ * `deploymentId` is deliberately not included, matching `agentId`, which is
+ * equally routing-critical and equally absent. Adding either would bind the
+ * token to it cryptographically, but the only attacker it would stop is one
+ * who can already rewrite this file, and that attacker has better options.
+ * The cost would be real: every registration written before deployment
+ * scoping would need decrypting and resealing during the upgrade in AC5,
+ * turning a field assignment into a migration that can fail halfway.
+ */
 function associatedData(registration) {
   return [
     registration.deviceId,

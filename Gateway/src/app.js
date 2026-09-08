@@ -8,6 +8,10 @@ import {
   tooLarge,
   unavailable,
 } from "./errors.js"
+import {
+  deploymentForBaseURL,
+  deploymentForRouteSecret,
+} from "./deployments.js"
 import { SlidingWindowRateLimiter } from "./rate-limiter.js"
 import {
   constantTimeMatches,
@@ -34,6 +38,7 @@ export function createGatewayHandler({ config, store, sender, logger }) {
     const startedAt = Date.now()
     let route = "unmatched"
     let status = 500
+    let deploymentID
 
     try {
       requireSecureTransport(request, config)
@@ -64,10 +69,19 @@ export function createGatewayHandler({ config, store, sender, logger }) {
         requireBearer(request, config.deviceAPIToken)
         const key = requireIdempotencyKey(request)
         const body = await readJSON(request, config)
-        const registration = validateCreateRegistration(
+        const submitted = validateCreateRegistration(
           body.value,
           config.apnsTopic,
         )
+        const enrolmentDeployment = resolveEnrolmentDeployment(
+          config,
+          submitted.baseUrl,
+        )
+        deploymentID = enrolmentDeployment.id
+        const registration = {
+          ...withoutBaseURL(submitted),
+          deploymentId: enrolmentDeployment.id,
+        }
         const result = await store.createRegistration(registration, {
           scope: "POST:/v1/devices",
           key,
@@ -85,11 +99,20 @@ export function createGatewayHandler({ config, store, sender, logger }) {
         requireBearer(request, config.deviceAPIToken)
         const key = requireIdempotencyKey(request)
         const body = await readJSON(request, config)
-        const registration = validateUpdateRegistration(
+        const submitted = validateUpdateRegistration(
           body.value,
           config.apnsTopic,
           deviceMatch[1],
         )
+        const enrolmentDeployment = resolveEnrolmentDeployment(
+          config,
+          submitted.baseUrl,
+        )
+        deploymentID = enrolmentDeployment.id
+        const registration = {
+          ...withoutBaseURL(submitted),
+          deploymentId: enrolmentDeployment.id,
+        }
         const result = await store.updateRegistration(registration, {
           scope: `PUT:/v1/devices/${registration.deviceId}`,
           key,
@@ -125,15 +148,28 @@ export function createGatewayHandler({ config, store, sender, logger }) {
         route = "chatwoot_webhook"
         enforceLimit(limiter, `webhook:${rateKey}`, config.webhookRateLimit)
         const suppliedSecret = parsedURL.pathname.slice(webhookPrefix.length)
-        if (
-          suppliedSecret.includes("/") ||
-          !constantTimeMatches(suppliedSecret, config.webhookRouteSecret)
-        ) {
+        // N85-64 AC1 and AC6. The route secret is the deployment's identity,
+        // because Chatwoot does not say who it is in the body. An unknown
+        // secret belongs to no configured deployment and is refused here
+        // rather than guessed at: guessing is precisely how an event from one
+        // Chatwoot could notify devices enrolled against another.
+        const deployment =
+          suppliedSecret.includes("/")
+            ? undefined
+            : deploymentForRouteSecret(config.deployments, suppliedSecret)
+        if (deployment === undefined) {
+          logger.warn("A webhook arrived on an unrecognised route.", {
+            requestId: requestID,
+            deliveryOutcome: "unknown_deployment",
+          })
           throw notFound()
         }
+        deploymentID = deployment.id
 
         const body = await readJSON(request, config)
-        if (config.webhookSigningSecret !== undefined) {
+        // AC3. Verified with this deployment's secret, so a payload signed by
+        // one deployment fails on another's endpoint.
+        if (deployment.signingSecret !== undefined) {
           verifyWebhookSignature({
             rawBody: body.raw,
             signature: request.headers["x-chatwoot-signature"],
@@ -141,7 +177,7 @@ export function createGatewayHandler({ config, store, sender, logger }) {
             // Chatwoot signs with the literal bytes of the secret it
             // issued. Decoding it as base64url only ever matched secrets the
             // gateway generated for itself.
-            secret: Buffer.from(config.webhookSigningSecret, "utf8"),
+            secret: Buffer.from(deployment.signingSecret, "utf8"),
             toleranceSeconds: config.webhookSignatureToleranceSeconds,
           })
         }
@@ -159,6 +195,7 @@ export function createGatewayHandler({ config, store, sender, logger }) {
         const result = await deliverEvent({
           identifier,
           event,
+          deployment,
           config,
           store,
           sender,
@@ -185,10 +222,61 @@ export function createGatewayHandler({ config, store, sender, logger }) {
         method: request.method,
         route,
         status,
+        // Which Chatwoot this concerned. Absent on requests that matched no
+        // deployment, which is itself the interesting case.
+        ...(deploymentID === undefined ? {} : { deploymentId: deploymentID }),
         durationMilliseconds: Date.now() - startedAt,
       })
     }
   }
+}
+
+/**
+ * Works out which deployment an enrolment belongs to (N85-64 AC4).
+ *
+ * The app sends the address of the server profile being enrolled. That is the
+ * only thing it knows which the gateway can also recognise, and it is not a
+ * secret: it is the server the agent already signs in to.
+ *
+ * When only one deployment is configured the address is optional, because
+ * there is nothing to disambiguate and requiring it would break every client
+ * built before this change. With more than one it is required, and an address
+ * the gateway has no configuration for is refused rather than attributed to
+ * whichever deployment happens to be first. Guessing here would enrol a device
+ * against a Chatwoot it has no relationship with, which is the same defect
+ * seen from the other end.
+ */
+function resolveEnrolmentDeployment(config, baseUrl) {
+  if (baseUrl === undefined) {
+    if (config.deployments.length === 1) {
+      return config.deployments[0]
+    }
+    throw badRequest(
+      "deployment_required",
+      "This gateway serves more than one Chatwoot deployment, so the enrolment must name the server it is for.",
+    )
+  }
+
+  const deployment = deploymentForBaseURL(config.deployments, baseUrl)
+  if (deployment === undefined) {
+    throw badRequest(
+      "unknown_deployment",
+      "This gateway has no configuration for that Chatwoot server, so the device was not enrolled.",
+    )
+  }
+  return deployment
+}
+
+/**
+ * Drops the submitted address once it has served its purpose.
+ *
+ * The deployment identifier is what routing needs. Keeping the address as
+ * well would store the same fact twice, and the two could then disagree after
+ * a deployment is reconfigured.
+ */
+function withoutBaseURL(registration) {
+  const { baseUrl: _ignored, ...rest } = registration
+  return rest
 }
 
 export function createGateway({ config, store, sender, logger }) {
@@ -214,6 +302,7 @@ export function createGateway({ config, store, sender, logger }) {
 async function deliverEvent({
   identifier,
   event,
+  deployment,
   config,
   store,
   sender,
@@ -228,15 +317,37 @@ async function deliverEvent({
     return { statusCode: 202, body: { status: "duplicate" } }
   }
 
-  const { recipients: registrations, unroutable } =
-    await store.registrationsForEvent(
-      event.accountId,
-      event.assigneeId,
-      config.registrationTTLDays,
-    )
+  // N85-64 AC1. Scoped to the deployment the event arrived from. Two
+  // deployments that both have an account numbered 1 previously selected the
+  // same registrations, so an event on one could notify devices enrolled
+  // against the other.
+  const {
+    recipients: registrations,
+    unroutable,
+    otherDeployments,
+  } = await store.registrationsForEvent(
+    deployment.id,
+    event.accountId,
+    event.assigneeId,
+    config.registrationTTLDays,
+  )
   if (registrations.length > config.maxRegistrationsPerEvent) {
     throw unavailable()
   }
+  if (otherDeployments > 0) {
+    // AC1 asks that the gateway records an event matching no registration for
+    // its deployment. Recorded whenever registrations existed for this account
+    // under a different deployment, because that is the case where the old
+    // behaviour would have notified them and this one does not. Silence here
+    // would make the fix indistinguishable from a delivery failure.
+    logger.info("Registrations for another deployment were not notified.", {
+      requestId: requestID,
+      deploymentId: deployment.id,
+      deliveryOutcome: "other_deployment_registrations",
+      count: otherDeployments,
+    })
+  }
+
   if (unroutable > 0) {
     // Enrolled before the client sent an agent identity. Such a device cannot
     // be matched to an assignee, so it is excluded rather than notified about

@@ -13,7 +13,7 @@ import {
 
 async function sendWebhook(harness, body, headers = {}) {
   return harness.request(
-    `/v1/webhooks/chatwoot/${harness.config.webhookRouteSecret}`,
+    `/v1/webhooks/chatwoot/${harness.config.deployments[0].routeSecret}`,
     {
       method: "POST",
       headers: { "content-type": "application/json", ...headers },
@@ -243,7 +243,13 @@ test("a stored registration without an agent identity is excluded and reported",
   const harness = await createHarness()
   t.after(() => harness.close())
 
-  const legacy = registration({ environment: "production" })
+  // Carries the deployment, because that is a separate filter and this test
+  // is about the agent identity one. A registration with neither is covered
+  // by the migration tests instead.
+  const legacy = registration({
+    environment: "production",
+    deploymentId: harness.deployments[0].id,
+  })
   delete legacy.agentId
   await harness.store.createRegistration(legacy, {
     key: "legacy-device-00001",
