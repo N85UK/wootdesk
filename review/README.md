@@ -67,7 +67,7 @@ curl -o /dev/null -w '%{http_code}\n' -H "api-access-token: $TOKEN" https://revi
 |---|---|
 | Server address | `https://review.n85.app` |
 | Account | `WootDesk Demo Support`, account ID 1 |
-| Agent | `Demo Agent`, administrator |
+| Agents | `Demo Agent`, the seeded user, and the user whose credentials App Store Connect holds, named `WootDesk Demo Support`; both administrators of this account |
 | Conversations | Three: two open, one resolved, so status filtering has something to show |
 | Labels | `billing`, `export`, `engineering` |
 | Messages | Each conversation has an incoming message, an agent reply, and a private note |
@@ -85,6 +85,16 @@ App Store Connect's private App Review fields.
 | `REVIEW_AGENT_EMAIL` | Chatwoot sign-in for the reviewer |
 | `REVIEW_AGENT_PASSWORD` | Chatwoot sign-in for the reviewer |
 | `REVIEW_ACCESS_TOKEN` | The token the reviewer pastes into WootDesk |
+
+**App Store Connect does not hold these.** On 4 September 2026, five minutes
+before submission, a second Chatwoot user was created for App Review with its
+own empty account, and that user's token was entered in App Store Connect. The
+reviewer signed in, found no conversations, and both platforms were rejected
+for information. On 10 September that user was made an administrator of
+`WootDesk Demo Support` and a member of its inbox, and removed from the empty
+account, so the credentials Apple holds now open the seeded data. Its token is
+not in Infisical. To check what a reviewer sees, use the demo account password
+shown in App Store Connect's App Review Information against `/api/v1/profile`.
 
 Retrieve one with:
 
@@ -104,8 +114,10 @@ ssh <vps> 'cd <deploy-root>/wootdesk-review && docker compose logs --tail 50 rai
 ssh <vps> 'cd <deploy-root>/wootdesk-review && docker compose restart rails sidekiq'
 ```
 
-Account signup is disabled (`ENABLE_ACCOUNT_SIGNUP=false`), so the environment
-cannot accumulate unexpected users while it is publicly reachable.
+Account signup is disabled (`ENABLE_ACCOUNT_SIGNUP=false`), so strangers cannot
+create accounts while it is publicly reachable. That did not keep the user list
+as seeded: a second user and account were added on 4 September 2026 by a route
+other than public signup, and nobody noticed until App Review failed.
 
 ## Re-seeding
 
@@ -118,13 +130,13 @@ ssh <vps> 'cd <deploy-root>/wootdesk-review && docker compose exec -T \
   rails bundle exec rails runner /app/seed_review_data.rb'
 ```
 
-## Current state: stopped
+## Current state: running
 
-The containers are **stopped**, so `https://review.n85.app` returns 502. DNS,
-the nginx site, the Let's Encrypt certificate and all three data volumes are
-kept, so restarting restores the same account, the same seeded conversations
-and, importantly, the **same access token**. Nothing in App Store Connect needs
-re-entering.
+Running since 4 September 2026, and `https://review.n85.app` returned HTTP 200
+on 10 September. Keep it running until both platforms are approved. If it is
+ever stopped, DNS, the nginx site, the Let's Encrypt certificate and all three
+data volumes are kept, so restarting restores the same accounts, conversations
+and access tokens, and nothing in App Store Connect needs re-entering.
 
 ```bash
 ssh <vps> 'cd <deploy-root>/wootdesk-review && docker compose start'
