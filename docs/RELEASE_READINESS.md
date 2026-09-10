@@ -2,17 +2,17 @@
 
 Document ID: `WOOT-REL-001`
 
-Status: Blocked for public App Store release
+Status: Submitted for App Review. macOS rejected for information on 5 September 2026; iOS awaiting review as last recorded
 
 Owner: N85 Dev
 
-Last reviewed: 1 September 2026
+Last reviewed: 10 September 2026
 
 ## Release details
 
 | Field | Detail |
 |---|---|
-| Proposed release | 1.0.0 (35 or later); build 34 is the current TestFlight candidate, delivered by CI |
+| Proposed release | 1.0.0. Current candidates are iOS build 111 and macOS build 112, both delivered by CI on Xcode 26.6.0 and `VALID` on 8 September 2026 |
 | Release channel | TestFlight first, then App Store after approval |
 | Platforms | iOS, iPadOS, macOS |
 | Release date | To confirm |
@@ -92,19 +92,19 @@ No platform version has been submitted for App Review.
 
 | ID | Criterion | Evidence | Status |
 |---|---|---|---|
-| GO-001 | Automated source checks pass | `./script/ci.sh` re-run on 1 September 2026 evening at commit `d0b8b22`: macOS and generic iOS Simulator builds and **192 Swift tests in 19 suites** passed, with 18 Node gateway tests; the three opt-in live compatibility tests skip by design. The earlier `--with-ui-tests` run added 4 macOS UI tests | Pass |
+| GO-001 | Automated source checks pass | CI passed at `182e20f` on 8 September 2026. The same day, local runs passed **230 Swift tests in 24 suites** on the iOS Simulator and **57 Node gateway tests**. The three opt-in live compatibility tests skip by design | Pass |
 | GO-002 | Live self-hosted connection works | Maintainer confirmed connection on 30 August 2026, no credential retained | Pass |
 | GO-003 | Message history, replies, private notes, and attachments meet Milestone 2 acceptance | **Verified against a live Chatwoot v4.9.0 server** on 2 September 2026. All three opt-in compatibility cases passed, covering history, public replies, private notes, attachments, availability and triage, with both write gates set. TestFlight device acceptance remains | Pass against the dedicated server |
-| GO-004 | iOS and macOS archives validate locally | Signed build 3 iOS archive and App Store export passed; signed universal build 3 macOS archive and installer export passed with the expected sandbox, runtime, icon, privacy, metadata, installer identity, and embedded profile | Pass |
-| GO-005 | Physical-device TestFlight checks pass | **iPhone and iPad both passed on hardware**, 4 of 4 UI journeys each: iPhone 17 Pro Max on iOS 27.0 with a real push notification delivered, and iPad Pro 13-inch (M4) on iPadOS 27.0. Apple silicon Mac passed the same suite. Manual acceptance cases and Intel Mac outstanding | Pass on iPhone, iPad and Apple silicon Mac |
-| GO-013 | App Review outcome | **macOS 1.0 build 100 was rejected on 5 September 2026 under Guideline 2.1, Information Needed.** Not a functional defect: the notice states the developer account has a limited App Review history and asks for a screen recording plus written answers on purpose, setup, external services, regional differences and regulated material. Answers to items 2 to 6 are now in the App Review Notes on **both** platforms, since iOS is still `WAITING_FOR_REVIEW` on the same account and will likely be asked the same. The screen recording on a physical device is outstanding and is the account holder's to make | Blocked on a screen recording |
-| GO-006 | App Store metadata and screenshots are approved | **Both platforms submitted on 4 September 2026 and are `WAITING_FOR_REVIEW`.** iOS carries build 98 with a 2075 character description, keywords and two screenshots; macOS carries build 100, the first macOS build ever uploaded, with a 2210 character description, keywords and two 2880 x 1800 screenshots recaptured from the current build. Apple has not yet reviewed either | Submitted, approval pending |
-| GO-007 | Privacy and export-compliance answers are approved | Builds 2 and 3 declare `ITSAppUsesNonExemptEncryption = false`; App Store privacy answers remain pending | In progress |
-| GO-008 | Dedicated App Review server and account are ready | Private review runbook | Not started |
+| GO-004 | iOS and macOS archives validate locally | Superseded by stronger evidence. CI archives, exports and uploads both platforms on Xcode 26.6.0, and App Store Connect accepted iOS build 111 and macOS build 112 as `VALID` on 8 September 2026. The macOS archive is universal, compiled for arm64 and x86_64. The build 3 local archives this row previously cited predate the push capability | Pass |
+| GO-005 | Physical-device TestFlight checks pass | **iPhone and iPad both passed on hardware**, 4 of 4 UI journeys each: iPhone 17 Pro Max on iOS 27.0 with a real push notification delivered, and iPad Pro 13-inch (M4) on iPadOS 27.0. Apple silicon Mac passed the same suite. **Intel Mac recorded as unavailable on 10 September 2026**, because no Intel hardware is available. Manual acceptance cases outstanding | Pass on iPhone, iPad and Apple silicon Mac; Intel unavailable |
+| GO-013 | App Review outcome | **macOS 1.0 build 100 was rejected on 5 September 2026 under Guideline 2.1, Information Needed.** Not a functional defect: the notice states the developer account has a limited App Review history and asks for a screen recording plus written answers on purpose, setup, external services, regional differences and regulated material. Answers to items 2 to 6 are in the App Review Notes on **both** platforms. macOS build 109 was attached to the rejected version on 5 September. **Build 112**, uploaded 8 September, is the first macOS build to send the agent identity when refreshing an APNs token, which the gateway otherwise refuses with HTTP 400, so the resubmission and its screen recording should use 112. The recording on a physical device is the account holder's to make. iOS was last recorded `WAITING_FOR_REVIEW` on 5 September and has not been re-read since | Blocked on a screen recording |
+| GO-006 | App Store metadata and screenshots are approved | **Both platforms submitted on 4 September 2026**: iOS with build 98 and macOS with build 100, each with description, keywords and screenshots. macOS was rejected on 5 September for information, see GO-013. iOS was last recorded `WAITING_FOR_REVIEW` on 5 September. Live App Store Connect state was not re-read on 10 September, because the Infisical session holding the API key had expired. Owner approval of this content belongs to GO-010 | Submitted; macOS rejected, iOS pending as last recorded |
+| GO-007 | Privacy and export-compliance answers are approved | **Export compliance:** the current source declares `ITSAppUsesNonExemptEncryption = false` in `Info-Release.plist`, verified 10 September 2026. **Privacy:** the answer was corrected on 3 September to declare Device ID and User ID, collected for App Functionality, linked to the user and not used for tracking, because the push gateway stores both. It replaced the earlier "Data Not Collected" answer. The API cannot set privacy fields, so the answer is entered by hand, and **no record confirms App Store Connect was updated**. Check App Privacy before resubmitting: an App Store answer that disagrees with the privacy manifest in the build is a mismatch App Review can raise | Decided; App Store Connect entry unconfirmed |
+| GO-008 | Dedicated App Review server and account are ready | **Server ready.** `review.n85.app` is defined in `review/` and returned HTTP 200 on 10 September 2026. **Demo credentials unconfirmed.** `demoAccountRequired` is true on both platforms, and the demo account name and password were recorded empty on 3 September. No later record shows them entered. They are credentials, entered by hand from Infisical `prod:/review`, so they could not be checked from here | Server ready; demo credentials unconfirmed |
 | GO-009 | App Store Connect agreements and roles are ready | Free Apps and Paid Apps agreements are `Active` to 24 July 2027, bank account and tax forms `Active`. The MRDP compliance declaration was answered on 1 September 2026, which cleared the upload refusal. **Digital Services Act trader verification failed on 4 September 2026** and no longer reads `In Review`. Apple Developer Support, case 20000152699489, gave the reason: the address entered in App Store Connect does not match the supporting documentation supplied. Neither app on the account is live, both being `PREPARE_FOR_SUBMISSION`, so nothing is being withdrawn from sale; the notice's warning about remaining available in the EU is boilerplate. It blocks EU release rather than delivery, and it is the account holder's to resolve in App Store Connect under Business, legal entity, Agreements, Compliance | Blocked for EU release |
-| GO-010 | Product, security, and release owners record Go | Signed decision table below | Not started |
-| GO-011 | macOS App Store package exports and validates | Xcode export succeeded; the Apple-issued installer signature validates, the embedded profile matches `dev.n85.wootdesk`, and the payload remains universal | Pass locally, upload pending |
-| GO-012 | Remote new-message notifications are private, profile-safe, and reliable | Source complete. Per-agent routing implemented per `DEC-008`: an assigned conversation reaches only the assignee, an unassigned one reaches every agent on the account. 28 gateway tests and 230 Swift tests pass, and the payload carries no message content. **Real APNs delivery has been exercised** on a physical iPhone: three routing cases were run against the live gateway, including the isolation proof that an assigned conversation reaches only the assignee. The earlier wording here, that no real delivery had been exercised, contradicted GO-005 and the record in `docs/PUSH_NOTIFICATIONS.md`, and was stale. What remains is delivery to a physical **iPad and Mac**, and a second physical handset for the negative case, which used a stand-in token because enrolling a second device needs notification permission and profile entry that cannot be automated | In progress; iPhone delivery proven, iPad and Mac delivery outstanding |
+| GO-010 | Product, security, and release owners record Go | Signed decision table below, still pending. **Both platforms were submitted on 4 September 2026 before any decision was recorded**, so the table now records approval after submission rather than before it | Not started |
+| GO-011 | macOS App Store package exports and validates | CI exports and uploads the macOS package. Builds 100, 109 and 112 are on App Store Connect's macOS build list as `VALID`, verified 8 September 2026. The archive is universal, compiled for arm64 and x86_64 | Pass |
+| GO-012 | Remote new-message notifications are private, profile-safe, and reliable | Per-agent routing per `DEC-008`: an assigned conversation reaches only the assignee, an unassigned one reaches every agent on the account. **Real APNs delivery has been exercised** on a physical iPhone, with three routing cases run against the live gateway, including the isolation proof. **Deployment scoping (N85-64) went live on 8 September 2026**: notifications route per Chatwoot deployment, proven end to end against a second deployment, and the one existing production registration was attributed on upgrade. Builds 111 and 112 are the first to send the agent identity when refreshing an APNs token; earlier builds had refresh refused with HTTP 400. That production registration carries no agent identity, so its device must re-enrol on build 111 or later before assigned conversations reach it. 57 gateway tests and 230 Swift tests pass, and the payload carries no message content. Outstanding: delivery to a physical **iPad and Mac**, and a second physical handset for the negative case, which used a stand-in token | In progress; iPhone delivery proven, iPad and Mac delivery outstanding |
 
 ## Quality checks
 
@@ -121,8 +121,8 @@ No platform version has been submitted for App Review.
 | Notification system source | Permission, cold-launch routing, secure enrolment, APNs rotation, removal, webhook filtering, and encrypted storage work without exposing tokens or message content | Dedicated Swift client tests, 18 Node gateway tests, and unsigned macOS and iOS Simulator builds | Pass for source; Apple activation, deployment, and devices blocked |
 | App icons | Asset catalogue validates on both platforms | Debug and Release platform builds passed | Pass |
 | iOS distribution | App Store package signs and exports | Build 24 archived, exported, uploaded, and processed to `VALID` on 1 September 2026, which proves distribution signing end to end | Pass |
-| macOS distribution | Sandboxed universal archive validates and exports | Build 3 archive and signed App Store installer export pass; upload has not started | Pass locally, upload pending |
-| Real devices | Supported-device behaviour | **iPhone acceptance passed on 3 September 2026**: 4 of 4 UI journeys on an iPhone 17 Pro Max running iOS 27.0, plus a real APNs notification delivered to the same handset on 2 September. iPad and Mac hardware outstanding | Passed on iPhone; iPad and Mac outstanding |
+| macOS distribution | Sandboxed universal archive validates and exports | CI archives, exports and uploads a universal arm64 and x86_64 package; builds 100, 109 and 112 are `VALID` on App Store Connect | Pass |
+| Real devices | Supported-device behaviour | **Passed on hardware on 3 September 2026**: 4 of 4 UI journeys on an iPhone 17 Pro Max running iOS 27.0, plus a real APNs notification on 2 September, and 4 of 4 on an iPad Pro 13-inch (M4). Apple silicon Mac passed the UI suite. Intel Mac unavailable, see the test matrix | Passed on iPhone, iPad and Apple silicon Mac; Intel unavailable |
 
 ## Required release test matrix
 
@@ -131,16 +131,22 @@ No platform version has been submitted for App Review.
 | iPhone | iOS 18 | Current supported iOS, small and large Dynamic Type | **Passed on hardware, 3 September 2026.** iPhone 17 Pro Max, iOS 27.0 build 24A5430a, 4 of 4 UI journeys including the conversation history and reply flow and the cold-launch metric. Dynamic Type on hardware still outstanding |
 | iPad | iPadOS 18 | Compact and regular layouts, keyboard navigation | **Passed on hardware, 3 September 2026.** iPad Pro 13-inch (M4), iPadOS 27.0 build 24A5424a, 4 of 4 UI journeys. Manual cases outstanding |
 | Mac | macOS 15 | Apple silicon, keyboard shortcuts, window restoration | Native build, unit tests, and 3 macOS UI tests pass on this Apple silicon host |
-| Mac | macOS 15 | Intel where available | Not started |
+| Mac | macOS 15 | Intel where available | **Unavailable, recorded 10 September 2026.** No Intel Mac is available to the project, and N85-18 AC4 accepts an unavailable result. The shipped macOS build is universal, so its x86_64 code is compiled by CI and reaches Intel users, but it has never run on Intel hardware: a defect specific to Intel would not have been seen |
 
 ## Automated verification evidence
 
-Source validation used Xcode 27.0 beta 6, build 27A5252f, with Apple Swift 6.4.
-Build 24's acceptance by App Store Connect supersedes the earlier caveat about
-whether the source was signable with the push capability: it is.
+Release builds are produced by CI on **Xcode 26.6.0**, a stable release, which
+App Review requires. Verified from the logs of the runs that uploaded iOS build
+111 and macOS build 112 on 8 September 2026.
+
+The rows after the first are dated evidence from earlier stages, kept as
+history. That earlier source validation used Xcode 27.0 beta 6, build 27A5252f,
+with Apple Swift 6.4. Build 24's acceptance by App Store Connect settled whether
+the source was signable with the push capability: it is.
 
 | Command | Result |
 |---|---|
+| CI release builds, 8 September 2026 | iOS build 111 and macOS build 112 archived, exported and uploaded by `.github/workflows/testflight.yml` on Xcode 26.6.0; both `VALID` on App Store Connect. CI passed at `182e20f` |
 | `xcodegen generate --spec project.yml` | Passed |
 | `./script/ci.sh` at commit `d0b8b22`, 1 September 2026 | Generic macOS and iOS Simulator Debug builds, **192 Swift tests in 19 suites**, 18 Node gateway tests, and the dependency policy check passed; the three opt-in live compatibility tests were skipped by design. The earlier `--with-ui-tests` run added 4 macOS UI tests |
 | Focused availability regression suite | Eight tests passed, including a confirmed availability mutation followed by profile switching and relaunch, immediate state clearing during the switch, and rejection of a delayed response from the previous profile |

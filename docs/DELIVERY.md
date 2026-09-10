@@ -6,7 +6,7 @@ Status: In review
 
 Owner: N85 Dev
 
-Last reviewed: 1 September 2026, evening
+Last reviewed: 10 September 2026
 
 ## Current delivery position
 
@@ -85,12 +85,12 @@ Store release. No macOS build has been uploaded.
 | G1 Repository foundation | Shared scheme, scripts, CI, documentation | Implemented |
 | G2 Secure connection | Profile validation, Keychain token, profile persistence | Implemented and locally verified |
 | G3 Conversation list | Real list, paging, filters, clear states | Implemented and locally verified |
-| G4 Automated quality | macOS and iOS builds, unit tests, UI tests, performance checks | The current source passes macOS and iOS Simulator builds, **194 Swift tests in 19 suites** including the performance regression checks, 18 Node gateway tests, and the 4 UI tests. On 1 September 2026 the UI suite was re-run on iPhone 17 Pro and iPad Pro 13-inch simulators, 4 of 4 passing on each, which closes the earlier caveat that the iPhone and iPad journeys predated the conversation actions and the iPad split layout. Physical-hardware runs remain outstanding. The three opt-in live compatibility tests are skipped by design |
-| G5 Signed archives | iOS and macOS Organizer validation | Cleared for iOS. An App Store Connect API key now refreshes the managed profiles during the build, so iOS produces a distribution-signed archive. Build 24 was accepted by App Store Connect on 1 September 2026, which is the proof. macOS installer signing still needs the `3rd Party Mac Developer Installer` identity |
-| G6 TestFlight | Physical-device and Mac acceptance | Automated delivery works. `.github/workflows/testflight.yml` is armed and run 33544372320 uploaded build 34, now `VALID` and `IN_BETA_TESTING`. Every green push to `main` now delivers. Build 24 remains `INSTALLED` on one internal tester's device. Documented acceptance runs are still unrecorded, and that is now the gating item |
+| G4 Automated quality | macOS and iOS builds, unit tests, UI tests, performance checks | **Verified.** CI passed at `182e20f` on 8 September 2026, and local runs that day passed **230 Swift tests in 24 suites** and **57 Node gateway tests**. The UI journeys passed on physical hardware on 3 September 2026, 4 of 4 on both an iPhone 17 Pro Max and an iPad Pro 13-inch (M4). The three opt-in live compatibility tests are skipped by design |
+| G5 Signed archives | iOS and macOS Organizer validation | **Cleared for both platforms.** iOS signs manually against the `WootDesk iOS App Store` profile, which stopped CI minting development certificates on 3 September 2026. The macOS installer identity is evidently in CI, because CI signed and uploaded macOS build 112 on 8 September. App Store Connect accepted iOS build 111 and macOS build 112 as `VALID` |
+| G6 TestFlight | Physical-device and Mac acceptance | Delivery works on both platforms: every green code push delivers iOS, and macOS is delivered by manual dispatch. Current builds are iOS 111 and macOS 112, both `VALID` on 8 September 2026. Acceptance is recorded: iPhone and iPad passed on hardware on 3 September, Apple silicon Mac passed the UI suite, and Intel Mac was recorded unavailable on 10 September |
 | G7 Product completeness | Message history, replies, private notes, attachments, and conversation triage | Source complete and **verified against a live Chatwoot v4.9.0 server** on 2 September 2026, 3 of 3 compatibility cases passing including the mutating triage checks |
-| G8 Public release | Explicit product, security, and release approval | No-go |
-| G9 Remote notifications | Push provider, push-capable signing, and profile-safe physical-device delivery | Push Notifications is confirmed on the App ID and the build signs with it. Per-agent routing is now implemented per `DEC-008`, so N85-15 AC2 is met in source. Gateway deployment and physical delivery acceptance remain, and the routing has not been exercised against a real APNs delivery |
+| G8 Public release | Explicit product, security, and release approval | **No-go.** No owner decision is recorded. Both platforms were nevertheless submitted for review on 4 September 2026, so approval, when recorded, will follow submission rather than precede it. See the approval table in `RELEASE_READINESS.md` |
+| G9 Remote notifications | Push provider, push-capable signing, and profile-safe physical-device delivery | Gateway live at `push.n85.app`. Real APNs delivery proven on a physical iPhone on 2 September 2026, including per-agent isolation. Deployment scoping (N85-64) went live on 8 September. Delivery to a physical iPad and Mac remains outstanding |
 
 ## Signing, resolved
 

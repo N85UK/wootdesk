@@ -164,7 +164,11 @@ for the platform, add the version as a `reviewSubmissionItem`, then patch the
 submission with `submitted: true`. The second call is where version validation
 runs, so that is where missing metadata surfaces.
 
-## Current submission snapshot
+## Earlier submission snapshot, superseded
+
+This table predates the 4 September 2026 submission recorded above and no
+longer describes the app. Current review state is tracked in
+`docs/RELEASE_READINESS.md` under GO-006 and GO-013.
 
 | Item | Verified state |
 |---|---|
@@ -451,8 +455,10 @@ payload, or the set of linked services changes, revisit it.
 WootDesk uses operating-system HTTPS and Keychain services and does not
 implement its own encryption algorithm. Builds 2 and 3 therefore declare
 `ITSAppUsesNonExemptEncryption = false`. App Store Connect processed build 2
-without the Missing Compliance state shown for build 1. Build 3 has not been
-uploaded, so its server-side compliance state is not yet known. Retain this
+without the Missing Compliance state shown for build 1. The declaration
+remains in the current source, verified on 10 September 2026, and both
+platforms were submitted for review on 4 September, which App Store Connect
+does not allow while a build's export compliance is unanswered. Retain this
 declaration only while the app continues to use exempt Apple operating-system
 cryptography, and reassess it if the implementation or linked services change.
 
