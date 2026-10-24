@@ -3,6 +3,16 @@
 A dedicated Chatwoot server at `https://review.n85.app` holding invented data
 only, for Apple App Review.
 
+## Chatwoot maintenance, 24 October 2026 (N85-180)
+
+The prepared release pins all three application services to Chatwoot 4.19.1 and
+its reviewed image digest. The controlled update requires a fresh database,
+storage and configuration backup with off-host read-back, an isolated migration
+rehearsal, and independent HTTP, token-header, version and database checks.
+Keep existing reviewer accounts, tokens, conversations and storage. Do not run
+the seed script during this upgrade. Execution and final deployed state are
+recorded in the Fleet N85-180 maintenance evidence.
+
 ## Why it exists
 
 WootDesk cannot be assessed without a Chatwoot server. A reviewer given no
