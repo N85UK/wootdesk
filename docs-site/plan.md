@@ -25,7 +25,7 @@ public-safe information.
 - Every method and path returns 410 with a plain accessible retirement page.
   Only GET/HEAD /build-info.json returns 200 with exact commit, built and
   retired:true metadata. HEAD always has an empty body.
-- All responses carry an explicit content type, no-store, noindex, nosniff and
+- All responses carry an explicit content type, no-store, no-transform, noindex, nosniff and
   a restrictive CSP. Old documentation, downloads, search and asset URLs cannot
   fall back to old files or another site.
 - Emit a separate verified retirement artifact. Preserve the legacy source and

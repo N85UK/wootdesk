@@ -20,7 +20,7 @@ exact build metadata and a hash manifest. Wrangler main points to that Worker
 and has no assets entry, binding or fallback. The Worker has no outbound calls
 or environment access. All paths/methods return 410 except GET/HEAD
 /build-info.json, whose exact commit/built/retired:true metadata returns 200.
-HEAD has no body. Apply no-store/noindex/nosniff and restrictive CSP throughout.
+HEAD has no body. Apply no-store/no-transform/noindex/nosniff and restrictive CSP throughout.
 
 Existing CI remains the deployment mechanism: verify and upload one artifact,
 then download and reverify those bytes in the push-main-only deployment job.

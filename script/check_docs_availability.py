@@ -58,7 +58,7 @@ def validate_response(method, path, expected_status, status, headers, body, expe
         return False, 'unexpected_status_or_redirect'
     if len(body) > MAX_BODY:
         return False, 'response_oversized'
-    required = {'cache-control': 'no-store', 'x-robots-tag': 'noindex, nofollow, noarchive',
+    required = {'cache-control': 'no-store, no-transform', 'x-robots-tag': 'noindex, nofollow, noarchive',
                 'x-content-type-options': 'nosniff', 'content-security-policy': CSP}
     if any(headers.get(key) != value for key, value in required.items()):
         return False, 'retirement_headers_missing'
@@ -88,6 +88,17 @@ def validate_response(method, path, expected_status, status, headers, body, expe
     return True, 'ok'
 
 
+def body_diagnostics(body):
+    """Only fixed classifications and hashes, never HTML or provider identifiers."""
+    lower = body.lower()
+    return {'bytes': len(body), 'sha256': hashlib.sha256(body).hexdigest(),
+            'expected_sha256': RETIREMENT_BODY_SHA256,
+            'script_elements': len(re.findall(rb'<script(?:\s|>)', lower)),
+            'cloudflare_analytics_marker': b'cloudflareinsights' in lower,
+            'cloudflare_challenge_marker': b'/cdn-cgi/challenge-platform/' in lower,
+            'crlf_count': body.count(b'\r\n')}
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument('--expected-build-info', type=Path)
@@ -110,6 +121,8 @@ def main(argv=None):
         try:
             result = fetch(path, method)
             ok, detail = validate_response(method, path, status, *result, expected_metadata=expected)
+            if detail == 'retirement_body_mismatch':
+                print('diagnostic ' + json.dumps(body_diagnostics(result[2]), sort_keys=True))
         except (OSError, http.client.HTTPException, ValueError):
             ok, detail = False, 'transport_or_tls_failure'
         elapsed = time.monotonic() - started

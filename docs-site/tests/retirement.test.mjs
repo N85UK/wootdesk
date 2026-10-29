@@ -121,3 +121,13 @@ test('retirement gates every native distribution job while retaining normal CI',
   assert.ok(ci.jobs['build-and-test']);
   assert.notEqual(ci.jobs['build-and-test'].if, '${{ false }}');
 });
+
+test('retirement responses forbid intermediary transformations without relaxing byte checks', async () => {
+  for (const pathname of ['/', '/help/support/', '/build-info.json']) {
+    for (const method of ['GET', 'HEAD']) {
+      const response = worker.fetch(request(method, pathname));
+      assert.equal(response.headers.get('cache-control'), 'no-store, no-transform');
+      if (method === 'GET' && pathname !== '/build-info.json') assert.equal(sha256(await response.text()), sha256(RETIREMENT_PAGE));
+    }
+  }
+});

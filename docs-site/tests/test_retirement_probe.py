@@ -14,7 +14,7 @@ spec = importlib.util.spec_from_file_location('retirement_probe', SOURCE)
 probe = importlib.util.module_from_spec(spec)
 exec(compile(SOURCE.read_bytes(), str(SOURCE), 'exec'), probe.__dict__)
 INFO = {'commit': 'a' * 40, 'built': '2026-10-29T08:00:00.000Z', 'retired': True}
-HEADERS = {'cache-control': 'no-store', 'x-robots-tag': 'noindex, nofollow, noarchive',
+HEADERS = {'cache-control': 'no-store, no-transform', 'x-robots-tag': 'noindex, nofollow, noarchive',
            'x-content-type-options': 'nosniff', 'content-security-policy': probe.CSP,
            'content-type': 'application/json; charset=utf-8'}
 
@@ -54,6 +54,21 @@ class ProbeTests(unittest.TestCase):
             self.assertTrue(probe.validate_response('GET', '/', 410, 410, headers, body)[0])
             self.assertFalse(probe.validate_response('GET', '/', 410, 410, headers, body + b'old docs')[0])
         self.assertFalse(probe.validate_response('GET', '/', 410, 410, headers, b'x' * (probe.MAX_BODY + 1))[0])
+
+    def test_no_transform_is_required_and_diagnostics_never_disclose_html(self):
+        body = b'<script src="https://cloudflareinsights.example.invalid/private-sentinel"></script>'
+        facts = probe.body_diagnostics(body)
+        self.assertEqual(facts['bytes'], len(body))
+        self.assertEqual(facts['script_elements'], 1)
+        self.assertTrue(facts['cloudflare_analytics_marker'])
+        self.assertNotIn('private-sentinel', json.dumps(facts))
+        self.assertNotIn('https://', json.dumps(facts))
+        old = {**HEADERS, 'cache-control': 'no-store'}
+        self.assertEqual(probe.validate_response('GET', '/build-info.json', 200, 200,
+                                                old, json.dumps(INFO).encode()),
+                         (False, 'retirement_headers_missing'))
+        self.assertEqual(probe.validate_response('GET', '/build-info.json', 200, 200,
+                                                HEADERS, json.dumps(INFO).encode()), (True, 'ok'))
 
     def test_strict_tls_fixed_host_no_redirect_follow_and_bounded_read(self):
         context = ssl.create_default_context()

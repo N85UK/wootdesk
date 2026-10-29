@@ -17,7 +17,7 @@ export const RETIREMENT_PAGE = `<!doctype html>
 `;
 
 export const SECURITY_HEADERS = Object.freeze({
-  'cache-control': 'no-store',
+  'cache-control': 'no-store, no-transform',
   'x-robots-tag': 'noindex, nofollow, noarchive',
   'x-content-type-options': 'nosniff',
   'content-security-policy': "default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",

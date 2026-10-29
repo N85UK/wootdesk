@@ -9,7 +9,7 @@ The retirement Worker has no assets, bindings, environment access or outbound
 requests. Every path and method returns **410 Gone** with an accessible plain
 retirement page. Only `GET` and `HEAD /build-info.json` return 200 with exact
 `commit`, `built` and `retired: true` metadata. Every HEAD response has no body.
-Responses include no-store, noindex, nosniff and a restrictive CSP.
+Responses include no-store, no-transform, noindex, nosniff and a restrictive CSP.
 
 The dedicated Worker name/custom domain remain unchanged. `workers_dev` and
 `preview_urls` stay disabled. No other site's route, build or index is shared.
