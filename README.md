@@ -1,5 +1,9 @@
 # WootDesk
 
+> **Retired, 29 October 2026:** WootDesk is no longer being developed or distributed. The source, historical documentation, tests and recovery material are retained. WootDesk demo and push services are being retired through a guarded process that preserves acknowledged work and stored data. Shared Chatwoot support and its embedded live chat remain in service.
+
+The feature descriptions and setup instructions below are historical reference.
+
 WootDesk is an independent, native Apple-platform client for [Chatwoot](https://www.chatwoot.com) customer support platforms. It is designed to run seamlessly across macOS, iOS, and iPadOS, connecting directly to self-hosted installations and cloud instances that you control.
 
 > [!IMPORTANT]

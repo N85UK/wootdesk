@@ -10,12 +10,16 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro build",
+    "build": "node scripts/build-retirement.mjs",
+    "build:legacy": "astro build",
     "preview": "astro preview",
     "check": "astro check",
     "verify:boundary": "node scripts/check-content-boundary.mjs",
     "verify:links": "node scripts/check-internal-links.mjs",
-    "verify": "npm run verify:boundary && npm run verify:links && npm run verify:external && npm run verify:a11y",
+    "verify": "npm run test:retirement && npm run verify:boundary && npm run verify:retirement",
+    "test:retirement": "node --test tests/retirement.test.mjs && python3 -B -m unittest discover -s tests -p test_retirement_probe.py",
+    "verify:retirement": "node scripts/verify-retirement.mjs",
+    "verify:a11y:retirement": "playwright test --config playwright.retirement.config.mjs",
     "verify:a11y": "playwright test",
     "verify:external": "node scripts/check-external-links.mjs"
   },

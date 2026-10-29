@@ -1,12 +1,8 @@
 name: Documentation availability
 
-# N85-47 AC11. Checks that docs.n85.app is actually serving.
-#
-# Three probes rather than one. A documentation site fails in parts: the home
-# page can serve while the search index 404s, and search can work while a
-# content route breaks after a routing change. The support route is included
-# because the App Store listing points at it, so its absence is visible to
-# Apple's reviewers and to anyone looking for help.
+# N85-47 lifecycle check: retirement must remain visible at every old route.
+# Require 410 for product/search/download paths and exact valid retirement
+# metadata. Strict TLS, no redirects and negative probes remain mandatory.
 #
 # This notifies rather than acting, matching the review-environment workflow.
 # There is nothing safe for an unattended job to do about an outage except say
@@ -38,7 +34,7 @@ jobs:
       # The exit status is read separately rather than through a pipe, because
       # piping into tee reports tee's status and the check always looks green.
       # That exact mistake produced a false issue on this repository before.
-      - name: Probe the public documentation site
+      - name: Probe the public retirement contract
         id: probe
         run: |
           set +e
@@ -64,7 +60,7 @@ jobs:
             exit 0
           fi
           body="$(printf '%s\n\n```\n%s\n```\n\n%s\n' \
-            "A scheduled probe of docs.n85.app failed." \
+            "A scheduled retirement probe of docs.n85.app failed." \
             "$(cat result.txt)" \
             "Run \`python3 script/check_docs_availability.py\` locally to reproduce.")"
           gh issue create --repo "$GITHUB_REPOSITORY" \

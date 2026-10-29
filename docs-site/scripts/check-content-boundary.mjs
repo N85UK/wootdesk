@@ -130,7 +130,9 @@ async function scan(targets) {
   return findings;
 }
 
-const targets = [path.join(root, 'src'), path.join(root, 'public')];
+const targets = [path.join(root, 'src'), path.join(root, 'public'), path.join(root, 'retirement')];
+const retirement = path.join(root, 'retirement-artifact');
+if (existsSync(retirement)) targets.push(retirement);
 const dist = path.join(root, 'dist');
 if (existsSync(dist)) {
   targets.push(dist);

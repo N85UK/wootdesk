@@ -1,161 +1,86 @@
 name: Documentation
 
-# The public WootDesk documentation published at https://docs.n85.app.
-#
-# This workflow is deliberately independent of the app CI: a documentation
-# change must not need a macOS runner, and an app change must not be able to
-# publish documentation without these checks passing.
-
 on:
   push:
     branches: [ main ]
     paths:
       - 'docs-site/**'
       - '.github/workflows/docs.yml'
+      - '.github/workflows/docs-availability.yml'
+      - 'script/check_docs_availability.py'
   pull_request:
     branches: [ main ]
     paths:
       - 'docs-site/**'
       - '.github/workflows/docs.yml'
+      - '.github/workflows/docs-availability.yml'
+      - 'script/check_docs_availability.py'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-
 permissions:
   contents: read
-
 defaults:
   run:
     working-directory: docs-site
+env:
+  WRANGLER_SEND_METRICS: 'false'
 
 jobs:
   build-and-verify:
-    name: Build and verify the public site
+    name: Verify the dedicated retirement artifact
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
           cache-dependency-path: docs-site/package-lock.json
-
-      # `npm ci` fails rather than resolving if the lock file and manifest
-      # disagree, which is what makes the build repeatable.
       - name: Install locked dependencies
         run: npm ci
-
-      - name: Type-check the site
+      - name: Type-check the retained documentation source
         run: npm run check
-
-      # Stamped before the build so it travels inside the verified artifact. The
-      # deploy job fetches this back from the live site to prove the deployment
-      # actually replaced what was there, rather than trusting an exit status.
-      - name: Stamp the build with its commit
-        run: |
-          set -euo pipefail
-          printf '{"commit":"%s","built":"%s"}\n' "$GITHUB_SHA" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-            > public/build-info.json
-          cat public/build-info.json
-
-      - name: Build
+      - name: Test Worker, artifact and offline probe contracts
+        run: npm run test:retirement
+      - name: Build the separate retirement artifact
         run: npm run build
-
-      # Proves no private hostname, internal marker, private address or
-      # credential reached the source or the generated output.
-      - name: Verify the public content boundary
+      - name: Verify public content isolation
         run: npm run verify:boundary
-
-      - name: Verify internal links
-        run: npm run verify:links
-
-      # N85-50 AC4. axe plus a keyboard smoke test against the built output, in
-      # light and dark at mobile and desktop. A browser is required: contrast is
-      # the rule that actually catches things here, and it cannot be evaluated
-      # without layout. This found a real WCAG AA contrast failure on the
-      # release pages in dark mode the first time it ran.
-      # External failures are reported rather than fatal, except a 404 or 410.
-      # A build must not break because somebody else's server is busy, which is
-      # why 429 and 5xx are warnings; link-exceptions.json covers the rest.
-      - name: Verify external links
-        run: npm run verify:external
-
-      - name: Install the browser for accessibility checks
+      - name: Verify exact clean source, metadata and artifact bytes
+        run: npm run verify:retirement -- --require-clean --expect-commit "$GITHUB_SHA"
+      - name: Install the accessibility browser
         run: npx playwright install chromium --with-deps
-
-      - name: Check accessibility and keyboard operation
-        run: npm run verify:a11y
-
-      - name: Upload the accessibility report on failure
+      - name: Check retirement accessibility and keyboard behaviour
+        run: npm run verify:a11y:retirement
+      - name: Retain diagnostic fixtures on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: accessibility-report
-          path: docs-site/test-results/
+          name: retirement-check-evidence
+          path: docs-site/.retirement-evidence/
+          include-hidden-files: true
           retention-days: 7
-
-      # A draft release note must never become a route, a sitemap entry or a
-      # search record. This asserts the property directly rather than trusting
-      # the filter that produces it.
-      - name: Assert draft releases are not published
-        run: |
-          set -euo pipefail
-          drafts=$(grep -rl '^status: draft' src/content/releases || true)
-          if [ -z "$drafts" ]; then
-            echo "No draft release notes present."
-            exit 0
-          fi
-          echo "Draft release notes present:"
-          echo "$drafts"
-          for file in $drafts; do
-            version=$(grep -m1 '^version:' "$file" | sed 's/^version: *"\{0,1\}//; s/"\{0,1\}$//')
-            echo "Checking that $version is absent from the build..."
-            if [ -e "dist/releases/$version" ]; then
-              echo "FAIL: draft $version produced a route at dist/releases/$version"
-              exit 1
-            fi
-            if grep -q "releases/$version" dist/sitemap-0.xml 2>/dev/null; then
-              echo "FAIL: draft $version appears in the sitemap"
-              exit 1
-            fi
-            if grep -rq "$version" dist/pagefind 2>/dev/null; then
-              echo "FAIL: draft $version appears in the search index"
-              exit 1
-            fi
-          done
-          echo "All draft release notes are excluded from routes, sitemap and search."
-
-      # Recorded so a deployment can name exactly what it published, and so a
-      # rollback has a verified target to return to.
-      - name: Record build evidence
+      - name: Record artifact evidence
         run: |
           {
-            echo "### Documentation build evidence"
-            echo ""
-            echo "| Field | Value |"
-            echo "| --- | --- |"
-            echo "| Commit | \`${{ github.sha }}\` |"
-            echo "| Node | \`$(node --version)\` |"
-            echo "| Lock file | \`$(sha256sum package-lock.json | cut -d' ' -f1)\` |"
-            echo "| Pages built | $(find dist -name '*.html' | wc -l | tr -d ' ') |"
-            echo "| Boundary check | passed |"
-            echo "| Link check | passed |"
-            echo "| Draft exclusion | passed |"
+            echo '### WootDesk retirement artifact'
+            echo "Commit: $GITHUB_SHA"
+            echo "Manifest SHA256: $(sha256sum retirement-artifact/artifact-manifest.json | cut -d' ' -f1)"
+            echo "Lock SHA256: $(sha256sum package-lock.json | cut -d' ' -f1)"
+            echo 'Worker/probe/boundary/accessibility checks passed. No legacy assets are published.'
           } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Upload the verified build
+      - name: Upload only the verified retirement artifact
         uses: actions/upload-artifact@v4
         with:
-          name: docs-site-dist
-          path: docs-site/dist
+          name: docs-site-retirement
+          path: docs-site/retirement-artifact/
+          if-no-files-found: error
           retention-days: 14
 
   deploy:
-    name: Deploy to docs.n85.app
+    name: Deploy the dedicated retirement Worker
     needs: build-and-verify
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
@@ -163,136 +88,74 @@ jobs:
       name: docs-production
       url: https://docs.n85.app
     steps:
-      - name: Check out the repository
-        uses: actions/checkout@v4
-
-      # N85-47 AC6. The deployed bytes are the ones the checks passed against,
-      # not a rebuild that could differ from what was verified.
-      - name: Download the verified build
-        uses: actions/download-artifact@v4
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
         with:
-          name: docs-site-dist
-          path: docs-site/dist
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+          name: docs-site-retirement
+          path: docs-site/retirement-artifact/
+      - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: '22'
           cache: npm
           cache-dependency-path: docs-site/package-lock.json
-
-      # Locked, so the deployment uses the wrangler version the repository
-      # pins rather than whatever npx resolves on the day.
-      - name: Install locked dependencies
+      - name: Install the locked deployment tool
         run: npm ci
-
-      - name: Confirm the deployment credentials are present
-        id: credentials
+      - name: Reverify uploaded bytes against this exact commit
+        run: npm run verify:retirement -- --require-clean --expect-commit "$GITHUB_SHA"
+      - name: Require the existing deployment credentials
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           set -euo pipefail
-          if [ -z "${CLOUDFLARE_API_TOKEN}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID}" ]; then
-            # A warning, not a notice. A deployment that quietly does nothing and
-            # reports success is how this project lost two TestFlight builds.
-            echo "::warning::Cloudflare credentials are absent, so nothing was deployed. Add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID to deploy docs.n85.app."
-            echo "configured=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "configured=true" >> "$GITHUB_OUTPUT"
-          fi
-
-      # N85-50 AC8 wants a rollback target recorded, which means knowing what
-      # this deployment replaced. Read before, not after.
-      - name: Record the version being replaced
-        if: steps.credentials.outputs.configured == 'true'
+          [ -n "$CLOUDFLARE_API_TOKEN" ] && [ -n "$CLOUDFLARE_ACCOUNT_ID" ] || {
+            echo '::error::Existing deployment credentials are absent. Nothing was deployed.'
+            exit 1
+          }
+      - name: Record the actual previous active deployment
         id: previous
-        continue-on-error: true
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           set -euo pipefail
-          # Search the response for the first version_id at any depth rather
-          # than assuming a shape. The first attempt assumed one, found nothing,
-          # and recorded "unknown", which is a rollback target that cannot be
-          # rolled back to.
-          npx wrangler versions list --json > versions.json 2>/dev/null \
-            || npx wrangler deployments list --json > versions.json 2>/dev/null \
-            || echo '[]' > versions.json
-          version="$(node -e '
-            const data = JSON.parse(require("fs").readFileSync("versions.json", "utf8"));
-            const find = (node) => {
-              if (Array.isArray(node)) { for (const item of node) { const hit = find(item); if (hit) return hit; } return null; }
-              if (node && typeof node === "object") {
-                for (const key of ["version_id", "versionId", "id"]) {
-                  if (typeof node[key] === "string" && /^[0-9a-f-]{36}$/.test(node[key])) return node[key];
-                }
-                for (const value of Object.values(node)) { const hit = find(value); if (hit) return hit; }
-              }
-              return null;
-            };
-            process.stdout.write(find(data) ?? "");
-          ')"
-          echo "version=${version}" >> "$GITHUB_OUTPUT"
-          if [ -z "$version" ]; then
-            echo "::warning::No previous version found, so no rollback target is recorded."
-            head -c 300 versions.json
-          else
-            echo "Replacing version: ${version}"
-          fi
-
-      - name: Deploy the Worker
-        if: steps.credentials.outputs.configured == 'true'
+          npx --no-install wrangler deployments list --name wootdesk-docs --json > previous-deployments.json
+          version="$(node scripts/previous-deployment.mjs previous-deployments.json)"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - name: Publish the verified module without rebuilding or assets
         id: deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           set -euo pipefail
-          npx wrangler deploy 2>&1 | tee deploy.log
+          npx --no-install wrangler deploy --no-bundle 2>&1 | tee deploy.log
           version="$(sed -n 's/.*Current Version ID: *//p' deploy.log | tail -1)"
-          echo "version=${version}" >> "$GITHUB_OUTPUT"
-
-      # N85-47 AC2 and AC6, and the rule this project keeps relearning: fetch the
-      # live site and confirm it serves this commit. A deploy step's exit status
-      # says the upload was accepted, not that visitors receive the new pages.
-      - name: Prove the live site serves this commit
+          [[ "$version" =~ ^[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}$ ]]
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - name: Verify actual retirement and exact metadata without redirects
         id: smoke
-        if: steps.credentials.outputs.configured == 'true'
         run: |
           set -euo pipefail
           for attempt in 1 2 3 4 5 6; do
-            served="$(curl -fsS --max-time 20 https://docs.n85.app/build-info.json || true)"
-            if echo "$served" | grep -q "$GITHUB_SHA"; then
-              echo "docs.n85.app is serving $GITHUB_SHA"
-              status="$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 https://docs.n85.app/)"
-              [ "$status" = "200" ] || { echo "Home page returned $status"; exit 1; }
+            if python3 ../script/check_docs_availability.py --expected-build-info retirement-artifact/build-info.json; then
               exit 0
             fi
-            echo "Attempt $attempt: not serving this commit yet."
+            echo "Readback attempt $attempt did not qualify."
             sleep 10
           done
-          echo "docs.n85.app did not serve $GITHUB_SHA after the deployment."
           exit 1
-
-      - name: Record the deployment
-        if: always() && steps.credentials.outputs.configured == 'true'
+      - name: Record the release and rollback target
+        if: always()
         run: |
-          lock="$(sha256sum docs-site/package-lock.json 2>/dev/null | cut -c1-16)"
           {
-            echo "### Documentation deployment"
-            echo ""
-            echo "| Field | Value |"
-            echo "| --- | --- |"
-            echo "| Commit | \`${GITHUB_SHA}\` |"
-            echo "| Dependency lock | \`${lock:-unknown}\` (sha256 prefix of package-lock.json) |"
-            echo "| Address | https://docs.n85.app |"
-            echo "| Build and checks | ${{ needs.build-and-verify.result }} |"
-            echo "| Deploy | ${{ steps.deploy.outcome }} |"
-            echo "| Worker version | \`${{ steps.deploy.outputs.version || 'unknown' }}\` |"
-            echo "| Smoke test | ${{ steps.smoke.outcome }} |"
-            echo "| Rollback target | \`${{ steps.previous.outputs.version || 'none recorded' }}\` |"
-            echo ""
-            echo "To roll back: \`npx wrangler rollback <rollback target> --name wootdesk-docs\`"
+            echo '### WootDesk retirement deployment'
+            echo "Commit: $GITHUB_SHA"
+            echo "Deploy outcome: ${{ steps.deploy.outcome }}"
+            echo "Strict retirement readback: ${{ steps.smoke.outcome }}"
+            echo "Published Worker version: ${{ steps.deploy.outputs.version || 'not qualified' }}"
+            echo "Previous full-traffic version: ${{ steps.previous.outputs.version || 'not qualified' }}"
+            echo "Manifest SHA256: $(sha256sum retirement-artifact/artifact-manifest.json | cut -d' ' -f1)"
+            echo 'Rollback reopens retired content and requires an owner decision.'
+            echo 'Use the recorded previous version with wrangler rollback --name wootdesk-docs, then independently verify it.'
           } >> "$GITHUB_STEP_SUMMARY"

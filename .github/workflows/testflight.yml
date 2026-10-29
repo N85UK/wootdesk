@@ -1,4 +1,5 @@
-# Delivers every green build on main to TestFlight for end-to-end testing.
+# WootDesk is retired. No automatic or manually dispatched distribution may run.
+# Historical delivery instructions are retained below; ordinary CI is unchanged.
 #
 # TestFlight accepts binaries built with a beta Xcode, so this pipeline can run
 # ahead of the stable-toolchain requirement that only App Store review imposes.
@@ -14,17 +15,6 @@
 name: TestFlight
 
 on:
-  push:
-    branches: [ main ]
-    # A documentation change cannot alter the binary, so it should not consume a
-    # build number, six minutes of runner time, and a slot in the tester's
-    # update list. Builds 35 and 36 were both spent this way. GitHub evaluates
-    # these against the whole push, so a commit touching docs alongside code
-    # still delivers.
-    paths-ignore:
-      - 'docs/**'
-      - '**/*.md'
-      - 'LICENSE'
   workflow_dispatch:
     inputs:
       platform:
@@ -46,9 +36,8 @@ jobs:
   deliver:
     name: Build and upload to TestFlight
     runs-on: macos-26
-    # Without the signing secrets this job cannot do anything useful, so it is
-    # skipped rather than failing every push on a fork or before setup.
-    if: ${{ github.repository == 'N85UK/wootdesk' }}
+    # Retirement is unconditional, including accidental workflow_dispatch.
+    if: ${{ false }}
     timeout-minutes: 60
 
     steps:

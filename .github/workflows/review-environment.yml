@@ -12,10 +12,9 @@ name: Review environment
 # command, and stopping a demo server while a reviewer is using it is the
 # expensive mistake.
 
+# WootDesk is retired. Automatic App Review polling is disabled. This retained
+# manual diagnostic does not act on shared Chatwoot support or stop a service.
 on:
-  schedule:
-    # Once a day. The state changes over days, not minutes.
-    - cron: '0 8 * * *'
   workflow_dispatch:
 
 permissions:
